@@ -2,6 +2,7 @@ package com.yala.auth;
 
 import com.yala.auth.dto.AuthResponse;
 import com.yala.auth.dto.LoginRequest;
+import com.yala.auth.dto.RefreshTokenRequest;
 import com.yala.auth.dto.RegisterRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -34,5 +35,12 @@ public class AuthController {
     @Operation(summary = "Autentica un usuario y devuelve los tokens JWT")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
         return ResponseEntity.ok(authService.login(request));
+    }
+
+    @PostMapping("/refresh-token")
+    @Operation(summary = "Renueva el access token a partir de un refresh token válido")
+    public ResponseEntity<AuthResponse> refreshToken(
+            @Valid @RequestBody RefreshTokenRequest request) {
+        return ResponseEntity.ok(authService.refreshToken(request));
     }
 }
