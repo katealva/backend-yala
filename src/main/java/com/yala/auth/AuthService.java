@@ -2,6 +2,7 @@ package com.yala.auth;
 
 import com.yala.auth.dto.AuthResponse;
 import com.yala.auth.dto.LoginRequest;
+import com.yala.auth.dto.RefreshTokenRequest;
 import com.yala.auth.dto.RegisterRequest;
 import com.yala.exception.EmailAlreadyExistsException;
 import com.yala.exception.UnauthorizedException;
@@ -51,6 +52,20 @@ public class AuthService {
             throw new UnauthorizedException("Invalid email or password");
         }
         return buildAuthResponse(user);
+    }
+
+    @Transactional(readOnly = true)
+    public AuthResponse refreshToken(RefreshTokenRequest request) {
+        String token = request.refreshToken();
+        if (!jwtService.isTokenValid(token)) {
+            throw new UnauthorizedException("Invalid or expired refresh token");
+        }
+        String email = jwtService.extractUsername(token);
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new UnauthorizedException("Invalid or expired refresh token"));
+        String accessToken = jwtService.generateAccessToken(user);
+        return AuthResponse.of(user, accessToken, token);
     }
 
     private AuthResponse buildAuthResponse(User user) {
