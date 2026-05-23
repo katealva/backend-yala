@@ -1,6 +1,8 @@
 package com.yala.category;
 
 import com.yala.category.dto.CategoryResponse;
+import com.yala.category.dto.CreateCategoryRequest;
+import com.yala.exception.DuplicateResourceException;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,5 +22,18 @@ public class CategoryService {
         return categoryRepository.findAll().stream()
                 .map(CategoryResponse::from)
                 .toList();
+    }
+
+    @Transactional
+    public CategoryResponse create(CreateCategoryRequest request) {
+        if (categoryRepository.existsByName(request.name())) {
+            throw new DuplicateResourceException(
+                    "Category already exists with name: " + request.name());
+        }
+        Category category = Category.builder()
+                .name(request.name())
+                .description(request.description())
+                .build();
+        return CategoryResponse.from(categoryRepository.save(category));
     }
 }
