@@ -132,7 +132,7 @@ public class AuctionServiceImpl implements AuctionService {
         for (Auction auction : expired) {
             bidRepository.findFirstByAuctionIdOrderByAmountDesc(auction.getId())
                     .ifPresent(winning -> auction.setWinner(winning.getBidder()));
-            auction.setStatus(AuctionStatus.CLOSED);
+            auction.setStatus(AuctionStatus.FINISHED);
             auctionRepository.save(auction);
             log.info("Auction {} closed. Winner: {}", auction.getId(),
                     auction.getWinner() != null ? auction.getWinner().getEmail() : "none");
