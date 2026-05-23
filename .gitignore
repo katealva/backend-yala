@@ -34,3 +34,9 @@ build/
 
 .claude/
 CLAUDE.md
+
+### Secretos y binarios fuera de control de versiones ###
+.env
+.env.*
+!.env.example
+*.pdf
