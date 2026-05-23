@@ -52,6 +52,12 @@ public class GlobalExceptionHandler {
         return build(HttpStatus.CONFLICT, "EMAIL_ALREADY_EXISTS", ex.getMessage(), request);
     }
 
+    @ExceptionHandler(DuplicateResourceException.class)
+    public ResponseEntity<ErrorResponse> handleDuplicateResource(
+            DuplicateResourceException ex, HttpServletRequest request) {
+        return build(HttpStatus.CONFLICT, "DUPLICATE_RESOURCE", ex.getMessage(), request);
+    }
+
     @ExceptionHandler(PaymentException.class)
     public ResponseEntity<ErrorResponse> handlePayment(
             PaymentException ex, HttpServletRequest request) {
