@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -67,6 +68,13 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleImageLimitExceeded(
             ImageLimitExceededException ex, HttpServletRequest request) {
         return build(HttpStatus.BAD_REQUEST, "IMAGE_LIMIT_EXCEEDED", ex.getMessage(), request);
+    }
+
+    @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
+    public ResponseEntity<ErrorResponse> handleOptimisticLocking(
+            ObjectOptimisticLockingFailureException ex, HttpServletRequest request) {
+        return build(HttpStatus.CONFLICT, "OPTIMISTIC_LOCK_CONFLICT",
+                "The resource was modified by another request. Please retry.", request);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
