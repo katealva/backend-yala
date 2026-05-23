@@ -1,5 +1,6 @@
 package com.yala.order;
 
+import com.yala.event.OrderConfirmedEvent;
 import com.yala.exception.OrderNotConfirmableException;
 import com.yala.exception.ResourceNotFoundException;
 import com.yala.exception.UnauthorizedException;
@@ -13,6 +14,7 @@ import com.yala.user.User;
 import com.yala.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -26,6 +28,7 @@ public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
     private final ListingRepository listingRepository;
     private final UserRepository userRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     @Transactional
@@ -96,7 +99,9 @@ public class OrderServiceImpl implements OrderService {
         order.setStatus(OrderStatus.CONFIRMED);
         Order saved = orderRepository.save(order);
 
-        // TODO publish OrderConfirmedEvent (PR #5 — event system)
+        eventPublisher.publishEvent(new OrderConfirmedEvent(
+                saved.getId(), saved.getBuyer().getId(), saved.getSeller().getId()));
+
         log.info("Order {} confirmed by seller {}", saved.getId(), sellerEmail);
         return OrderResponse.from(saved);
     }
