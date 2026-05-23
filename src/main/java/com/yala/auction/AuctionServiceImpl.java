@@ -4,6 +4,7 @@ import com.yala.auction.dto.AuctionResponse;
 import com.yala.auction.dto.AuctionSummaryResponse;
 import com.yala.auction.dto.CreateAuctionRequest;
 import com.yala.bid.BidRepository;
+import com.yala.event.AuctionFinishedEvent;
 import com.yala.exception.DuplicateResourceException;
 import com.yala.exception.InvalidBidException;
 import com.yala.exception.ResourceNotFoundException;
@@ -16,6 +17,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -31,6 +33,7 @@ public class AuctionServiceImpl implements AuctionService {
     private final BidRepository bidRepository;
     private final ListingRepository listingRepository;
     private final UserRepository userRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     @Transactional
@@ -93,6 +96,7 @@ public class AuctionServiceImpl implements AuctionService {
             auctionRepository.save(auction);
             log.info("Auction {} closed. Winner: {}", auction.getId(),
                     auction.getWinner() != null ? auction.getWinner().getEmail() : "none");
+            eventPublisher.publishEvent(new AuctionFinishedEvent(this, auction.getId()));
         }
     }
 
