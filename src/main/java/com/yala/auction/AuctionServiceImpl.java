@@ -96,7 +96,7 @@ public class AuctionServiceImpl implements AuctionService {
             auctionRepository.save(auction);
             log.info("Auction {} closed. Winner: {}", auction.getId(),
                     auction.getWinner() != null ? auction.getWinner().getEmail() : "none");
-            eventPublisher.publishEvent(new AuctionFinishedEvent(this, auction.getId()));
+            eventPublisher.publishEvent(new AuctionFinishedEvent(auction.getId()));
         }
     }
 

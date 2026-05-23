@@ -54,7 +54,7 @@ class EventListenersTest {
 
     @Test
     void shouldNotifyPreviousBidderWhenOnNewBidHasPreviousBidder() {
-        NewBidEvent event = new NewBidEvent(this, 100L, 250f, 5L, 6L);
+        NewBidEvent event = new NewBidEvent(100L, 250f, 5L, 6L);
 
         eventListeners.onNewBid(event);
 
@@ -66,7 +66,7 @@ class EventListenersTest {
 
     @Test
     void shouldNotInvokeNotificationServiceWhenOnNewBidHasNoPreviousBidder() {
-        NewBidEvent event = new NewBidEvent(this, 100L, 250f, null, 6L);
+        NewBidEvent event = new NewBidEvent(100L, 250f, null, 6L);
 
         eventListeners.onNewBid(event);
 
@@ -88,7 +88,7 @@ class EventListenersTest {
             return o;
         });
 
-        eventListeners.onAuctionFinished(new AuctionFinishedEvent(this, 100L));
+        eventListeners.onAuctionFinished(new AuctionFinishedEvent(100L));
 
         verify(orderRepository).save(any(Order.class));
         verify(listingRepository).save(listing);
@@ -107,7 +107,7 @@ class EventListenersTest {
                 .status(AuctionStatus.FINISHED).winner(null).build();
         when(auctionRepository.findById(100L)).thenReturn(Optional.of(auction));
 
-        eventListeners.onAuctionFinished(new AuctionFinishedEvent(this, 100L));
+        eventListeners.onAuctionFinished(new AuctionFinishedEvent(100L));
 
         verify(orderRepository, never()).save(any());
         verify(notificationService, never()).createNotification(any(), any(), any());
@@ -118,13 +118,13 @@ class EventListenersTest {
         when(auctionRepository.findById(404L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() ->
-                eventListeners.onAuctionFinished(new AuctionFinishedEvent(this, 404L)))
+                eventListeners.onAuctionFinished(new AuctionFinishedEvent(404L)))
                 .isInstanceOf(ResourceNotFoundException.class);
     }
 
     @Test
     void shouldNotifyBuyerWhenOnOrderConfirmedInvoked() {
-        eventListeners.onOrderConfirmed(new OrderConfirmedEvent(this, 50L, 10L, 20L));
+        eventListeners.onOrderConfirmed(new OrderConfirmedEvent(50L, 10L, 20L));
 
         verify(notificationService).createNotification(
                 eq(10L), eq(NotificationType.SALE_CONFIRMED),
