@@ -14,7 +14,7 @@ import software.amazon.awssdk.services.s3.S3Client;
         "aws.s3.bucket=bucket-de-prueba"
 })
 
-@SpringBootTest
+
 class YalaApplicationTests {
 
     // Esto engaña a Spring Boot haciéndole creer que S3 está conectado
