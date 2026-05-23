@@ -3,8 +3,6 @@ package com.yala.auction;
 import com.yala.auction.dto.AuctionResponse;
 import com.yala.auction.dto.AuctionSummaryResponse;
 import com.yala.auction.dto.CreateAuctionRequest;
-import com.yala.bid.dto.BidResponse;
-import com.yala.bid.dto.CreateBidRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -45,10 +43,4 @@ public class AuctionController {
                 .body(auctionService.create(request, auth.getName()));
     }
 
-    @PostMapping("/{id}/bids")
-    public ResponseEntity<BidResponse> placeBid(@PathVariable Long id,
-            @Valid @RequestBody CreateBidRequest request, Authentication auth) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(auctionService.placeBid(request, auth.getName()));
-    }
 }
