@@ -3,11 +3,8 @@ package com.yala.auction;
 import com.yala.auction.dto.AuctionResponse;
 import com.yala.auction.dto.AuctionSummaryResponse;
 import com.yala.auction.dto.CreateAuctionRequest;
-import com.yala.bid.Bid;
 import com.yala.bid.BidRepository;
-import com.yala.bid.dto.BidResponse;
-import com.yala.bid.dto.CreateBidRequest;
-import com.yala.exception.AuctionNotActiveException;
+import com.yala.event.AuctionFinishedEvent;
 import com.yala.exception.DuplicateResourceException;
 import com.yala.exception.InvalidBidException;
 import com.yala.exception.ResourceNotFoundException;
@@ -20,6 +17,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -35,6 +33,7 @@ public class AuctionServiceImpl implements AuctionService {
     private final BidRepository bidRepository;
     private final ListingRepository listingRepository;
     private final UserRepository userRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     @Transactional
@@ -84,45 +83,6 @@ public class AuctionServiceImpl implements AuctionService {
     }
 
     @Override
-    @Transactional
-    public BidResponse placeBid(CreateBidRequest request, String bidderEmail) {
-        Auction auction = findOrThrow(request.auctionId());
-
-        if (auction.getStatus() != AuctionStatus.ACTIVE) {
-            throw new AuctionNotActiveException(
-                    "Auction " + auction.getId() + " is not active");
-        }
-
-        if (auction.getEndsAt().isBefore(LocalDateTime.now())) {
-            throw new AuctionNotActiveException("Auction has already ended");
-        }
-
-        User bidder = userRepository.findByEmail(bidderEmail)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-
-        if (auction.getListing().getSeller().getId().equals(bidder.getId())) {
-            throw new InvalidBidException("The seller cannot bid on their own auction");
-        }
-
-        if (request.amount() <= auction.getCurrentPrice()) {
-            throw new InvalidBidException(
-                    "Bid must be greater than current price: " + auction.getCurrentPrice());
-        }
-
-        Bid bid = bidRepository.save(Bid.builder()
-                .amount(request.amount())
-                .auction(auction)
-                .bidder(bidder)
-                .build());
-
-        // Triggers optimistic lock check — throws ObjectOptimisticLockingFailureException on conflict
-        auction.setCurrentPrice(request.amount());
-        auctionRepository.save(auction);
-
-        return BidResponse.from(bid);
-    }
-
-    @Override
     @Scheduled(fixedDelay = 60_000)
     @Transactional
     public void closeExpiredAuctions() {
@@ -136,6 +96,7 @@ public class AuctionServiceImpl implements AuctionService {
             auctionRepository.save(auction);
             log.info("Auction {} closed. Winner: {}", auction.getId(),
                     auction.getWinner() != null ? auction.getWinner().getEmail() : "none");
+            eventPublisher.publishEvent(new AuctionFinishedEvent(auction.getId()));
         }
     }
 
