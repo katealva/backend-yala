@@ -5,14 +5,17 @@ import com.yala.auction.AuctionRepository;
 import com.yala.auction.AuctionStatus;
 import com.yala.bid.dto.BidResponse;
 import com.yala.bid.dto.CreateBidRequest;
+import com.yala.event.NewBidEvent;
 import com.yala.exception.AuctionNotActiveException;
 import com.yala.exception.InvalidBidException;
 import com.yala.exception.ResourceNotFoundException;
 import com.yala.user.User;
 import com.yala.user.UserRepository;
 import java.time.LocalDateTime;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -31,6 +34,7 @@ public class BidServiceImpl implements BidService {
     private final BidRepository bidRepository;
     private final AuctionRepository auctionRepository;
     private final UserRepository userRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     @Transactional
@@ -58,6 +62,13 @@ public class BidServiceImpl implements BidService {
                     "Bid must be greater than current price: " + auction.getCurrentPrice());
         }
 
+        Long previousBidderId = bidRepository
+                .findFirstByAuctionIdOrderByAmountDesc(auction.getId())
+                .map(Bid::getBidder)
+                .map(User::getId)
+                .filter(id -> !id.equals(bidder.getId()))
+                .orElse(null);
+
         Bid bid = bidRepository.save(Bid.builder()
                 .amount(request.amount())
                 .auction(auction)
@@ -70,10 +81,17 @@ public class BidServiceImpl implements BidService {
         auction.setCurrentPrice(request.amount());
         auctionRepository.save(auction);
 
-        // TODO publish NewBidEvent (PR #5 — event system)
+        eventPublisher.publishEvent(new NewBidEvent(
+                auction.getId(), request.amount(), previousBidderId, bidder.getId()));
+
         log.info("Bid {} placed on auction {} by {} for amount {}",
                 bid.getId(), auction.getId(), bidder.getEmail(), request.amount());
         return BidResponse.from(bid);
+    }
+
+    @SuppressWarnings("unused")
+    private static <T> Optional<T> nullSafe(Optional<T> opt) {
+        return opt;
     }
 
     @Override
