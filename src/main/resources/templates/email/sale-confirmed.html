@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Tu venta fue confirmada</title>
+</head>
+<body style="font-family: Arial, Helvetica, sans-serif; background-color: #f4f4f4; margin: 0; padding: 0;">
+    <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center"
+           style="width: 600px; max-width: 100%; margin: 24px auto; background-color: #ffffff; border-radius: 8px; overflow: hidden;">
+        <tr>
+            <td style="background-color: #1a1a2e; color: #ffffff; padding: 24px; text-align: center;">
+                <h1 style="margin: 0; font-size: 24px;">Yala</h1>
+                <p style="margin: 4px 0 0; font-size: 12px; color: #c8c8d8;">Marketplace de coleccionables</p>
+            </td>
+        </tr>
+        <tr>
+            <td style="padding: 32px 24px; color: #333333; line-height: 1.5;">
+                <h2 style="color: #2e7d32; margin-top: 0;">Tu venta fue confirmada</h2>
+                <p>Hola <span th:text="${recipientName}">vendedor</span>,</p>
+                <p>
+                    Tu publicación <strong th:text="${listingTitle}">esta publicación</strong>
+                    fue vendida a <span th:text="${buyerName}">el comprador</span>.
+                </p>
+                <p style="font-size: 18px; margin: 24px 0;">
+                    Monto:
+                    <strong>S/. <span th:text="${#numbers.formatDecimal(amount, 1, 2)}">0.00</span></strong>
+                </p>
+                <p>Coordiná los detalles de la entrega con el comprador desde la orden.</p>
+                <p style="text-align: center; margin: 32px 0;">
+                    <a th:href="${orderUrl}" href="#"
+                       style="background-color: #1a1a2e; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 4px; display: inline-block;">
+                        Ver la orden
+                    </a>
+                </p>
+            </td>
+        </tr>
+        <tr>
+            <td style="background-color: #f9f9f9; padding: 16px; text-align: center; font-size: 12px; color: #888888;">
+                <p style="margin: 0;">Yala &middot; noreply@yala.pe</p>
+                <p style="margin: 4px 0 0;">Este es un email automático, no respondas a esta dirección.</p>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
