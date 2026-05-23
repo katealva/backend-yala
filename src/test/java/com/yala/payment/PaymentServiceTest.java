@@ -24,12 +24,16 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
+
+import com.yala.event.OrderConfirmedEvent;
 
 @ExtendWith(MockitoExtension.class)
 class PaymentServiceTest {
 
     @Mock private PaymentRepository paymentRepository;
     @Mock private OrderRepository orderRepository;
+    @Mock private ApplicationEventPublisher eventPublisher;
 
     @InjectMocks
     private PaymentServiceImpl paymentService;
@@ -115,6 +119,55 @@ class PaymentServiceTest {
 
         assertThat(payment.getStatus()).isEqualTo(PaymentStatus.SUCCESS);
         assertThat(order.getStatus()).isEqualTo(OrderStatus.CONFIRMED);
+    }
+
+    @Test
+    void shouldPublishOrderConfirmedEventWhenWebhookConfirmsPendingOrder() {
+        Order order = pendingOrder();
+        Payment payment = Payment.builder()
+                .id(1L).gateway("stripe").externalReference("pi_evt_pub")
+                .amount(250f).status(PaymentStatus.PENDING).order(order).build();
+        when(paymentRepository.findByExternalReference("pi_evt_pub")).thenReturn(Optional.of(payment));
+        when(paymentRepository.save(any(Payment.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(orderRepository.save(any(Order.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        String payload = """
+                {
+                    "type": "payment_intent.succeeded",
+                    "data": { "object": { "id": "pi_evt_pub" } }
+                }
+                """;
+        paymentService.handleWebhook(payload, "sig");
+
+        org.mockito.ArgumentCaptor<OrderConfirmedEvent> captor =
+                org.mockito.ArgumentCaptor.forClass(OrderConfirmedEvent.class);
+        org.mockito.Mockito.verify(eventPublisher).publishEvent(captor.capture());
+        OrderConfirmedEvent published = captor.getValue();
+        assertThat(published.orderId()).isEqualTo(50L);
+        assertThat(published.buyerId()).isEqualTo(1L);
+        assertThat(published.sellerId()).isEqualTo(2L);
+    }
+
+    @Test
+    void shouldNotPublishOrderConfirmedEventWhenOrderWasAlreadyConfirmed() {
+        Order order = pendingOrder();
+        order.setStatus(OrderStatus.CONFIRMED);
+        Payment payment = Payment.builder()
+                .id(1L).gateway("stripe").externalReference("pi_already")
+                .amount(250f).status(PaymentStatus.PENDING).order(order).build();
+        when(paymentRepository.findByExternalReference("pi_already")).thenReturn(Optional.of(payment));
+        when(paymentRepository.save(any(Payment.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        String payload = """
+                {
+                    "type": "payment_intent.succeeded",
+                    "data": { "object": { "id": "pi_already" } }
+                }
+                """;
+        paymentService.handleWebhook(payload, "sig");
+
+        assertThat(payment.getStatus()).isEqualTo(PaymentStatus.SUCCESS);
+        org.mockito.Mockito.verifyNoInteractions(eventPublisher);
     }
 
     @Test
