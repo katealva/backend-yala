@@ -46,12 +46,12 @@ public class EventListeners {
     @EventListener
     public void onNewBid(NewBidEvent event) {
         log.info("Handling NewBidEvent for auction {} amount {}",
-                event.getAuctionId(), event.getNewAmount());
-        if (event.getPreviousBidderId() != null) {
+                event.auctionId(), event.newBidAmount());
+        if (event.previousBidderId() != null) {
             notificationService.createNotification(
-                    event.getPreviousBidderId(),
+                    event.previousBidderId(),
                     NotificationType.BID_OUTBID,
-                    "You have been outbid! Current price: " + event.getNewAmount());
+                    "You have been outbid! Current price: " + event.newBidAmount());
         }
         // TODO: WebSocket broadcast cuando WebSocketConfig esté disponible (punto 14)
     }
@@ -60,10 +60,10 @@ public class EventListeners {
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void onAuctionFinished(AuctionFinishedEvent event) {
-        log.info("Handling AuctionFinishedEvent for auction {}", event.getAuctionId());
-        Auction auction = auctionRepository.findById(event.getAuctionId())
+        log.info("Handling AuctionFinishedEvent for auction {}", event.auctionId());
+        Auction auction = auctionRepository.findById(event.auctionId())
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "Auction not found with id: " + event.getAuctionId()));
+                        "Auction not found with id: " + event.auctionId()));
 
         if (auction.getWinner() == null) {
             log.info("Auction {} closed without a winner; skipping order creation",
@@ -99,9 +99,9 @@ public class EventListeners {
     @Async
     @EventListener
     public void onOrderConfirmed(OrderConfirmedEvent event) {
-        log.info("Handling OrderConfirmedEvent for order {}", event.getOrderId());
+        log.info("Handling OrderConfirmedEvent for order {}", event.orderId());
         notificationService.createNotification(
-                event.getBuyerId(),
+                event.buyerId(),
                 NotificationType.SALE_CONFIRMED,
                 "Your order has been confirmed by the seller.");
     }

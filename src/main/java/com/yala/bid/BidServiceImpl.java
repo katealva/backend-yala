@@ -82,7 +82,7 @@ public class BidServiceImpl implements BidService {
         auctionRepository.save(auction);
 
         eventPublisher.publishEvent(new NewBidEvent(
-                this, auction.getId(), request.amount(), previousBidderId, bidder.getId()));
+                auction.getId(), request.amount(), previousBidderId, bidder.getId()));
 
         log.info("Bid {} placed on auction {} by {} for amount {}",
                 bid.getId(), auction.getId(), bidder.getEmail(), request.amount());

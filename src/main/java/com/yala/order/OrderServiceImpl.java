@@ -100,7 +100,7 @@ public class OrderServiceImpl implements OrderService {
         Order saved = orderRepository.save(order);
 
         eventPublisher.publishEvent(new OrderConfirmedEvent(
-                this, saved.getId(), saved.getBuyer().getId(), saved.getSeller().getId()));
+                saved.getId(), saved.getBuyer().getId(), saved.getSeller().getId()));
 
         log.info("Order {} confirmed by seller {}", saved.getId(), sellerEmail);
         return OrderResponse.from(saved);

@@ -1,30 +1,13 @@
 package com.yala.event;
 
-import lombok.Getter;
-import org.springframework.context.ApplicationEvent;
-
 /**
- * Published asynchronously when a {@code Bid} is successfully persisted.
- * Consumers notify the previous (now-outbid) bidder if any.
+ * Published when a bid is successfully placed on an auction.
+ * Consumed by listeners that notify the previous highest bidder and broadcast
+ * the updated price to the auction's WebSocket topic.
  */
-@Getter
-public class NewBidEvent extends ApplicationEvent {
-
-    private final Long auctionId;
-    private final Float newAmount;
-    private final Long previousBidderId;
-    private final Long currentBidderId;
-
-    public NewBidEvent(
-            Object source,
-            Long auctionId,
-            Float newAmount,
-            Long previousBidderId,
-            Long currentBidderId) {
-        super(source);
-        this.auctionId = auctionId;
-        this.newAmount = newAmount;
-        this.previousBidderId = previousBidderId;
-        this.currentBidderId = currentBidderId;
-    }
+public record NewBidEvent(
+        Long auctionId,
+        Float newBidAmount,
+        Long previousBidderId,
+        Long currentBidderId) {
 }
