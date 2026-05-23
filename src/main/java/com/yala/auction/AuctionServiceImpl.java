@@ -3,11 +3,7 @@ package com.yala.auction;
 import com.yala.auction.dto.AuctionResponse;
 import com.yala.auction.dto.AuctionSummaryResponse;
 import com.yala.auction.dto.CreateAuctionRequest;
-import com.yala.bid.Bid;
 import com.yala.bid.BidRepository;
-import com.yala.bid.dto.BidResponse;
-import com.yala.bid.dto.CreateBidRequest;
-import com.yala.exception.AuctionNotActiveException;
 import com.yala.exception.DuplicateResourceException;
 import com.yala.exception.InvalidBidException;
 import com.yala.exception.ResourceNotFoundException;
@@ -81,45 +77,6 @@ public class AuctionServiceImpl implements AuctionService {
     public Page<AuctionSummaryResponse> findAllActive(Pageable pageable) {
         return auctionRepository.findByStatus(AuctionStatus.ACTIVE, pageable)
                 .map(AuctionSummaryResponse::from);
-    }
-
-    @Override
-    @Transactional
-    public BidResponse placeBid(CreateBidRequest request, String bidderEmail) {
-        Auction auction = findOrThrow(request.auctionId());
-
-        if (auction.getStatus() != AuctionStatus.ACTIVE) {
-            throw new AuctionNotActiveException(
-                    "Auction " + auction.getId() + " is not active");
-        }
-
-        if (auction.getEndsAt().isBefore(LocalDateTime.now())) {
-            throw new AuctionNotActiveException("Auction has already ended");
-        }
-
-        User bidder = userRepository.findByEmail(bidderEmail)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-
-        if (auction.getListing().getSeller().getId().equals(bidder.getId())) {
-            throw new InvalidBidException("The seller cannot bid on their own auction");
-        }
-
-        if (request.amount() <= auction.getCurrentPrice()) {
-            throw new InvalidBidException(
-                    "Bid must be greater than current price: " + auction.getCurrentPrice());
-        }
-
-        Bid bid = bidRepository.save(Bid.builder()
-                .amount(request.amount())
-                .auction(auction)
-                .bidder(bidder)
-                .build());
-
-        // Triggers optimistic lock check — throws ObjectOptimisticLockingFailureException on conflict
-        auction.setCurrentPrice(request.amount());
-        auctionRepository.save(auction);
-
-        return BidResponse.from(bid);
     }
 
     @Override
