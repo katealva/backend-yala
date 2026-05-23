@@ -2,6 +2,7 @@ package com.yala.payment;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.yala.event.OrderConfirmedEvent;
 import com.yala.exception.OrderNotConfirmableException;
 import com.yala.exception.PaymentException;
 import com.yala.exception.ResourceNotFoundException;
@@ -14,6 +15,7 @@ import com.yala.payment.dto.PaymentIntentResponse;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,6 +37,7 @@ public class PaymentServiceImpl implements PaymentService {
 
     private final PaymentRepository paymentRepository;
     private final OrderRepository orderRepository;
+    private final ApplicationEventPublisher eventPublisher;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
@@ -98,7 +101,10 @@ public class PaymentServiceImpl implements PaymentService {
                 if (order.getStatus() == OrderStatus.PENDING) {
                     order.setStatus(OrderStatus.CONFIRMED);
                     orderRepository.save(order);
-                    // TODO publish OrderConfirmedEvent once event system is merged (PR #5)
+                    eventPublisher.publishEvent(new OrderConfirmedEvent(
+                            order.getId(),
+                            order.getBuyer().getId(),
+                            order.getSeller().getId()));
                 }
                 log.info("Stripe webhook reconciled payment {} as SUCCESS", payment.getId());
             }
