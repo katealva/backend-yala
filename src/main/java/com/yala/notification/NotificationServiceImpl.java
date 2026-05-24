@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +20,7 @@ public class NotificationServiceImpl implements NotificationService {
 
     private final NotificationRepository notificationRepository;
     private final UserRepository userRepository;
+    private final SimpMessagingTemplate messagingTemplate;
 
     @Override
     @Transactional
@@ -35,9 +37,12 @@ public class NotificationServiceImpl implements NotificationService {
                 .user(recipient)
                 .build());
 
+        NotificationResponse response = NotificationResponse.from(saved);
+        messagingTemplate.convertAndSend("/topic/notifications/" + userId, response);
+
         log.info("Notification {} of type {} delivered to user {}",
                 saved.getId(), type, recipient.getEmail());
-        return NotificationResponse.from(saved);
+        return response;
     }
 
     @Override
