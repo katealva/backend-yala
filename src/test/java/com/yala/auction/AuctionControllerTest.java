@@ -14,7 +14,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.yala.auction.dto.AuctionResponse;
 import com.yala.auction.dto.AuctionSummaryResponse;
 import com.yala.auction.dto.CreateAuctionRequest;
-import com.yala.auth.JwtService;
+import com.yala.security.JwtService;
 import com.yala.exception.DuplicateResourceException;
 import com.yala.exception.ResourceNotFoundException;
 import com.yala.exception.UnauthorizedException;

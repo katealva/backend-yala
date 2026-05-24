@@ -8,7 +8,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.yala.auth.JwtService;
+import com.yala.security.JwtService;
 import com.yala.exception.ResourceNotFoundException;
 import com.yala.exception.UnauthorizedException;
 import com.yala.notification.dto.NotificationResponse;

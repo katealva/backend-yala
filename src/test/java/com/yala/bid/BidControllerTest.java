@@ -9,7 +9,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.yala.auth.JwtService;
+import com.yala.security.JwtService;
 import com.yala.bid.dto.BidResponse;
 import com.yala.bid.dto.CreateBidRequest;
 import com.yala.exception.AuctionNotActiveException;

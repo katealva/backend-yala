@@ -6,6 +6,7 @@ import com.yala.auth.dto.RefreshTokenRequest;
 import com.yala.auth.dto.RegisterRequest;
 import com.yala.exception.EmailAlreadyExistsException;
 import com.yala.exception.UnauthorizedException;
+import com.yala.security.JwtService;
 import com.yala.user.User;
 import com.yala.user.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;

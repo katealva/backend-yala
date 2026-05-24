@@ -34,7 +34,7 @@ class AuthControllerTest {
     @MockitoBean
     private AuthService authService;
 
-    /** Satisfies the JwtAuthFilter bean pulled into the @WebMvcTest slice. */
+    /** Satisfies the JwtAuthorizationFilter bean pulled into the @WebMvcTest slice. */
     @MockitoBean
     private JwtService jwtService;
 

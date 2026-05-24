@@ -10,7 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.yala.auth.JwtService;
+import com.yala.security.JwtService;
 import com.yala.exception.OrderNotConfirmableException;
 import com.yala.exception.UnauthorizedException;
 import com.yala.order.dto.CreateOrderRequest;
