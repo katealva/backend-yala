@@ -94,7 +94,8 @@ public class EventListeners {
                             prev.getName(),
                             auction.getListing().getTitle(),
                             event.newBidAmount(),
-                            baseUrl + "/auctions/" + auction.getId()));
+                            baseUrl + "/auctions/" + auction.getId(),
+                            auction.getId()));
         }
     }
 
@@ -159,14 +160,16 @@ public class EventListeners {
                 auction.getWinner().getName(),
                 listing.getTitle(),
                 auction.getCurrentPrice(),
-                orderUrl);
+                orderUrl,
+                order.getId());
         emailService.sendSaleConfirmed(
                 listing.getSeller().getEmail(),
                 listing.getSeller().getName(),
                 listing.getTitle(),
                 auction.getWinner().getName(),
                 auction.getCurrentPrice(),
-                orderUrl);
+                orderUrl,
+                order.getId());
 
         log.info("Auction {} order {} materialized for winner {}",
                 auction.getId(), order.getId(), auction.getWinner().getEmail());
@@ -190,7 +193,8 @@ public class EventListeners {
                             buyer.getName(),
                             title,
                             order.getAmount(),
-                            baseUrl + "/orders/" + order.getId());
+                            baseUrl + "/orders/" + order.getId(),
+                            order.getId());
                 }));
     }
 }

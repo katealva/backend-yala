@@ -172,7 +172,8 @@ class EventListenersTest {
                 eq("Ada Lovelace"),
                 eq("Pikachu Illustrator"),
                 eq(250f),
-                contains("/auctions/100"));
+                contains("/auctions/100"),
+                eq(100L));
     }
 
     @Test
@@ -206,14 +207,16 @@ class EventListenersTest {
                 any(),
                 eq("Pikachu Illustrator"),
                 eq(500f),
-                contains("/orders/999"));
+                contains("/orders/999"),
+                eq(999L));
         verify(emailService).sendSaleConfirmed(
                 eq(seller.getEmail()),
                 any(),
                 eq("Pikachu Illustrator"),
                 any(),
                 eq(500f),
-                contains("/orders/999"));
+                contains("/orders/999"),
+                eq(999L));
     }
 
     @Test
@@ -232,6 +235,7 @@ class EventListenersTest {
                 eq("Comprador Pe"),
                 eq("Pikachu Illustrator"),
                 eq(750f),
-                contains("/orders/50"));
+                contains("/orders/50"),
+                eq(50L));
     }
 }
