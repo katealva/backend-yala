@@ -11,8 +11,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yala.security.JwtService;
-import com.yala.exception.OrderNotConfirmableException;
-import com.yala.exception.UnauthorizedException;
+import com.yala.exceptions.OrderNotConfirmableException;
+import com.yala.exceptions.UnauthorizedException;
 import com.yala.order.dto.CreateOrderRequest;
 import com.yala.order.dto.OrderResponse;
 import java.security.Principal;

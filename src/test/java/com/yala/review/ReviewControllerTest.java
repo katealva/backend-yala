@@ -10,7 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yala.security.JwtService;
-import com.yala.exception.ReviewNotAllowedException;
+import com.yala.exceptions.ReviewNotAllowedException;
 import com.yala.review.dto.CreateReviewRequest;
 import com.yala.review.dto.ReviewResponse;
 import com.yala.user.Role;

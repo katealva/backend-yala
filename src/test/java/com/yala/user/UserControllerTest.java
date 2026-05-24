@@ -10,7 +10,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yala.security.JwtService;
-import com.yala.exception.ResourceNotFoundException;
+import com.yala.exceptions.ResourceNotFoundException;
 import com.yala.user.dto.UpdateUserRequest;
 import com.yala.user.dto.UserResponse;
 import java.security.Principal;

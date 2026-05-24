@@ -1,4 +1,4 @@
-package com.yala.exception;
+package com.yala.exceptions;
 
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;

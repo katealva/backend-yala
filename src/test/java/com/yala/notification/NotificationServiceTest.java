@@ -7,8 +7,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.yala.exception.ResourceNotFoundException;
-import com.yala.exception.UnauthorizedException;
+import com.yala.exceptions.ResourceNotFoundException;
+import com.yala.exceptions.UnauthorizedException;
 import com.yala.notification.dto.NotificationResponse;
 import com.yala.user.Role;
 import com.yala.user.User;

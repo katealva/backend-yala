@@ -1,9 +1,9 @@
 package com.yala.order;
 
 import com.yala.event.OrderConfirmedEvent;
-import com.yala.exception.OrderNotConfirmableException;
-import com.yala.exception.ResourceNotFoundException;
-import com.yala.exception.UnauthorizedException;
+import com.yala.exceptions.OrderNotConfirmableException;
+import com.yala.exceptions.ResourceNotFoundException;
+import com.yala.exceptions.UnauthorizedException;
 import com.yala.listing.Listing;
 import com.yala.listing.ListingMode;
 import com.yala.listing.ListingRepository;

@@ -1,4 +1,4 @@
-package com.yala.exception;
+package com.yala.exceptions;
 
 /** Thrown when confirming an order that is already CONFIRMED or CANCELLED. Maps to HTTP 409. */
 public class OrderNotConfirmableException extends RuntimeException {

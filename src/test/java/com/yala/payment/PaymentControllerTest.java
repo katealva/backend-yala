@@ -11,7 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yala.security.JwtService;
-import com.yala.exception.PaymentException;
+import com.yala.exceptions.PaymentException;
 import com.yala.payment.dto.CreatePaymentPreferenceRequest;
 import com.yala.payment.dto.PaymentPreferenceResponse;
 import java.security.Principal;

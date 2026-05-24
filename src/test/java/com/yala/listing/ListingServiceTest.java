@@ -9,9 +9,9 @@ import static org.mockito.Mockito.when;
 
 import com.yala.category.Category;
 import com.yala.category.CategoryRepository;
-import com.yala.exception.InvalidBidException;
-import com.yala.exception.ResourceNotFoundException;
-import com.yala.exception.UnauthorizedException;
+import com.yala.exceptions.InvalidBidException;
+import com.yala.exceptions.ResourceNotFoundException;
+import com.yala.exceptions.UnauthorizedException;
 import com.yala.listing.dto.CreateListingRequest;
 import com.yala.listing.dto.ListingResponse;
 import com.yala.tag.TagRepository;

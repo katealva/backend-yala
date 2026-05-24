@@ -15,8 +15,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yala.security.JwtService;
 import com.yala.category.dto.CategoryResponse;
-import com.yala.exception.ResourceNotFoundException;
-import com.yala.exception.UnauthorizedException;
+import com.yala.exceptions.ResourceNotFoundException;
+import com.yala.exceptions.UnauthorizedException;
 import com.yala.listing.dto.CreateListingRequest;
 import com.yala.listing.dto.ListingResponse;
 import com.yala.user.Role;

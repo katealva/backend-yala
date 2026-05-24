@@ -1,8 +1,8 @@
 package com.yala.image;
 
-import com.yala.exception.ImageLimitExceededException;
-import com.yala.exception.ResourceNotFoundException;
-import com.yala.exception.UnauthorizedException;
+import com.yala.exceptions.ImageLimitExceededException;
+import com.yala.exceptions.ResourceNotFoundException;
+import com.yala.exceptions.UnauthorizedException;
 import com.yala.image.dto.ImageResponse;
 import com.yala.listing.Listing;
 import com.yala.listing.ListingRepository;

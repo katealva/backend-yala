@@ -9,7 +9,7 @@ import static org.mockito.Mockito.when;
 
 import com.yala.category.dto.CategoryResponse;
 import com.yala.category.dto.CreateCategoryRequest;
-import com.yala.exception.DuplicateResourceException;
+import com.yala.exceptions.DuplicateResourceException;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

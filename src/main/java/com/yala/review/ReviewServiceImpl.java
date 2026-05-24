@@ -1,7 +1,7 @@
 package com.yala.review;
 
-import com.yala.exception.ResourceNotFoundException;
-import com.yala.exception.ReviewNotAllowedException;
+import com.yala.exceptions.ResourceNotFoundException;
+import com.yala.exceptions.ReviewNotAllowedException;
 import com.yala.order.Order;
 import com.yala.order.OrderRepository;
 import com.yala.order.OrderStatus;

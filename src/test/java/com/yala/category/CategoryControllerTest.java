@@ -11,7 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yala.security.JwtService;
 import com.yala.category.dto.CategoryResponse;
 import com.yala.category.dto.CreateCategoryRequest;
-import com.yala.exception.DuplicateResourceException;
+import com.yala.exceptions.DuplicateResourceException;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

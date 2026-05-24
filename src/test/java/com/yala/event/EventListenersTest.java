@@ -13,7 +13,7 @@ import com.yala.auction.Auction;
 import com.yala.auction.AuctionRepository;
 import com.yala.auction.AuctionStatus;
 import com.yala.email.EmailService;
-import com.yala.exception.ResourceNotFoundException;
+import com.yala.exceptions.ResourceNotFoundException;
 import com.yala.listing.Listing;
 import com.yala.listing.ListingRepository;
 import com.yala.listing.ListingStatus;
