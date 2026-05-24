@@ -20,12 +20,14 @@ import com.yala.order.Order;
 import com.yala.order.OrderRepository;
 import com.yala.user.Role;
 import com.yala.user.User;
+import java.util.Collections;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 @ExtendWith(MockitoExtension.class)
 class EventListenersTest {
@@ -34,9 +36,18 @@ class EventListenersTest {
     @Mock private AuctionRepository auctionRepository;
     @Mock private OrderRepository orderRepository;
     @Mock private ListingRepository listingRepository;
+    @Mock private SimpMessagingTemplate messagingTemplate;
 
     @InjectMocks
     private EventListeners eventListeners;
+
+    private Auction emptyActiveAuction() {
+        return Auction.builder()
+                .id(100L).currentPrice(250f)
+                .status(AuctionStatus.ACTIVE)
+                .bids(Collections.emptyList())
+                .build();
+    }
 
     private User seller() {
         return User.builder().id(1L).email("seller@yala.pe").role(Role.SELLER).build();
@@ -54,6 +65,7 @@ class EventListenersTest {
 
     @Test
     void shouldNotifyPreviousBidderWhenOnNewBidHasPreviousBidder() {
+        when(auctionRepository.findById(100L)).thenReturn(Optional.of(emptyActiveAuction()));
         NewBidEvent event = new NewBidEvent(100L, 250f, 5L, 6L);
 
         eventListeners.onNewBid(event);
@@ -66,6 +78,7 @@ class EventListenersTest {
 
     @Test
     void shouldNotInvokeNotificationServiceWhenOnNewBidHasNoPreviousBidder() {
+        when(auctionRepository.findById(100L)).thenReturn(Optional.of(emptyActiveAuction()));
         NewBidEvent event = new NewBidEvent(100L, 250f, null, 6L);
 
         eventListeners.onNewBid(event);
