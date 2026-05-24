@@ -7,11 +7,18 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.mercadopago.client.preference.PreferenceClient;
+import com.mercadopago.client.preference.PreferenceRequest;
+import com.mercadopago.exceptions.MPApiException;
+import com.mercadopago.net.MPResponse;
+import com.mercadopago.resources.preference.Preference;
+import java.util.Collections;
 import com.yala.event.OrderConfirmedEvent;
 import com.yala.exception.OrderNotConfirmableException;
 import com.yala.exception.PaymentException;
 import com.yala.exception.ResourceNotFoundException;
 import com.yala.exception.UnauthorizedException;
+import com.yala.listing.Listing;
 import com.yala.order.Order;
 import com.yala.order.OrderRepository;
 import com.yala.order.OrderStatus;
@@ -20,6 +27,7 @@ import com.yala.payment.dto.PaymentPreferenceResponse;
 import com.yala.user.Role;
 import com.yala.user.User;
 import java.util.Optional;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -27,6 +35,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @ExtendWith(MockitoExtension.class)
 class PaymentServiceTest {
@@ -34,9 +43,15 @@ class PaymentServiceTest {
     @Mock private PaymentRepository paymentRepository;
     @Mock private OrderRepository orderRepository;
     @Mock private ApplicationEventPublisher eventPublisher;
+    @Mock private PreferenceClient preferenceClient;
 
     @InjectMocks
     private PaymentServiceImpl paymentService;
+
+    @BeforeEach
+    void setUp() {
+        ReflectionTestUtils.setField(paymentService, "accessToken", "TEST-access-token");
+    }
 
     private User buyer() {
         return User.builder().id(1L).email("ada@yala.pe").role(Role.USER).build();
@@ -46,15 +61,29 @@ class PaymentServiceTest {
         return User.builder().id(2L).email("bob@yala.pe").role(Role.SELLER).build();
     }
 
+    private Listing listing() {
+        return Listing.builder().id(10L).title("Charizard PSA 9").build();
+    }
+
     private Order pendingOrder() {
         return Order.builder()
                 .id(50L).amount(250f).status(OrderStatus.PENDING)
-                .buyer(buyer()).seller(seller()).build();
+                .listing(listing()).buyer(buyer()).seller(seller()).build();
+    }
+
+    private Preference fakePreference(String id, String initPoint) {
+        Preference preference = new Preference();
+        ReflectionTestUtils.setField(preference, "id", id);
+        ReflectionTestUtils.setField(preference, "initPoint", initPoint);
+        return preference;
     }
 
     @Test
-    void shouldCreatePreferenceWhenOrderIsPendingAndBuyerMatches() {
+    void shouldCreatePreferenceWhenOrderIsPendingAndBuyerMatches() throws Exception {
         when(orderRepository.findById(50L)).thenReturn(Optional.of(pendingOrder()));
+        when(preferenceClient.create(any(PreferenceRequest.class))).thenReturn(
+                fakePreference("123456789",
+                        "https://www.mercadopago.com.pe/checkout/v1/redirect?pref_id=123456789"));
         when(paymentRepository.save(any(Payment.class))).thenAnswer(inv -> {
             Payment p = inv.getArgument(0);
             p.setId(999L);
@@ -64,9 +93,8 @@ class PaymentServiceTest {
         PaymentPreferenceResponse response = paymentService.createPreference(
                 new CreatePaymentPreferenceRequest(50L), "ada@yala.pe");
 
-        assertThat(response.preferenceId()).startsWith("pref_");
-        assertThat(response.initPoint())
-                .startsWith("https://www.mercadopago.com.pe/checkout/v1/redirect?pref_id=pref_");
+        assertThat(response.preferenceId()).isEqualTo("123456789");
+        assertThat(response.initPoint()).contains("pref_id=123456789");
         verify(paymentRepository).save(any(Payment.class));
     }
 
@@ -98,6 +126,33 @@ class PaymentServiceTest {
         assertThatThrownBy(() -> paymentService.createPreference(
                 new CreatePaymentPreferenceRequest(404L), "ada@yala.pe"))
                 .isInstanceOf(ResourceNotFoundException.class);
+    }
+
+    @Test
+    void shouldThrowPaymentExceptionWhenAccessTokenIsNotConfigured() {
+        ReflectionTestUtils.setField(paymentService, "accessToken", "");
+        when(orderRepository.findById(50L)).thenReturn(Optional.of(pendingOrder()));
+
+        assertThatThrownBy(() -> paymentService.createPreference(
+                new CreatePaymentPreferenceRequest(50L), "ada@yala.pe"))
+                .isInstanceOf(PaymentException.class)
+                .hasMessageContaining("not configured");
+        verify(paymentRepository, never()).save(any());
+    }
+
+    @Test
+    void shouldThrowPaymentExceptionWhenMercadoPagoApiFails() throws Exception {
+        when(orderRepository.findById(50L)).thenReturn(Optional.of(pendingOrder()));
+        MPResponse mpResponse = new MPResponse(400, Collections.emptyMap(),
+                "{\"error\":\"bad_request\"}");
+        when(preferenceClient.create(any(PreferenceRequest.class)))
+                .thenThrow(new MPApiException("Bad request", mpResponse));
+
+        assertThatThrownBy(() -> paymentService.createPreference(
+                new CreatePaymentPreferenceRequest(50L), "ada@yala.pe"))
+                .isInstanceOf(PaymentException.class)
+                .hasMessageContaining("Mercado Pago");
+        verify(paymentRepository, never()).save(any());
     }
 
     @Test
