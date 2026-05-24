@@ -10,6 +10,7 @@ import com.yala.review.dto.ReviewResponse;
 import com.yala.user.User;
 import com.yala.user.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,7 @@ public class ReviewServiceImpl implements ReviewService {
     private final ReviewRepository reviewRepository;
     private final OrderRepository orderRepository;
     private final UserRepository userRepository;
+    private final ModelMapper modelMapper;
 
     @Override
     @Transactional
@@ -62,13 +64,13 @@ public class ReviewServiceImpl implements ReviewService {
             userRepository.save(seller);
         }
 
-        return ReviewResponse.from(saved);
+        return modelMapper.map(saved, ReviewResponse.class);
     }
 
     @Override
     @Transactional(readOnly = true)
     public Page<ReviewResponse> findByRecipient(Long recipientId, Pageable pageable) {
         return reviewRepository.findByRecipientId(recipientId, pageable)
-                .map(ReviewResponse::from);
+                .map(r -> modelMapper.map(r, ReviewResponse.class));
     }
 }

@@ -14,6 +14,7 @@ import com.yala.user.User;
 import com.yala.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -29,6 +30,7 @@ public class OrderServiceImpl implements OrderService {
     private final ListingRepository listingRepository;
     private final UserRepository userRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final ModelMapper modelMapper;
 
     @Override
     @Transactional
@@ -65,7 +67,7 @@ public class OrderServiceImpl implements OrderService {
 
         log.info("Order {} created by buyer {} for listing {}",
                 order.getId(), buyer.getEmail(), listing.getId());
-        return OrderResponse.from(order);
+        return modelMapper.map(order, OrderResponse.class);
     }
 
     @Override
@@ -73,7 +75,7 @@ public class OrderServiceImpl implements OrderService {
     public Page<OrderResponse> findByBuyer(String buyerEmail, Pageable pageable) {
         User buyer = userRepository.findByEmail(buyerEmail)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-        return orderRepository.findByBuyerId(buyer.getId(), pageable).map(OrderResponse::from);
+        return orderRepository.findByBuyerId(buyer.getId(), pageable).map(o -> modelMapper.map(o, OrderResponse.class));
     }
 
     @Override
@@ -81,7 +83,7 @@ public class OrderServiceImpl implements OrderService {
     public OrderResponse findById(Long id, String requesterEmail) {
         Order order = findOrThrow(id);
         ensureBuyerOrSeller(order, requesterEmail);
-        return OrderResponse.from(order);
+        return modelMapper.map(order, OrderResponse.class);
     }
 
     @Override
@@ -103,7 +105,7 @@ public class OrderServiceImpl implements OrderService {
                 saved.getId(), saved.getBuyer().getId(), saved.getSeller().getId()));
 
         log.info("Order {} confirmed by seller {}", saved.getId(), sellerEmail);
-        return OrderResponse.from(saved);
+        return modelMapper.map(saved, OrderResponse.class);
     }
 
     @Override
@@ -128,7 +130,7 @@ public class OrderServiceImpl implements OrderService {
         listingRepository.save(listing);
 
         log.info("Order {} cancelled by {}", saved.getId(), requesterEmail);
-        return OrderResponse.from(saved);
+        return modelMapper.map(saved, OrderResponse.class);
     }
 
     private Order findOrThrow(Long id) {

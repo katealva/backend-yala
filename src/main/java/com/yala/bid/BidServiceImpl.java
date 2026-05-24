@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -35,6 +36,7 @@ public class BidServiceImpl implements BidService {
     private final AuctionRepository auctionRepository;
     private final UserRepository userRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final ModelMapper modelMapper;
 
     @Override
     @Transactional
@@ -86,7 +88,7 @@ public class BidServiceImpl implements BidService {
 
         log.info("Bid {} placed on auction {} by {} for amount {}",
                 bid.getId(), auction.getId(), bidder.getEmail(), request.amount());
-        return BidResponse.from(bid);
+        return modelMapper.map(bid, BidResponse.class);
     }
 
     @SuppressWarnings("unused")
@@ -100,7 +102,8 @@ public class BidServiceImpl implements BidService {
         if (!auctionRepository.existsById(auctionId)) {
             throw new ResourceNotFoundException("Auction not found with id: " + auctionId);
         }
-        return bidRepository.findByAuctionId(auctionId, pageable).map(BidResponse::from);
+        return bidRepository.findByAuctionId(auctionId, pageable)
+                .map(b -> modelMapper.map(b, BidResponse.class));
     }
 
     @Override
@@ -110,7 +113,7 @@ public class BidServiceImpl implements BidService {
             throw new ResourceNotFoundException("Auction not found with id: " + auctionId);
         }
         return bidRepository.findFirstByAuctionIdOrderByAmountDesc(auctionId)
-                .map(BidResponse::from)
+                .map(b -> modelMapper.map(b, BidResponse.class))
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "No bids found for auction: " + auctionId));
     }
