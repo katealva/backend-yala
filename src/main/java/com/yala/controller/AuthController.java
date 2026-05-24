@@ -1,4 +1,4 @@
-package com.yala.auth;
+package com.yala.controller;
 import com.yala.service.*;
 
 import com.yala.auth.dto.AuthResponse;
