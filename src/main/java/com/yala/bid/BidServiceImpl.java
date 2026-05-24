@@ -77,7 +77,7 @@ public class BidServiceImpl implements BidService {
 
         // Triggers optimistic-lock check on Auction.currentPrice — throws
         // ObjectOptimisticLockingFailureException on conflict, mapped to 409
-        // by GlobalExceptionHandler.
+        // by GlobalExceptionsHandler.
         auction.setCurrentPrice(request.amount());
         auctionRepository.save(auction);
 
