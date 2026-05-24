@@ -2,23 +2,85 @@ package com.yala.notification;
 import com.yala.repository.*;
 import com.yala.model.*;
 
+import com.yala.exceptions.ResourceNotFoundException;
+import com.yala.exceptions.UnauthorizedException;
 import com.yala.notification.dto.NotificationResponse;
+import com.yala.model.User;
+import com.yala.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-public interface NotificationService {
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class NotificationService {
 
-    /**
-     * Internal entry point invoked by event listeners. Persists a notification
-     * targeted at the given user.
-     */
-    NotificationResponse createNotification(Long userId, NotificationType type, String message);
+    private final NotificationRepository notificationRepository;
+    private final UserRepository userRepository;
+    private final SimpMessagingTemplate messagingTemplate;
+    private final ModelMapper modelMapper;
 
-    Page<NotificationResponse> findMine(String userEmail, Pageable pageable);
+    @Transactional
+    public NotificationResponse createNotification(
+            Long userId, NotificationType type, String message) {
+        User recipient = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "User not found with id: " + userId));
 
-    NotificationResponse markAsRead(Long id, String userEmail);
+        Notification saved = notificationRepository.save(Notification.builder()
+                .type(type)
+                .message(message)
+                .isRead(false)
+                .user(recipient)
+                .build());
 
-    int markAllAsRead(String userEmail);
+        NotificationResponse response = modelMapper.map(saved, NotificationResponse.class);
+        messagingTemplate.convertAndSend("/topic/notifications/" + userId, response);
 
-    long countUnread(String userEmail);
+        log.info("Notification {} of type {} delivered to user {}",
+                saved.getId(), type, recipient.getEmail());
+        return response;
+    }
+
+    @Transactional(readOnly = true)
+    public Page<NotificationResponse> findMine(String userEmail, Pageable pageable) {
+        User user = resolveUser(userEmail);
+        return notificationRepository.findByUserId(user.getId(), pageable)
+                .map(n -> modelMapper.map(n, NotificationResponse.class));
+    }
+
+    @Transactional
+    public NotificationResponse markAsRead(Long id, String userEmail) {
+        Notification notification = notificationRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Notification not found with id: " + id));
+        if (!notification.getUser().getEmail().equals(userEmail)) {
+            throw new UnauthorizedException("You can only mark your own notifications as read");
+        }
+        notification.setIsRead(true);
+        return modelMapper.map(notificationRepository.save(notification), NotificationResponse.class);
+    }
+
+    @Transactional
+    public int markAllAsRead(String userEmail) {
+        User user = resolveUser(userEmail);
+        return notificationRepository.markAllAsReadByUserId(user.getId());
+    }
+
+    @Transactional(readOnly = true)
+    public long countUnread(String userEmail) {
+        User user = resolveUser(userEmail);
+        return notificationRepository.countByUserIdAndIsReadFalse(user.getId());
+    }
+
+    private User resolveUser(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+    }
 }

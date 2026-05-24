@@ -46,7 +46,7 @@ class ListingServiceTest {
     private ModelMapper modelMapper = new ModelMapperConfig().modelMapper();
 
     @InjectMocks
-    private ListingServiceImpl listingService;
+    private ListingService listingService;
 
     private User verifiedSeller() {
         return User.builder()

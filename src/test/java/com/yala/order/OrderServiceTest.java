@@ -42,7 +42,7 @@ class OrderServiceTest {
     private ModelMapper modelMapper = new ModelMapperConfig().modelMapper();
 
     @InjectMocks
-    private OrderServiceImpl orderService;
+    private OrderService orderService;
 
     private User buyer() {
         return User.builder().id(1L).name("Ada").email("ada@yala.pe").role(Role.USER).build();

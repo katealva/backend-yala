@@ -52,7 +52,7 @@ class AuctionServiceTest {
     private ModelMapper modelMapper = new ModelMapperConfig().modelMapper();
 
     @InjectMocks
-    private AuctionServiceImpl auctionService;
+    private AuctionService auctionService;
 
     private User seller() {
         return User.builder().id(1L).name("Bob").email("bob@yala.pe")

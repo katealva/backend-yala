@@ -46,7 +46,7 @@ class PaymentServiceTest {
     @Mock private PreferenceClient preferenceClient;
 
     @InjectMocks
-    private PaymentServiceImpl paymentService;
+    private PaymentService paymentService;
 
     @BeforeEach
     void setUp() {

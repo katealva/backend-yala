@@ -49,7 +49,7 @@ class BidServiceTest {
     private ModelMapper modelMapper = new ModelMapperConfig().modelMapper();
 
     @InjectMocks
-    private BidServiceImpl bidService;
+    private BidService bidService;
 
     private User seller() {
         return User.builder().id(1L).name("Bob").email("bob@yala.pe")

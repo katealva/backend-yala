@@ -40,7 +40,7 @@ class NotificationServiceTest {
     private ModelMapper modelMapper = new ModelMapperConfig().modelMapper();
 
     @InjectMocks
-    private NotificationServiceImpl notificationService;
+    private NotificationService notificationService;
 
     private User sampleUser() {
         return User.builder().id(1L).name("Ada").email("ada@yala.pe").role(Role.USER).build();
