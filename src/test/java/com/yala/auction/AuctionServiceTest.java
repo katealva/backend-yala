@@ -17,6 +17,7 @@ import com.yala.exception.DuplicateResourceException;
 import com.yala.exception.InvalidBidException;
 import com.yala.exception.ResourceNotFoundException;
 import com.yala.exception.UnauthorizedException;
+import com.yala.event.AuctionFinishedEvent;
 import com.yala.listing.Listing;
 import com.yala.listing.ListingRepository;
 import com.yala.user.Role;
