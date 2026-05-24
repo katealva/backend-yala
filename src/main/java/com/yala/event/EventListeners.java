@@ -20,7 +20,6 @@ import java.util.Comparator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -57,7 +56,8 @@ public class EventListeners {
     private String baseUrl;
 
     @Async
-    @EventListener
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void onNewBid(NewBidEvent event) {
         log.info("Handling NewBidEvent for auction {} amount {}",
                 event.auctionId(), event.newBidAmount());
