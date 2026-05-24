@@ -176,7 +176,8 @@ public class EventListeners {
     }
 
     @Async
-    @EventListener
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void onOrderConfirmed(OrderConfirmedEvent event) {
         log.info("Handling OrderConfirmedEvent for order {}", event.orderId());
         notificationService.createNotification(
