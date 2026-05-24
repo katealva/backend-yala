@@ -7,7 +7,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.yala.exception.ResourceNotFoundException;
+import com.yala.config.ModelMapperConfig;
+import com.yala.exceptions.ResourceNotFoundException;
 import com.yala.listing.Listing;
 import com.yala.listing.ListingMode;
 import com.yala.listing.ListingRepository;
@@ -20,7 +21,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -34,6 +37,9 @@ class UserServiceTest {
 
     @Mock
     private ListingRepository listingRepository;
+
+    @Spy
+    private ModelMapper modelMapper = new ModelMapperConfig().modelMapper();
 
     @InjectMocks
     private UserService userService;

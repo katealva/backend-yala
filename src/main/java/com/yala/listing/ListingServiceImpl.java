@@ -2,9 +2,9 @@ package com.yala.listing;
 
 import com.yala.category.Category;
 import com.yala.category.CategoryRepository;
-import com.yala.exception.InvalidBidException;
-import com.yala.exception.ResourceNotFoundException;
-import com.yala.exception.UnauthorizedException;
+import com.yala.exceptions.InvalidBidException;
+import com.yala.exceptions.ResourceNotFoundException;
+import com.yala.exceptions.UnauthorizedException;
 import com.yala.listing.dto.CreateListingRequest;
 import com.yala.listing.dto.ListingResponse;
 import com.yala.tag.Tag;
@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -31,6 +32,7 @@ public class ListingServiceImpl implements ListingService {
     private final CategoryRepository categoryRepository;
     private final TagRepository tagRepository;
     private final UserRepository userRepository;
+    private final ModelMapper modelMapper;
 
     @Override
     @Transactional
@@ -60,13 +62,13 @@ public class ListingServiceImpl implements ListingService {
                 .build());
 
         log.info("Listing {} created by seller {}", saved.getId(), seller.getEmail());
-        return ListingResponse.from(saved);
+        return modelMapper.map(saved, ListingResponse.class);
     }
 
     @Override
     @Transactional(readOnly = true)
     public ListingResponse findById(Long id) {
-        return ListingResponse.from(findOrThrow(id));
+        return modelMapper.map(findOrThrow(id), ListingResponse.class);
     }
 
     @Override
@@ -93,7 +95,7 @@ public class ListingServiceImpl implements ListingService {
                 .reduce(Specification::and)
                 .orElse(null);
 
-        return listingRepository.findAll(combined, pageable).map(ListingResponse::from);
+        return listingRepository.findAll(combined, pageable).map(l -> modelMapper.map(l, ListingResponse.class));
     }
 
     @Override
@@ -117,7 +119,7 @@ public class ListingServiceImpl implements ListingService {
         listing.setCategory(category);
         listing.setTags(resolveTags(request.tags()));
 
-        return ListingResponse.from(listingRepository.save(listing));
+        return modelMapper.map(listingRepository.save(listing), ListingResponse.class);
     }
 
     @Override

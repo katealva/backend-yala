@@ -8,10 +8,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.yala.auth.JwtService;
+import com.yala.security.JwtService;
 import com.yala.category.dto.CategoryResponse;
 import com.yala.category.dto.CreateCategoryRequest;
-import com.yala.exception.DuplicateResourceException;
+import com.yala.exceptions.DuplicateResourceException;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +44,7 @@ class CategoryControllerTest {
     @MockitoBean
     private CategoryService categoryService;
 
-    /** Satisfies the JwtAuthFilter bean pulled into the @WebMvcTest slice. */
+    /** Satisfies the JwtAuthorizationFilter bean pulled into the @WebMvcTest slice. */
     @MockitoBean
     private JwtService jwtService;
 

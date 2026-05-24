@@ -37,3 +37,7 @@ CLAUDE.md
 
 ### ENV ###
 .env
+
+.agents
+app.log
+skills-lock.json

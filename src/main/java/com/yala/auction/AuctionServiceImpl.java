@@ -5,10 +5,10 @@ import com.yala.auction.dto.AuctionSummaryResponse;
 import com.yala.auction.dto.CreateAuctionRequest;
 import com.yala.bid.BidRepository;
 import com.yala.event.AuctionFinishedEvent;
-import com.yala.exception.DuplicateResourceException;
-import com.yala.exception.InvalidBidException;
-import com.yala.exception.ResourceNotFoundException;
-import com.yala.exception.UnauthorizedException;
+import com.yala.exceptions.DuplicateResourceException;
+import com.yala.exceptions.InvalidBidException;
+import com.yala.exceptions.ResourceNotFoundException;
+import com.yala.exceptions.UnauthorizedException;
 import com.yala.listing.Listing;
 import com.yala.listing.ListingRepository;
 import com.yala.user.User;
@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -33,6 +34,7 @@ public class AuctionServiceImpl implements AuctionService {
     private final ListingRepository listingRepository;
     private final UserRepository userRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final ModelMapper modelMapper;
 
     @Override
     @Transactional
@@ -65,20 +67,20 @@ public class AuctionServiceImpl implements AuctionService {
                 .status(AuctionStatus.ACTIVE)
                 .build());
 
-        return AuctionResponse.from(saved);
+        return modelMapper.map(saved, AuctionResponse.class);
     }
 
     @Override
     @Transactional(readOnly = true)
     public AuctionResponse findById(Long id) {
-        return AuctionResponse.from(findOrThrow(id));
+        return modelMapper.map(findOrThrow(id), AuctionResponse.class);
     }
 
     @Override
     @Transactional(readOnly = true)
     public Page<AuctionSummaryResponse> findAllActive(Pageable pageable) {
         return auctionRepository.findByStatus(AuctionStatus.ACTIVE, pageable)
-                .map(AuctionSummaryResponse::from);
+                .map(a -> modelMapper.map(a, AuctionSummaryResponse.class));
     }
 
     @Override

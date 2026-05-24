@@ -6,7 +6,7 @@ import com.yala.auction.dto.AuctionUpdateMessage;
 import com.yala.auction.dto.LatestBidInfo;
 import com.yala.bid.Bid;
 import com.yala.email.EmailService;
-import com.yala.exception.ResourceNotFoundException;
+import com.yala.exceptions.ResourceNotFoundException;
 import com.yala.listing.Listing;
 import com.yala.listing.ListingRepository;
 import com.yala.listing.ListingStatus;

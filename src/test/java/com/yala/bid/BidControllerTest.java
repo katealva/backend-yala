@@ -9,11 +9,11 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.yala.auth.JwtService;
+import com.yala.security.JwtService;
 import com.yala.bid.dto.BidResponse;
 import com.yala.bid.dto.CreateBidRequest;
-import com.yala.exception.AuctionNotActiveException;
-import com.yala.exception.InvalidBidException;
+import com.yala.exceptions.AuctionNotActiveException;
+import com.yala.exceptions.InvalidBidException;
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.List;

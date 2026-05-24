@@ -7,9 +7,10 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.yala.exception.OrderNotConfirmableException;
-import com.yala.exception.ResourceNotFoundException;
-import com.yala.exception.UnauthorizedException;
+import com.yala.config.ModelMapperConfig;
+import com.yala.exceptions.OrderNotConfirmableException;
+import com.yala.exceptions.ResourceNotFoundException;
+import com.yala.exceptions.UnauthorizedException;
 import com.yala.listing.Listing;
 import com.yala.listing.ListingMode;
 import com.yala.listing.ListingRepository;
@@ -24,7 +25,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.modelmapper.ModelMapper;
 import org.springframework.context.ApplicationEventPublisher;
 
 @ExtendWith(MockitoExtension.class)
@@ -34,6 +37,9 @@ class OrderServiceTest {
     @Mock private ListingRepository listingRepository;
     @Mock private UserRepository userRepository;
     @Mock private ApplicationEventPublisher eventPublisher;
+
+    @Spy
+    private ModelMapper modelMapper = new ModelMapperConfig().modelMapper();
 
     @InjectMocks
     private OrderServiceImpl orderService;

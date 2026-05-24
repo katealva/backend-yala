@@ -9,8 +9,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.yala.auth.JwtService;
-import com.yala.exception.ReviewNotAllowedException;
+import com.yala.security.JwtService;
+import com.yala.exceptions.ReviewNotAllowedException;
 import com.yala.review.dto.CreateReviewRequest;
 import com.yala.review.dto.ReviewResponse;
 import com.yala.user.Role;
@@ -42,7 +42,7 @@ class ReviewControllerTest {
     @MockitoBean
     private ReviewService reviewService;
 
-    /** Satisfies the JwtAuthFilter bean pulled into the @WebMvcTest slice. */
+    /** Satisfies the JwtAuthorizationFilter bean pulled into the @WebMvcTest slice. */
     @MockitoBean
     private JwtService jwtService;
 

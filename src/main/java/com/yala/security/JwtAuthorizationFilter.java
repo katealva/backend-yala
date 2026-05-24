@@ -1,4 +1,4 @@
-package com.yala.auth;
+package com.yala.security;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -21,13 +21,13 @@ import org.springframework.web.filter.OncePerRequestFilter;
  * built directly from the token claims (no {@code UserDetailsService} lookup).
  */
 @Component
-public class JwtAuthFilter extends OncePerRequestFilter {
+public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
     private static final String BEARER_PREFIX = "Bearer ";
 
     private final JwtService jwtService;
 
-    public JwtAuthFilter(JwtService jwtService) {
+    public JwtAuthorizationFilter(JwtService jwtService) {
         this.jwtService = jwtService;
     }
 

@@ -1,5 +1,16 @@
-package com.yala.exception;
+package com.yala;
 
+import com.yala.exceptions.AuctionNotActiveException;
+import com.yala.exceptions.DuplicateResourceException;
+import com.yala.exceptions.EmailAlreadyExistsException;
+import com.yala.exceptions.ErrorResponse;
+import com.yala.exceptions.ImageLimitExceededException;
+import com.yala.exceptions.InvalidBidException;
+import com.yala.exceptions.OrderNotConfirmableException;
+import com.yala.exceptions.PaymentException;
+import com.yala.exceptions.ResourceNotFoundException;
+import com.yala.exceptions.ReviewNotAllowedException;
+import com.yala.exceptions.UnauthorizedException;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.stream.Collectors;
@@ -14,7 +25,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 /** Centralizes exception-to-HTTP mapping, returning a consistent {@link ErrorResponse}. */
 @RestControllerAdvice
-public class GlobalExceptionHandler {
+public class GlobalExceptionsHandler {
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleResourceNotFound(

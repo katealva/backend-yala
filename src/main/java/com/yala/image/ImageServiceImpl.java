@@ -1,8 +1,8 @@
 package com.yala.image;
 
-import com.yala.exception.ImageLimitExceededException;
-import com.yala.exception.ResourceNotFoundException;
-import com.yala.exception.UnauthorizedException;
+import com.yala.exceptions.ImageLimitExceededException;
+import com.yala.exceptions.ResourceNotFoundException;
+import com.yala.exceptions.UnauthorizedException;
 import com.yala.image.dto.ImageResponse;
 import com.yala.listing.Listing;
 import com.yala.listing.ListingRepository;
@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,6 +32,7 @@ public class ImageServiceImpl implements ImageService {
     private final ListingRepository listingRepository;
     private final UserRepository userRepository;
     private final S3Client s3Client;
+    private final ModelMapper modelMapper;
 
     @Value("${aws.s3.bucket}")
     private String bucket;
@@ -67,14 +69,14 @@ public class ImageServiceImpl implements ImageService {
                 .listing(listing)
                 .build());
 
-        return ImageResponse.from(saved);
+        return modelMapper.map(saved, ImageResponse.class);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<ImageResponse> findByListing(Long listingId) {
         return imageRepository.findByListingIdOrderBySortOrderAsc(listingId).stream()
-                .map(ImageResponse::from)
+                .map(image -> modelMapper.map(image, ImageResponse.class))
                 .toList();
     }
 

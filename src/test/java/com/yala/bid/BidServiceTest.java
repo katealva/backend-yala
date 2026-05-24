@@ -13,9 +13,10 @@ import com.yala.auction.AuctionRepository;
 import com.yala.auction.AuctionStatus;
 import com.yala.bid.dto.BidResponse;
 import com.yala.bid.dto.CreateBidRequest;
-import com.yala.exception.AuctionNotActiveException;
-import com.yala.exception.InvalidBidException;
-import com.yala.exception.ResourceNotFoundException;
+import com.yala.config.ModelMapperConfig;
+import com.yala.exceptions.AuctionNotActiveException;
+import com.yala.exceptions.InvalidBidException;
+import com.yala.exceptions.ResourceNotFoundException;
 import com.yala.listing.Listing;
 import com.yala.user.Role;
 import com.yala.user.User;
@@ -27,7 +28,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.modelmapper.ModelMapper;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -41,6 +44,9 @@ class BidServiceTest {
     @Mock private AuctionRepository auctionRepository;
     @Mock private UserRepository userRepository;
     @Mock private ApplicationEventPublisher eventPublisher;
+
+    @Spy
+    private ModelMapper modelMapper = new ModelMapperConfig().modelMapper();
 
     @InjectMocks
     private BidServiceImpl bidService;

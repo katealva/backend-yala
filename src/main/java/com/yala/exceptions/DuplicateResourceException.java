@@ -1,4 +1,4 @@
-package com.yala.exception;
+package com.yala.exceptions;
 
 public class DuplicateResourceException extends RuntimeException {
 

@@ -1,7 +1,7 @@
 package com.yala.tag;
 
-import com.yala.exception.DuplicateResourceException;
-import com.yala.exception.ResourceNotFoundException;
+import com.yala.exceptions.DuplicateResourceException;
+import com.yala.exceptions.ResourceNotFoundException;
 import com.yala.tag.dto.TagRequest;
 import com.yala.tag.dto.TagResponse;
 import java.util.List;

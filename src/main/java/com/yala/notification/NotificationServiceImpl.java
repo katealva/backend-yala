@@ -1,12 +1,13 @@
 package com.yala.notification;
 
-import com.yala.exception.ResourceNotFoundException;
-import com.yala.exception.UnauthorizedException;
+import com.yala.exceptions.ResourceNotFoundException;
+import com.yala.exceptions.UnauthorizedException;
 import com.yala.notification.dto.NotificationResponse;
 import com.yala.user.User;
 import com.yala.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -21,6 +22,7 @@ public class NotificationServiceImpl implements NotificationService {
     private final NotificationRepository notificationRepository;
     private final UserRepository userRepository;
     private final SimpMessagingTemplate messagingTemplate;
+    private final ModelMapper modelMapper;
 
     @Override
     @Transactional
@@ -37,7 +39,7 @@ public class NotificationServiceImpl implements NotificationService {
                 .user(recipient)
                 .build());
 
-        NotificationResponse response = NotificationResponse.from(saved);
+        NotificationResponse response = modelMapper.map(saved, NotificationResponse.class);
         messagingTemplate.convertAndSend("/topic/notifications/" + userId, response);
 
         log.info("Notification {} of type {} delivered to user {}",
@@ -50,7 +52,7 @@ public class NotificationServiceImpl implements NotificationService {
     public Page<NotificationResponse> findMine(String userEmail, Pageable pageable) {
         User user = resolveUser(userEmail);
         return notificationRepository.findByUserId(user.getId(), pageable)
-                .map(NotificationResponse::from);
+                .map(n -> modelMapper.map(n, NotificationResponse.class));
     }
 
     @Override
@@ -63,7 +65,7 @@ public class NotificationServiceImpl implements NotificationService {
             throw new UnauthorizedException("You can only mark your own notifications as read");
         }
         notification.setIsRead(true);
-        return NotificationResponse.from(notificationRepository.save(notification));
+        return modelMapper.map(notificationRepository.save(notification), NotificationResponse.class);
     }
 
     @Override

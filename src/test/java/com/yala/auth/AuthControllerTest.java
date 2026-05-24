@@ -11,8 +11,9 @@ import com.yala.auth.dto.AuthResponse;
 import com.yala.auth.dto.LoginRequest;
 import com.yala.auth.dto.RefreshTokenRequest;
 import com.yala.auth.dto.RegisterRequest;
-import com.yala.exception.EmailAlreadyExistsException;
-import com.yala.exception.UnauthorizedException;
+import com.yala.exceptions.EmailAlreadyExistsException;
+import com.yala.exceptions.UnauthorizedException;
+import com.yala.security.JwtService;
 import com.yala.user.Role;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +35,7 @@ class AuthControllerTest {
     @MockitoBean
     private AuthService authService;
 
-    /** Satisfies the JwtAuthFilter bean pulled into the @WebMvcTest slice. */
+    /** Satisfies the JwtAuthorizationFilter bean pulled into the @WebMvcTest slice. */
     @MockitoBean
     private JwtService jwtService;
 

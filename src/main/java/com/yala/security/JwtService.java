@@ -1,4 +1,4 @@
-package com.yala.auth;
+package com.yala.security;
 
 import com.yala.user.User;
 import io.jsonwebtoken.Claims;

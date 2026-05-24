@@ -1,10 +1,11 @@
 package com.yala.user;
 
-import com.yala.exception.ResourceNotFoundException;
+import com.yala.exceptions.ResourceNotFoundException;
 import com.yala.listing.ListingRepository;
 import com.yala.listing.dto.ListingResponse;
 import com.yala.user.dto.UpdateUserRequest;
 import com.yala.user.dto.UserResponse;
+import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -16,15 +17,18 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final ListingRepository listingRepository;
+    private final ModelMapper modelMapper;
 
-    public UserService(UserRepository userRepository, ListingRepository listingRepository) {
+    public UserService(UserRepository userRepository, ListingRepository listingRepository,
+            ModelMapper modelMapper) {
         this.userRepository = userRepository;
         this.listingRepository = listingRepository;
+        this.modelMapper = modelMapper;
     }
 
     @Transactional(readOnly = true)
     public UserResponse getCurrentUser(String email) {
-        return UserResponse.from(findByEmailOrThrow(email));
+        return modelMapper.map(findByEmailOrThrow(email), UserResponse.class);
     }
 
     @Transactional(readOnly = true)
@@ -32,7 +36,7 @@ public class UserService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "User not found with id: " + id));
-        return UserResponse.from(user);
+        return modelMapper.map(user, UserResponse.class);
     }
 
     @Transactional
@@ -44,7 +48,7 @@ public class UserService {
         if (request.avatarUrl() != null) {
             user.setAvatarUrl(request.avatarUrl());
         }
-        return UserResponse.from(userRepository.save(user));
+        return modelMapper.map(userRepository.save(user), UserResponse.class);
     }
 
     @Transactional(readOnly = true)
@@ -53,7 +57,7 @@ public class UserService {
             throw new ResourceNotFoundException("User not found with id: " + userId);
         }
         return listingRepository.findBySellerId(userId, pageable)
-                .map(ListingResponse::from);
+                .map(listing -> modelMapper.map(listing, ListingResponse.class));
     }
 
     private User findByEmailOrThrow(String email) {

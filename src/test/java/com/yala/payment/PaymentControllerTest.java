@@ -10,8 +10,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.yala.auth.JwtService;
-import com.yala.exception.PaymentException;
+import com.yala.security.JwtService;
+import com.yala.exceptions.PaymentException;
 import com.yala.payment.dto.CreatePaymentPreferenceRequest;
 import com.yala.payment.dto.PaymentPreferenceResponse;
 import java.security.Principal;

@@ -9,19 +9,25 @@ import static org.mockito.Mockito.when;
 
 import com.yala.category.dto.CategoryResponse;
 import com.yala.category.dto.CreateCategoryRequest;
-import com.yala.exception.DuplicateResourceException;
+import com.yala.config.ModelMapperConfig;
+import com.yala.exceptions.DuplicateResourceException;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.modelmapper.ModelMapper;
 
 @ExtendWith(MockitoExtension.class)
 class CategoryServiceTest {
 
     @Mock
     private CategoryRepository categoryRepository;
+
+    @Spy
+    private ModelMapper modelMapper = new ModelMapperConfig().modelMapper();
 
     @InjectMocks
     private CategoryService categoryService;

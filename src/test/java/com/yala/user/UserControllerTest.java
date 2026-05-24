@@ -9,8 +9,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.yala.auth.JwtService;
-import com.yala.exception.ResourceNotFoundException;
+import com.yala.security.JwtService;
+import com.yala.exceptions.ResourceNotFoundException;
 import com.yala.user.dto.UpdateUserRequest;
 import com.yala.user.dto.UserResponse;
 import java.security.Principal;
@@ -36,7 +36,7 @@ class UserControllerTest {
     @MockitoBean
     private UserService userService;
 
-    /** Satisfies the JwtAuthFilter bean pulled into the @WebMvcTest slice. */
+    /** Satisfies the JwtAuthorizationFilter bean pulled into the @WebMvcTest slice. */
     @MockitoBean
     private JwtService jwtService;
 

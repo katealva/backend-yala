@@ -9,9 +9,10 @@ import static org.mockito.Mockito.when;
 
 import com.yala.category.Category;
 import com.yala.category.CategoryRepository;
-import com.yala.exception.InvalidBidException;
-import com.yala.exception.ResourceNotFoundException;
-import com.yala.exception.UnauthorizedException;
+import com.yala.config.ModelMapperConfig;
+import com.yala.exceptions.InvalidBidException;
+import com.yala.exceptions.ResourceNotFoundException;
+import com.yala.exceptions.UnauthorizedException;
 import com.yala.listing.dto.CreateListingRequest;
 import com.yala.listing.dto.ListingResponse;
 import com.yala.tag.TagRepository;
@@ -24,7 +25,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -38,6 +41,9 @@ class ListingServiceTest {
     @Mock private CategoryRepository categoryRepository;
     @Mock private TagRepository tagRepository;
     @Mock private UserRepository userRepository;
+
+    @Spy
+    private ModelMapper modelMapper = new ModelMapperConfig().modelMapper();
 
     @InjectMocks
     private ListingServiceImpl listingService;
