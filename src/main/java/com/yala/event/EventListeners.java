@@ -5,6 +5,7 @@ import com.yala.auction.AuctionRepository;
 import com.yala.auction.dto.AuctionUpdateMessage;
 import com.yala.auction.dto.LatestBidInfo;
 import com.yala.bid.Bid;
+import com.yala.email.EmailService;
 import com.yala.exception.ResourceNotFoundException;
 import com.yala.listing.Listing;
 import com.yala.listing.ListingRepository;
@@ -14,9 +15,11 @@ import com.yala.notification.NotificationType;
 import com.yala.order.Order;
 import com.yala.order.OrderRepository;
 import com.yala.order.OrderStatus;
+import com.yala.user.UserRepository;
 import java.util.Comparator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Async;
@@ -46,7 +49,12 @@ public class EventListeners {
     private final AuctionRepository auctionRepository;
     private final OrderRepository orderRepository;
     private final ListingRepository listingRepository;
+    private final UserRepository userRepository;
+    private final EmailService emailService;
     private final SimpMessagingTemplate messagingTemplate;
+
+    @Value("${app.base-url:http://localhost:8081}")
+    private String baseUrl;
 
     @Async
     @EventListener
@@ -78,6 +86,16 @@ public class EventListeners {
                 latestBid,
                 null);
         messagingTemplate.convertAndSend("/topic/auction/" + auction.getId(), payload);
+
+        if (event.previousBidderId() != null && auction.getListing() != null) {
+            userRepository.findById(event.previousBidderId()).ifPresent(prev ->
+                    emailService.sendBidOutbid(
+                            prev.getEmail(),
+                            prev.getName(),
+                            auction.getListing().getTitle(),
+                            event.newBidAmount(),
+                            baseUrl + "/auctions/" + auction.getId()));
+        }
     }
 
     @Async
@@ -135,6 +153,21 @@ public class EventListeners {
                         null,
                         auction.getWinner().getName()));
 
+        String orderUrl = baseUrl + "/orders/" + order.getId();
+        emailService.sendAuctionWon(
+                auction.getWinner().getEmail(),
+                auction.getWinner().getName(),
+                listing.getTitle(),
+                auction.getCurrentPrice(),
+                orderUrl);
+        emailService.sendSaleConfirmed(
+                listing.getSeller().getEmail(),
+                listing.getSeller().getName(),
+                listing.getTitle(),
+                auction.getWinner().getName(),
+                auction.getCurrentPrice(),
+                orderUrl);
+
         log.info("Auction {} order {} materialized for winner {}",
                 auction.getId(), order.getId(), auction.getWinner().getEmail());
     }
@@ -147,5 +180,17 @@ public class EventListeners {
                 event.buyerId(),
                 NotificationType.SALE_CONFIRMED,
                 "Your order has been confirmed by the seller.");
+
+        orderRepository.findById(event.orderId()).ifPresent(order ->
+                userRepository.findById(event.buyerId()).ifPresent(buyer -> {
+                    Listing listing = order.getListing();
+                    String title = listing != null ? listing.getTitle() : "";
+                    emailService.sendOrderConfirmed(
+                            buyer.getEmail(),
+                            buyer.getName(),
+                            title,
+                            order.getAmount(),
+                            baseUrl + "/orders/" + order.getId());
+                }));
     }
 }
