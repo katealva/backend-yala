@@ -1,4 +1,5 @@
 package com.yala.notification;
+import com.yala.service.*;
 import com.yala.repository.*;
 import com.yala.model.*;
 

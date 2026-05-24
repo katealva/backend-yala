@@ -1,4 +1,4 @@
-package com.yala.listing;
+package com.yala.service;
 import com.yala.repository.*;
 import com.yala.model.*;
 

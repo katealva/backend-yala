@@ -1,4 +1,4 @@
-package com.yala.email;
+package com.yala.service;
 
 import com.resend.Resend;
 import com.resend.core.exception.ResendException;
