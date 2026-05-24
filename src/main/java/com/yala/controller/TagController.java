@@ -3,8 +3,8 @@ import com.yala.service.*;
 import com.yala.repository.*;
 import com.yala.model.*;
 
-import com.yala.tag.dto.TagRequest;
-import com.yala.tag.dto.TagResponse;
+import com.yala.dto.tag.RequestTagDTO;
+import com.yala.dto.tag.ResponseTagDTO;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -28,25 +28,25 @@ public class TagController {
     private final TagService tagService;
 
     @GetMapping
-    public ResponseEntity<List<TagResponse>> findAll() {
+    public ResponseEntity<List<ResponseTagDTO>> findAll() {
         return ResponseEntity.ok(tagService.findAll());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<TagResponse> findById(@PathVariable Long id) {
+    public ResponseEntity<ResponseTagDTO> findById(@PathVariable Long id) {
         return ResponseEntity.ok(tagService.findById(id));
     }
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<TagResponse> create(@Valid @RequestBody TagRequest request) {
+    public ResponseEntity<ResponseTagDTO> create(@Valid @RequestBody RequestTagDTO request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(tagService.create(request));
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<TagResponse> update(@PathVariable Long id,
-            @Valid @RequestBody TagRequest request) {
+    public ResponseEntity<ResponseTagDTO> update(@PathVariable Long id,
+            @Valid @RequestBody RequestTagDTO request) {
         return ResponseEntity.ok(tagService.update(id, request));
     }
 

@@ -15,8 +15,8 @@ import com.yala.model.Listing;
 import com.yala.model.ListingMode;
 import com.yala.repository.ListingRepository;
 import com.yala.model.ListingStatus;
-import com.yala.order.dto.CreateOrderRequest;
-import com.yala.order.dto.OrderResponse;
+import com.yala.dto.order.RequestOrderDTO;
+import com.yala.dto.order.ResponseOrderDTO;
 import com.yala.model.Role;
 import com.yala.model.User;
 import com.yala.repository.UserRepository;
@@ -75,7 +75,7 @@ class OrderServiceTest {
             return o;
         });
 
-        OrderResponse response = orderService.create(new CreateOrderRequest(10L), "ada@yala.pe");
+        ResponseOrderDTO response = orderService.create(new RequestOrderDTO(10L), "ada@yala.pe");
 
         assertThat(response.id()).isEqualTo(99L);
         assertThat(response.amount()).isEqualTo(250f);
@@ -88,7 +88,7 @@ class OrderServiceTest {
         when(userRepository.findByEmail("ada@yala.pe")).thenReturn(Optional.of(buyer()));
         when(listingRepository.findById(11L)).thenReturn(Optional.of(auctionListing()));
 
-        assertThatThrownBy(() -> orderService.create(new CreateOrderRequest(11L), "ada@yala.pe"))
+        assertThatThrownBy(() -> orderService.create(new RequestOrderDTO(11L), "ada@yala.pe"))
                 .isInstanceOf(OrderNotConfirmableException.class)
                 .hasMessageContaining("FIXED");
         verify(orderRepository, never()).save(any());
@@ -99,7 +99,7 @@ class OrderServiceTest {
         when(userRepository.findByEmail("ada@yala.pe")).thenReturn(Optional.of(buyer()));
         when(listingRepository.findById(10L)).thenReturn(Optional.of(fixedListing(ListingStatus.SOLD)));
 
-        assertThatThrownBy(() -> orderService.create(new CreateOrderRequest(10L), "ada@yala.pe"))
+        assertThatThrownBy(() -> orderService.create(new RequestOrderDTO(10L), "ada@yala.pe"))
                 .isInstanceOf(OrderNotConfirmableException.class)
                 .hasMessageContaining("no longer available");
     }
@@ -112,7 +112,7 @@ class OrderServiceTest {
         listing.setSeller(selfSeller);
         when(listingRepository.findById(10L)).thenReturn(Optional.of(listing));
 
-        assertThatThrownBy(() -> orderService.create(new CreateOrderRequest(10L), "bob@yala.pe"))
+        assertThatThrownBy(() -> orderService.create(new RequestOrderDTO(10L), "bob@yala.pe"))
                 .isInstanceOf(OrderNotConfirmableException.class)
                 .hasMessageContaining("cannot buy their own");
     }
@@ -122,7 +122,7 @@ class OrderServiceTest {
         when(userRepository.findByEmail("ada@yala.pe")).thenReturn(Optional.of(buyer()));
         when(listingRepository.findById(404L)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> orderService.create(new CreateOrderRequest(404L), "ada@yala.pe"))
+        assertThatThrownBy(() -> orderService.create(new RequestOrderDTO(404L), "ada@yala.pe"))
                 .isInstanceOf(ResourceNotFoundException.class);
     }
 
@@ -135,7 +135,7 @@ class OrderServiceTest {
         when(orderRepository.findById(50L)).thenReturn(Optional.of(order));
         when(orderRepository.save(any(Order.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        OrderResponse response = orderService.confirm(50L, "bob@yala.pe");
+        ResponseOrderDTO response = orderService.confirm(50L, "bob@yala.pe");
 
         assertThat(response.status()).isEqualTo("CONFIRMED");
     }
@@ -173,7 +173,7 @@ class OrderServiceTest {
         when(orderRepository.findById(60L)).thenReturn(Optional.of(order));
         when(orderRepository.save(any(Order.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        OrderResponse response = orderService.cancel(60L, "ada@yala.pe");
+        ResponseOrderDTO response = orderService.cancel(60L, "ada@yala.pe");
 
         assertThat(response.status()).isEqualTo("CANCELLED");
         assertThat(listing.getStatus()).isEqualTo(ListingStatus.ACTIVE);
@@ -189,7 +189,7 @@ class OrderServiceTest {
         when(orderRepository.findById(60L)).thenReturn(Optional.of(order));
         when(orderRepository.save(any(Order.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        OrderResponse response = orderService.cancel(60L, "bob@yala.pe");
+        ResponseOrderDTO response = orderService.cancel(60L, "bob@yala.pe");
 
         assertThat(response.status()).isEqualTo("CANCELLED");
     }
@@ -226,7 +226,7 @@ class OrderServiceTest {
                 .buyer(buyer()).seller(seller()).build();
         when(orderRepository.findById(70L)).thenReturn(Optional.of(order));
 
-        OrderResponse response = orderService.findById(70L, "ada@yala.pe");
+        ResponseOrderDTO response = orderService.findById(70L, "ada@yala.pe");
 
         assertThat(response.id()).isEqualTo(70L);
     }

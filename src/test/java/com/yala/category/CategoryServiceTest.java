@@ -7,8 +7,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.yala.category.dto.CategoryResponse;
-import com.yala.category.dto.CreateCategoryRequest;
+import com.yala.dto.category.ResponseCategoryDTO;
+import com.yala.dto.category.RequestCategoryDTO;
 import com.yala.config.ModelMapperConfig;
 import com.yala.exceptions.DuplicateResourceException;
 import java.util.List;
@@ -40,7 +40,7 @@ class CategoryServiceTest {
                 .id(2L).name("Funko Pop").description("Figures").build();
         when(categoryRepository.findAll()).thenReturn(List.of(c1, c2));
 
-        List<CategoryResponse> result = categoryService.findAll();
+        List<ResponseCategoryDTO> result = categoryService.findAll();
 
         assertThat(result).hasSize(2);
         assertThat(result.get(0).name()).isEqualTo("Pokémon TCG");
@@ -49,7 +49,7 @@ class CategoryServiceTest {
 
     @Test
     void shouldCreateCategoryWhenNameIsUnique() {
-        CreateCategoryRequest request = new CreateCategoryRequest("Comics", "Marvel/DC");
+        RequestCategoryDTO request = new RequestCategoryDTO("Comics", "Marvel/DC");
         when(categoryRepository.existsByName("Comics")).thenReturn(false);
         when(categoryRepository.save(any(Category.class))).thenAnswer(invocation -> {
             Category saved = invocation.getArgument(0);
@@ -57,7 +57,7 @@ class CategoryServiceTest {
             return saved;
         });
 
-        CategoryResponse response = categoryService.create(request);
+        ResponseCategoryDTO response = categoryService.create(request);
 
         assertThat(response.id()).isEqualTo(3L);
         assertThat(response.name()).isEqualTo("Comics");
@@ -67,7 +67,7 @@ class CategoryServiceTest {
 
     @Test
     void shouldThrowDuplicateResourceExceptionWhenNameAlreadyExists() {
-        CreateCategoryRequest request = new CreateCategoryRequest("Pokémon TCG", "Cards");
+        RequestCategoryDTO request = new RequestCategoryDTO("Pokémon TCG", "Cards");
         when(categoryRepository.existsByName("Pokémon TCG")).thenReturn(true);
 
         assertThatThrownBy(() -> categoryService.create(request))

@@ -7,8 +7,8 @@ import com.yala.exceptions.ReviewNotAllowedException;
 import com.yala.model.Order;
 import com.yala.repository.OrderRepository;
 import com.yala.model.OrderStatus;
-import com.yala.review.dto.CreateReviewRequest;
-import com.yala.review.dto.ReviewResponse;
+import com.yala.dto.review.RequestReviewDTO;
+import com.yala.dto.review.ResponseReviewDTO;
 import com.yala.model.User;
 import com.yala.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -28,7 +28,7 @@ public class ReviewService {
     private final ModelMapper modelMapper;
 
     @Transactional
-    public ReviewResponse create(CreateReviewRequest request, String authorEmail) {
+    public ResponseReviewDTO create(RequestReviewDTO request, String authorEmail) {
         User author = userRepository.findByEmail(authorEmail)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
@@ -65,12 +65,12 @@ public class ReviewService {
             userRepository.save(seller);
         }
 
-        return modelMapper.map(saved, ReviewResponse.class);
+        return modelMapper.map(saved, ResponseReviewDTO.class);
     }
 
     @Transactional(readOnly = true)
-    public Page<ReviewResponse> findByRecipient(Long recipientId, Pageable pageable) {
+    public Page<ResponseReviewDTO> findByRecipient(Long recipientId, Pageable pageable) {
         return reviewRepository.findByRecipientId(recipientId, pageable)
-                .map(r -> modelMapper.map(r, ReviewResponse.class));
+                .map(r -> modelMapper.map(r, ResponseReviewDTO.class));
     }
 }

@@ -3,7 +3,7 @@ import com.yala.service.*;
 import com.yala.repository.*;
 import com.yala.model.*;
 
-import com.yala.image.dto.ImageResponse;
+import com.yala.dto.image.ResponseImageDTO;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -27,7 +27,7 @@ public class ImageController {
     private final ImageService imageService;
 
     @PostMapping(value = "/listings/{listingId}/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ImageResponse> upload(
+    public ResponseEntity<ResponseImageDTO> upload(
             @PathVariable Long listingId,
             @RequestParam("file") MultipartFile file,
             @RequestParam(value = "sortOrder", required = false) Integer sortOrder,
@@ -37,7 +37,7 @@ public class ImageController {
     }
 
     @GetMapping("/listings/{listingId}/images")
-    public ResponseEntity<List<ImageResponse>> findByListing(@PathVariable Long listingId) {
+    public ResponseEntity<List<ResponseImageDTO>> findByListing(@PathVariable Long listingId) {
         return ResponseEntity.ok(imageService.findByListing(listingId));
     }
 

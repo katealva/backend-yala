@@ -3,8 +3,8 @@ import com.yala.service.*;
 import com.yala.repository.*;
 import com.yala.model.*;
 
-import com.yala.bid.dto.BidResponse;
-import com.yala.bid.dto.CreateBidRequest;
+import com.yala.dto.bid.ResponseBidDTO;
+import com.yala.dto.bid.RequestBidDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -33,15 +33,15 @@ public class BidController {
 
     @PostMapping
     @Operation(summary = "Realiza una puja en una subasta activa")
-    public ResponseEntity<BidResponse> placeBid(
-            @Valid @RequestBody CreateBidRequest request, Authentication auth) {
+    public ResponseEntity<ResponseBidDTO> placeBid(
+            @Valid @RequestBody RequestBidDTO request, Authentication auth) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(bidService.placeBid(request, auth.getName()));
     }
 
     @GetMapping("/auction/{auctionId}")
     @Operation(summary = "Historial paginado de pujas de una subasta")
-    public ResponseEntity<Page<BidResponse>> findByAuction(
+    public ResponseEntity<Page<ResponseBidDTO>> findByAuction(
             @PathVariable Long auctionId,
             @PageableDefault(size = 20, sort = "amount", direction = Sort.Direction.DESC)
                     Pageable pageable) {
@@ -50,7 +50,7 @@ public class BidController {
 
     @GetMapping("/auction/{auctionId}/highest")
     @Operation(summary = "Puja máxima vigente de una subasta")
-    public ResponseEntity<BidResponse> findHighest(@PathVariable Long auctionId) {
+    public ResponseEntity<ResponseBidDTO> findHighest(@PathVariable Long auctionId) {
         return ResponseEntity.ok(bidService.findHighest(auctionId));
     }
 }

@@ -12,8 +12,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yala.security.JwtService;
 import com.yala.exceptions.PaymentException;
-import com.yala.payment.dto.CreatePaymentPreferenceRequest;
-import com.yala.payment.dto.PaymentPreferenceResponse;
+import com.yala.dto.payment.RequestPaymentPreferenceDTO;
+import com.yala.dto.payment.ResponsePaymentPreferenceDTO;
 import java.security.Principal;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -48,9 +48,9 @@ class PaymentControllerTest {
 
     @Test
     void shouldReturn201WhenCreatePreferenceInvokedByBuyer() throws Exception {
-        when(paymentService.createPreference(any(CreatePaymentPreferenceRequest.class),
+        when(paymentService.createPreference(any(RequestPaymentPreferenceDTO.class),
                         eq("ada@yala.pe")))
-                .thenReturn(new PaymentPreferenceResponse(
+                .thenReturn(new ResponsePaymentPreferenceDTO(
                         "https://www.mercadopago.com.pe/checkout/v1/redirect?pref_id=pref_abc",
                         "pref_abc"));
 
@@ -58,7 +58,7 @@ class PaymentControllerTest {
                         .principal(principal("ada@yala.pe"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(
-                                new CreatePaymentPreferenceRequest(50L))))
+                                new RequestPaymentPreferenceDTO(50L))))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.preferenceId").value("pref_abc"))
                 .andExpect(jsonPath("$.initPoint").value(

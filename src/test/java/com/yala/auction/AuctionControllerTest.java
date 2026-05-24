@@ -11,9 +11,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.yala.auction.dto.AuctionResponse;
-import com.yala.auction.dto.AuctionSummaryResponse;
-import com.yala.auction.dto.CreateAuctionRequest;
+import com.yala.dto.auction.ResponseAuctionDTO;
+import com.yala.dto.auction.ResponseAuctionSummaryDTO;
+import com.yala.dto.auction.RequestAuctionDTO;
 import com.yala.security.JwtService;
 import com.yala.exceptions.DuplicateResourceException;
 import com.yala.exceptions.ResourceNotFoundException;
@@ -50,12 +50,12 @@ class AuctionControllerTest {
                 email, null, List.of(new SimpleGrantedAuthority("ROLE_SELLER")));
     }
 
-    private AuctionSummaryResponse summaryResponse() {
-        return new AuctionSummaryResponse(100L, 100f, LocalDateTime.now().plusDays(1), "ACTIVE");
+    private ResponseAuctionSummaryDTO summaryResponse() {
+        return new ResponseAuctionSummaryDTO(100L, 100f, LocalDateTime.now().plusDays(1), "ACTIVE");
     }
 
-    private AuctionResponse fullResponse() {
-        return new AuctionResponse(100L, 100f, 100f, LocalDateTime.now(),
+    private ResponseAuctionDTO fullResponse() {
+        return new ResponseAuctionDTO(100L, 100f, 100f, LocalDateTime.now(),
                 LocalDateTime.now().plusDays(1), "ACTIVE", null, 0);
     }
 
@@ -91,9 +91,9 @@ class AuctionControllerTest {
 
     @Test
     void shouldReturn201WhenCreateAuctionRequestIsValid() throws Exception {
-        CreateAuctionRequest request = new CreateAuctionRequest(
+        RequestAuctionDTO request = new RequestAuctionDTO(
                 10L, 100f, LocalDateTime.now().plusDays(1));
-        when(auctionService.create(any(CreateAuctionRequest.class), eq("bob@yala.pe")))
+        when(auctionService.create(any(RequestAuctionDTO.class), eq("bob@yala.pe")))
                 .thenReturn(fullResponse());
 
         mockMvc.perform(post("/api/v1/auctions")
@@ -116,9 +116,9 @@ class AuctionControllerTest {
 
     @Test
     void shouldReturn401WhenSellerIsNotListingOwner() throws Exception {
-        CreateAuctionRequest request = new CreateAuctionRequest(
+        RequestAuctionDTO request = new RequestAuctionDTO(
                 10L, 100f, LocalDateTime.now().plusDays(1));
-        when(auctionService.create(any(CreateAuctionRequest.class), eq("eve@yala.pe")))
+        when(auctionService.create(any(RequestAuctionDTO.class), eq("eve@yala.pe")))
                 .thenThrow(new UnauthorizedException("Only the seller of this listing can create an auction"));
 
         mockMvc.perform(post("/api/v1/auctions")
@@ -130,9 +130,9 @@ class AuctionControllerTest {
 
     @Test
     void shouldReturn409WhenAuctionAlreadyExistsForListing() throws Exception {
-        CreateAuctionRequest request = new CreateAuctionRequest(
+        RequestAuctionDTO request = new RequestAuctionDTO(
                 10L, 100f, LocalDateTime.now().plusDays(1));
-        when(auctionService.create(any(CreateAuctionRequest.class), eq("bob@yala.pe")))
+        when(auctionService.create(any(RequestAuctionDTO.class), eq("bob@yala.pe")))
                 .thenThrow(new DuplicateResourceException("Listing 10 already has an auction"));
 
         mockMvc.perform(post("/api/v1/auctions")

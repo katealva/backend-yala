@@ -14,13 +14,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yala.security.JwtService;
-import com.yala.category.dto.CategoryResponse;
+import com.yala.dto.category.ResponseCategoryDTO;
 import com.yala.exceptions.ResourceNotFoundException;
 import com.yala.exceptions.UnauthorizedException;
-import com.yala.listing.dto.CreateListingRequest;
-import com.yala.listing.dto.ListingResponse;
+import com.yala.dto.listing.RequestListingDTO;
+import com.yala.dto.listing.ResponseListingDTO;
 import com.yala.model.Role;
-import com.yala.user.dto.UserResponse;
+import com.yala.dto.user.ResponseUserDTO;
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -66,8 +66,8 @@ class ListingControllerTest {
                 email, null, List.of(new SimpleGrantedAuthority("ROLE_" + role)));
     }
 
-    private ListingResponse sampleResponse(Long id) {
-        return new ListingResponse(
+    private ResponseListingDTO sampleResponse(Long id) {
+        return new ResponseListingDTO(
                 id,
                 "Charizard Holo",
                 "Near mint",
@@ -76,21 +76,21 @@ class ListingControllerTest {
                 "USED",
                 "ACTIVE",
                 LocalDateTime.now(),
-                new UserResponse(1L, "Ada", "ada@yala.pe", null, 0f, true, Role.SELLER),
-                new CategoryResponse(10L, "Pokémon TCG", "Cards"),
+                new ResponseUserDTO(1L, "Ada", "ada@yala.pe", null, 0f, true, Role.SELLER),
+                new ResponseCategoryDTO(10L, "Pokémon TCG", "Cards"),
                 List.of(),
                 null);
     }
 
-    private CreateListingRequest sampleRequest() {
-        return new CreateListingRequest(
+    private RequestListingDTO sampleRequest() {
+        return new RequestListingDTO(
                 "Charizard Holo", "Near mint", "FIXED", 250.0f, "USED", 10L, List.of("rare"));
     }
 
     @Test
     @WithMockUser(username = "ada@yala.pe", roles = "SELLER")
     void shouldReturn201WhenSellerCreatesListing() throws Exception {
-        when(listingService.create(any(CreateListingRequest.class), eq("ada@yala.pe")))
+        when(listingService.create(any(RequestListingDTO.class), eq("ada@yala.pe")))
                 .thenReturn(sampleResponse(99L));
 
         mockMvc.perform(post("/api/v1/listings")
@@ -105,7 +105,7 @@ class ListingControllerTest {
     @Test
     @WithMockUser(username = "admin@yala.pe", roles = "ADMIN")
     void shouldReturn201WhenAdminCreatesListing() throws Exception {
-        when(listingService.create(any(CreateListingRequest.class), eq("admin@yala.pe")))
+        when(listingService.create(any(RequestListingDTO.class), eq("admin@yala.pe")))
                 .thenReturn(sampleResponse(100L));
 
         mockMvc.perform(post("/api/v1/listings")
@@ -181,7 +181,7 @@ class ListingControllerTest {
     @Test
     @WithMockUser(username = "ada@yala.pe", roles = "SELLER")
     void shouldReturn200WhenOwnerUpdatesListing() throws Exception {
-        when(listingService.update(eq(7L), any(CreateListingRequest.class), eq("ada@yala.pe")))
+        when(listingService.update(eq(7L), any(RequestListingDTO.class), eq("ada@yala.pe")))
                 .thenReturn(sampleResponse(7L));
 
         mockMvc.perform(put("/api/v1/listings/7")
@@ -195,7 +195,7 @@ class ListingControllerTest {
     @Test
     @WithMockUser(username = "intruder@yala.pe", roles = "SELLER")
     void shouldReturn401WhenNonOwnerUpdatesListing() throws Exception {
-        when(listingService.update(eq(7L), any(CreateListingRequest.class), eq("intruder@yala.pe")))
+        when(listingService.update(eq(7L), any(RequestListingDTO.class), eq("intruder@yala.pe")))
                 .thenThrow(new UnauthorizedException(
                         "Only the listing owner can perform this operation"));
 

@@ -3,7 +3,7 @@ import com.yala.service.*;
 import com.yala.repository.*;
 import com.yala.model.*;
 
-import com.yala.notification.dto.NotificationResponse;
+import com.yala.dto.notification.ResponseNotificationDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.Map;
@@ -30,7 +30,7 @@ public class NotificationController {
 
     @GetMapping
     @Operation(summary = "Lista paginada de notificaciones del usuario autenticado")
-    public ResponseEntity<Page<NotificationResponse>> findMine(
+    public ResponseEntity<Page<ResponseNotificationDTO>> findMine(
             Authentication auth,
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC)
                     Pageable pageable) {
@@ -39,7 +39,7 @@ public class NotificationController {
 
     @PutMapping("/{id}/read")
     @Operation(summary = "Marca una notificación como leída")
-    public ResponseEntity<NotificationResponse> markAsRead(
+    public ResponseEntity<ResponseNotificationDTO> markAsRead(
             @PathVariable Long id, Authentication auth) {
         return ResponseEntity.ok(notificationService.markAsRead(id, auth.getName()));
     }

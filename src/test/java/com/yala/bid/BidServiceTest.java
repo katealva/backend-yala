@@ -11,8 +11,8 @@ import static org.mockito.Mockito.when;
 import com.yala.model.Auction;
 import com.yala.repository.AuctionRepository;
 import com.yala.model.AuctionStatus;
-import com.yala.bid.dto.BidResponse;
-import com.yala.bid.dto.CreateBidRequest;
+import com.yala.dto.bid.ResponseBidDTO;
+import com.yala.dto.bid.RequestBidDTO;
 import com.yala.config.ModelMapperConfig;
 import com.yala.exceptions.AuctionNotActiveException;
 import com.yala.exceptions.InvalidBidException;
@@ -78,8 +78,8 @@ class BidServiceTest {
             return b;
         });
 
-        BidResponse response = bidService.placeBid(
-                new CreateBidRequest(100L, 200f), "ada@yala.pe");
+        ResponseBidDTO response = bidService.placeBid(
+                new RequestBidDTO(100L, 200f), "ada@yala.pe");
 
         assertThat(response.id()).isEqualTo(999L);
         assertThat(response.amount()).isEqualTo(200f);
@@ -94,7 +94,7 @@ class BidServiceTest {
         when(userRepository.findByEmail("ada@yala.pe")).thenReturn(Optional.of(bidder()));
 
         assertThatThrownBy(() -> bidService.placeBid(
-                new CreateBidRequest(100L, 150f), "ada@yala.pe"))
+                new RequestBidDTO(100L, 150f), "ada@yala.pe"))
                 .isInstanceOf(InvalidBidException.class)
                 .hasMessageContaining("greater than current price");
         verify(bidRepository, never()).save(any());
@@ -107,7 +107,7 @@ class BidServiceTest {
         when(auctionRepository.findById(100L)).thenReturn(Optional.of(auction));
 
         assertThatThrownBy(() -> bidService.placeBid(
-                new CreateBidRequest(100L, 200f), "ada@yala.pe"))
+                new RequestBidDTO(100L, 200f), "ada@yala.pe"))
                 .isInstanceOf(AuctionNotActiveException.class);
     }
 
@@ -118,7 +118,7 @@ class BidServiceTest {
         when(auctionRepository.findById(100L)).thenReturn(Optional.of(auction));
 
         assertThatThrownBy(() -> bidService.placeBid(
-                new CreateBidRequest(100L, 200f), "ada@yala.pe"))
+                new RequestBidDTO(100L, 200f), "ada@yala.pe"))
                 .isInstanceOf(AuctionNotActiveException.class)
                 .hasMessageContaining("already ended");
     }
@@ -130,7 +130,7 @@ class BidServiceTest {
         when(userRepository.findByEmail("bob@yala.pe")).thenReturn(Optional.of(seller()));
 
         assertThatThrownBy(() -> bidService.placeBid(
-                new CreateBidRequest(100L, 200f), "bob@yala.pe"))
+                new RequestBidDTO(100L, 200f), "bob@yala.pe"))
                 .isInstanceOf(InvalidBidException.class)
                 .hasMessageContaining("cannot bid on their own");
     }
@@ -140,7 +140,7 @@ class BidServiceTest {
         when(auctionRepository.findById(404L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> bidService.placeBid(
-                new CreateBidRequest(404L, 200f), "ada@yala.pe"))
+                new RequestBidDTO(404L, 200f), "ada@yala.pe"))
                 .isInstanceOf(ResourceNotFoundException.class);
     }
 
@@ -152,7 +152,7 @@ class BidServiceTest {
         when(bidRepository.findByAuctionId(eq(100L), any(Pageable.class)))
                 .thenReturn(new PageImpl<>(List.of(bid)));
 
-        Page<BidResponse> page = bidService.findByAuction(100L, PageRequest.of(0, 20));
+        Page<ResponseBidDTO> page = bidService.findByAuction(100L, PageRequest.of(0, 20));
 
         assertThat(page.getContent()).hasSize(1);
         assertThat(page.getContent().get(0).amount()).isEqualTo(200f);
@@ -172,7 +172,7 @@ class BidServiceTest {
         when(auctionRepository.existsById(100L)).thenReturn(true);
         when(bidRepository.findFirstByAuctionIdOrderByAmountDesc(100L)).thenReturn(Optional.of(top));
 
-        BidResponse response = bidService.findHighest(100L);
+        ResponseBidDTO response = bidService.findHighest(100L);
 
         assertThat(response.amount()).isEqualTo(500f);
     }

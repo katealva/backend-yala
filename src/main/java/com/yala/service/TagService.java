@@ -4,8 +4,8 @@ import com.yala.model.*;
 
 import com.yala.exceptions.DuplicateResourceException;
 import com.yala.exceptions.ResourceNotFoundException;
-import com.yala.tag.dto.TagRequest;
-import com.yala.tag.dto.TagResponse;
+import com.yala.dto.tag.RequestTagDTO;
+import com.yala.dto.tag.ResponseTagDTO;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,19 +18,19 @@ public class TagService {
     private final TagRepository tagRepository;
 
     @Transactional(readOnly = true)
-    public List<TagResponse> findAll() {
+    public List<ResponseTagDTO> findAll() {
         return tagRepository.findAll().stream()
                 .map(this::toResponse)
                 .toList();
     }
 
     @Transactional(readOnly = true)
-    public TagResponse findById(Long id) {
+    public ResponseTagDTO findById(Long id) {
         return toResponse(findOrThrow(id));
     }
 
     @Transactional
-    public TagResponse create(TagRequest request) {
+    public ResponseTagDTO create(RequestTagDTO request) {
         if (tagRepository.existsByName(request.name())) {
             throw new DuplicateResourceException(
                     "Tag with name '" + request.name() + "' already exists");
@@ -40,7 +40,7 @@ public class TagService {
     }
 
     @Transactional
-    public TagResponse update(Long id, TagRequest request) {
+    public ResponseTagDTO update(Long id, RequestTagDTO request) {
         Tag tag = findOrThrow(id);
         if (!tag.getName().equals(request.name()) && tagRepository.existsByName(request.name())) {
             throw new DuplicateResourceException(
@@ -60,7 +60,7 @@ public class TagService {
                 .orElseThrow(() -> new ResourceNotFoundException("Tag not found with id: " + id));
     }
 
-    private TagResponse toResponse(Tag tag) {
-        return new TagResponse(tag.getId(), tag.getName());
+    private ResponseTagDTO toResponse(Tag tag) {
+        return new ResponseTagDTO(tag.getId(), tag.getName());
     }
 }

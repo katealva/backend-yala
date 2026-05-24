@@ -10,7 +10,7 @@ import static org.mockito.Mockito.when;
 import com.yala.config.ModelMapperConfig;
 import com.yala.exceptions.ResourceNotFoundException;
 import com.yala.exceptions.UnauthorizedException;
-import com.yala.notification.dto.NotificationResponse;
+import com.yala.dto.notification.ResponseNotificationDTO;
 import com.yala.model.Role;
 import com.yala.model.User;
 import com.yala.repository.UserRepository;
@@ -62,7 +62,7 @@ class NotificationServiceTest {
             return n;
         });
 
-        NotificationResponse response = notificationService.createNotification(
+        ResponseNotificationDTO response = notificationService.createNotification(
                 1L, NotificationType.BID_OUTBID, "You have been outbid! Current price: 300");
 
         assertThat(response.id()).isEqualTo(99L);
@@ -88,7 +88,7 @@ class NotificationServiceTest {
         when(notificationRepository.findByUserId(eq(1L), any(Pageable.class)))
                 .thenReturn(new PageImpl<>(List.of(sampleNotification(1L, user))));
 
-        Page<NotificationResponse> result = notificationService.findMine(
+        Page<ResponseNotificationDTO> result = notificationService.findMine(
                 "ada@yala.pe", PageRequest.of(0, 20));
 
         assertThat(result.getContent()).hasSize(1);
@@ -102,7 +102,7 @@ class NotificationServiceTest {
         when(notificationRepository.findById(50L)).thenReturn(Optional.of(n));
         when(notificationRepository.save(any(Notification.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        NotificationResponse response = notificationService.markAsRead(50L, "ada@yala.pe");
+        ResponseNotificationDTO response = notificationService.markAsRead(50L, "ada@yala.pe");
 
         assertThat(response.isRead()).isTrue();
         assertThat(n.getIsRead()).isTrue();

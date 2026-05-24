@@ -9,8 +9,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yala.security.JwtService;
-import com.yala.category.dto.CategoryResponse;
-import com.yala.category.dto.CreateCategoryRequest;
+import com.yala.dto.category.ResponseCategoryDTO;
+import com.yala.dto.category.RequestCategoryDTO;
 import com.yala.exceptions.DuplicateResourceException;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -51,8 +51,8 @@ class CategoryControllerTest {
     @Test
     void shouldReturn200WithCategoryListWhenInvoked() throws Exception {
         when(categoryService.findAll()).thenReturn(List.of(
-                new CategoryResponse(1L, "Pokémon TCG", "Cards"),
-                new CategoryResponse(2L, "Funko Pop", "Figures")));
+                new ResponseCategoryDTO(1L, "Pokémon TCG", "Cards"),
+                new ResponseCategoryDTO(2L, "Funko Pop", "Figures")));
 
         mockMvc.perform(get("/api/v1/categories"))
                 .andExpect(status().isOk())
@@ -63,9 +63,9 @@ class CategoryControllerTest {
     @Test
     @WithMockUser(roles = "ADMIN")
     void shouldReturn201WhenCategoryIsCreatedByAdmin() throws Exception {
-        CreateCategoryRequest request = new CreateCategoryRequest("Funko Pop", "Figures");
-        when(categoryService.create(any(CreateCategoryRequest.class)))
-                .thenReturn(new CategoryResponse(2L, "Funko Pop", "Figures"));
+        RequestCategoryDTO request = new RequestCategoryDTO("Funko Pop", "Figures");
+        when(categoryService.create(any(RequestCategoryDTO.class)))
+                .thenReturn(new ResponseCategoryDTO(2L, "Funko Pop", "Figures"));
 
         mockMvc.perform(post("/api/v1/categories")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -77,7 +77,7 @@ class CategoryControllerTest {
     @Test
     @WithMockUser(roles = "USER")
     void shouldReturn403WhenNonAdminCreatesCategory() throws Exception {
-        CreateCategoryRequest request = new CreateCategoryRequest("Comics", "Marvel/DC");
+        RequestCategoryDTO request = new RequestCategoryDTO("Comics", "Marvel/DC");
 
         mockMvc.perform(post("/api/v1/categories")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -88,8 +88,8 @@ class CategoryControllerTest {
     @Test
     @WithMockUser(roles = "ADMIN")
     void shouldReturn409WhenCategoryAlreadyExists() throws Exception {
-        CreateCategoryRequest request = new CreateCategoryRequest("Pokémon TCG", "Cards");
-        when(categoryService.create(any(CreateCategoryRequest.class)))
+        RequestCategoryDTO request = new RequestCategoryDTO("Pokémon TCG", "Cards");
+        when(categoryService.create(any(RequestCategoryDTO.class)))
                 .thenThrow(new DuplicateResourceException(
                         "Category already exists with name: Pokémon TCG"));
 

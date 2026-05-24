@@ -7,10 +7,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.yala.auth.dto.AuthResponse;
-import com.yala.auth.dto.LoginRequest;
-import com.yala.auth.dto.RefreshTokenRequest;
-import com.yala.auth.dto.RegisterRequest;
+import com.yala.dto.auth.ResponseAuthDTO;
+import com.yala.dto.auth.RequestLoginDTO;
+import com.yala.dto.auth.RequestRefreshTokenDTO;
+import com.yala.dto.auth.RequestRegisterDTO;
 import com.yala.exceptions.EmailAlreadyExistsException;
 import com.yala.exceptions.UnauthorizedException;
 import com.yala.security.JwtService;
@@ -41,11 +41,11 @@ class AuthControllerTest {
 
     @Test
     void shouldReturn201WhenRegisterIsSuccessful() throws Exception {
-        RegisterRequest request = new RegisterRequest(
+        RequestRegisterDTO request = new RequestRegisterDTO(
                 "Ada Lovelace", "ada@yala.pe", "password123", Role.USER);
-        AuthResponse response = new AuthResponse(
+        ResponseAuthDTO response = new ResponseAuthDTO(
                 "access-token", "refresh-token", 1L, "ada@yala.pe", "Ada Lovelace", Role.USER);
-        when(authService.register(any(RegisterRequest.class))).thenReturn(response);
+        when(authService.register(any(RequestRegisterDTO.class))).thenReturn(response);
 
         mockMvc.perform(post("/api/v1/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -57,9 +57,9 @@ class AuthControllerTest {
 
     @Test
     void shouldReturn409WhenEmailAlreadyExists() throws Exception {
-        RegisterRequest request = new RegisterRequest(
+        RequestRegisterDTO request = new RequestRegisterDTO(
                 "Ada Lovelace", "ada@yala.pe", "password123", Role.USER);
-        when(authService.register(any(RegisterRequest.class)))
+        when(authService.register(any(RequestRegisterDTO.class)))
                 .thenThrow(new EmailAlreadyExistsException("Email already registered"));
 
         mockMvc.perform(post("/api/v1/auth/register")
@@ -70,10 +70,10 @@ class AuthControllerTest {
 
     @Test
     void shouldReturn200WithTokenWhenLoginIsSuccessful() throws Exception {
-        LoginRequest request = new LoginRequest("ada@yala.pe", "password123");
-        AuthResponse response = new AuthResponse(
+        RequestLoginDTO request = new RequestLoginDTO("ada@yala.pe", "password123");
+        ResponseAuthDTO response = new ResponseAuthDTO(
                 "access-token", "refresh-token", 1L, "ada@yala.pe", "Ada Lovelace", Role.USER);
-        when(authService.login(any(LoginRequest.class))).thenReturn(response);
+        when(authService.login(any(RequestLoginDTO.class))).thenReturn(response);
 
         mockMvc.perform(post("/api/v1/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -84,8 +84,8 @@ class AuthControllerTest {
 
     @Test
     void shouldReturn401WhenCredentialsAreInvalid() throws Exception {
-        LoginRequest request = new LoginRequest("ada@yala.pe", "wrong-password");
-        when(authService.login(any(LoginRequest.class)))
+        RequestLoginDTO request = new RequestLoginDTO("ada@yala.pe", "wrong-password");
+        when(authService.login(any(RequestLoginDTO.class)))
                 .thenThrow(new UnauthorizedException("Invalid email or password"));
 
         mockMvc.perform(post("/api/v1/auth/login")
@@ -96,11 +96,11 @@ class AuthControllerTest {
 
     @Test
     void shouldReturn200WhenRefreshTokenIsValid() throws Exception {
-        RefreshTokenRequest request = new RefreshTokenRequest("valid-refresh-token");
-        AuthResponse response = new AuthResponse(
+        RequestRefreshTokenDTO request = new RequestRefreshTokenDTO("valid-refresh-token");
+        ResponseAuthDTO response = new ResponseAuthDTO(
                 "new-access-token", "valid-refresh-token", 1L, "ada@yala.pe",
                 "Ada Lovelace", Role.USER);
-        when(authService.refreshToken(any(RefreshTokenRequest.class))).thenReturn(response);
+        when(authService.refreshToken(any(RequestRefreshTokenDTO.class))).thenReturn(response);
 
         mockMvc.perform(post("/api/v1/auth/refresh-token")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -111,7 +111,7 @@ class AuthControllerTest {
 
     @Test
     void shouldReturn400WhenRegisterRequestIsInvalid() throws Exception {
-        RegisterRequest request = new RegisterRequest(
+        RequestRegisterDTO request = new RequestRegisterDTO(
                 "A", "not-an-email", "short", Role.USER);
 
         mockMvc.perform(post("/api/v1/auth/register")

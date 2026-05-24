@@ -7,10 +7,10 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.yala.auth.dto.AuthResponse;
-import com.yala.auth.dto.LoginRequest;
-import com.yala.auth.dto.RefreshTokenRequest;
-import com.yala.auth.dto.RegisterRequest;
+import com.yala.dto.auth.ResponseAuthDTO;
+import com.yala.dto.auth.RequestLoginDTO;
+import com.yala.dto.auth.RequestRefreshTokenDTO;
+import com.yala.dto.auth.RequestRegisterDTO;
 import com.yala.exceptions.EmailAlreadyExistsException;
 import com.yala.exceptions.UnauthorizedException;
 import com.yala.security.JwtService;
@@ -42,7 +42,7 @@ class AuthServiceTest {
 
     @Test
     void shouldRegisterUserWhenEmailIsUnique() {
-        RegisterRequest request = new RegisterRequest(
+        RequestRegisterDTO request = new RequestRegisterDTO(
                 "Ada Lovelace", "ada@yala.pe", "password123", Role.USER);
         when(userRepository.existsByEmail("ada@yala.pe")).thenReturn(false);
         when(passwordEncoder.encode("password123")).thenReturn("hashed-password");
@@ -54,7 +54,7 @@ class AuthServiceTest {
         when(jwtService.generateAccessToken(any(User.class))).thenReturn("access-token");
         when(jwtService.generateRefreshToken(any(User.class))).thenReturn("refresh-token");
 
-        AuthResponse response = authService.register(request);
+        ResponseAuthDTO response = authService.register(request);
 
         assertThat(response.accessToken()).isEqualTo("access-token");
         assertThat(response.refreshToken()).isEqualTo("refresh-token");
@@ -65,7 +65,7 @@ class AuthServiceTest {
 
     @Test
     void shouldThrowEmailAlreadyExistsExceptionWhenEmailIsDuplicated() {
-        RegisterRequest request = new RegisterRequest(
+        RequestRegisterDTO request = new RequestRegisterDTO(
                 "Ada Lovelace", "ada@yala.pe", "password123", Role.USER);
         when(userRepository.existsByEmail("ada@yala.pe")).thenReturn(true);
 
@@ -76,7 +76,7 @@ class AuthServiceTest {
 
     @Test
     void shouldReturnTokenWhenCredentialsAreValid() {
-        LoginRequest request = new LoginRequest("ada@yala.pe", "password123");
+        RequestLoginDTO request = new RequestLoginDTO("ada@yala.pe", "password123");
         User user = User.builder()
                 .id(1L)
                 .name("Ada Lovelace")
@@ -89,7 +89,7 @@ class AuthServiceTest {
         when(jwtService.generateAccessToken(user)).thenReturn("access-token");
         when(jwtService.generateRefreshToken(user)).thenReturn("refresh-token");
 
-        AuthResponse response = authService.login(request);
+        ResponseAuthDTO response = authService.login(request);
 
         assertThat(response.accessToken()).isEqualTo("access-token");
         assertThat(response.userId()).isEqualTo(1L);
@@ -97,7 +97,7 @@ class AuthServiceTest {
 
     @Test
     void shouldThrowUnauthorizedExceptionWhenPasswordIsWrong() {
-        LoginRequest request = new LoginRequest("ada@yala.pe", "wrong-password");
+        RequestLoginDTO request = new RequestLoginDTO("ada@yala.pe", "wrong-password");
         User user = User.builder()
                 .id(1L)
                 .email("ada@yala.pe")
@@ -113,7 +113,7 @@ class AuthServiceTest {
 
     @Test
     void shouldThrowUnauthorizedExceptionWhenEmailDoesNotExist() {
-        LoginRequest request = new LoginRequest("ghost@yala.pe", "password123");
+        RequestLoginDTO request = new RequestLoginDTO("ghost@yala.pe", "password123");
         when(userRepository.findByEmail("ghost@yala.pe")).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> authService.login(request))
@@ -122,7 +122,7 @@ class AuthServiceTest {
 
     @Test
     void shouldReturnNewAccessTokenWhenRefreshTokenIsValid() {
-        RefreshTokenRequest request = new RefreshTokenRequest("valid-refresh-token");
+        RequestRefreshTokenDTO request = new RequestRefreshTokenDTO("valid-refresh-token");
         User user = User.builder()
                 .id(1L)
                 .email("ada@yala.pe")
@@ -133,7 +133,7 @@ class AuthServiceTest {
         when(userRepository.findByEmail("ada@yala.pe")).thenReturn(Optional.of(user));
         when(jwtService.generateAccessToken(user)).thenReturn("new-access-token");
 
-        AuthResponse response = authService.refreshToken(request);
+        ResponseAuthDTO response = authService.refreshToken(request);
 
         assertThat(response.accessToken()).isEqualTo("new-access-token");
         assertThat(response.refreshToken()).isEqualTo("valid-refresh-token");
@@ -141,7 +141,7 @@ class AuthServiceTest {
 
     @Test
     void shouldThrowUnauthorizedExceptionWhenRefreshTokenIsInvalid() {
-        RefreshTokenRequest request = new RefreshTokenRequest("invalid-refresh-token");
+        RequestRefreshTokenDTO request = new RequestRefreshTokenDTO("invalid-refresh-token");
         when(jwtService.isTokenValid("invalid-refresh-token")).thenReturn(false);
 
         assertThatThrownBy(() -> authService.refreshToken(request))

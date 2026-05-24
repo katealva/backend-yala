@@ -10,8 +10,8 @@ import com.yala.model.Listing;
 import com.yala.model.ListingMode;
 import com.yala.repository.ListingRepository;
 import com.yala.model.ListingStatus;
-import com.yala.order.dto.CreateOrderRequest;
-import com.yala.order.dto.OrderResponse;
+import com.yala.dto.order.RequestOrderDTO;
+import com.yala.dto.order.ResponseOrderDTO;
 import com.yala.model.User;
 import com.yala.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +35,7 @@ public class OrderService {
     private final ModelMapper modelMapper;
 
     @Transactional
-    public OrderResponse create(CreateOrderRequest request, String buyerEmail) {
+    public ResponseOrderDTO create(RequestOrderDTO request, String buyerEmail) {
         User buyer = userRepository.findByEmail(buyerEmail)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
@@ -68,25 +68,25 @@ public class OrderService {
 
         log.info("Order {} created by buyer {} for listing {}",
                 order.getId(), buyer.getEmail(), listing.getId());
-        return modelMapper.map(order, OrderResponse.class);
+        return modelMapper.map(order, ResponseOrderDTO.class);
     }
 
     @Transactional(readOnly = true)
-    public Page<OrderResponse> findByBuyer(String buyerEmail, Pageable pageable) {
+    public Page<ResponseOrderDTO> findByBuyer(String buyerEmail, Pageable pageable) {
         User buyer = userRepository.findByEmail(buyerEmail)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
-        return orderRepository.findByBuyerId(buyer.getId(), pageable).map(o -> modelMapper.map(o, OrderResponse.class));
+        return orderRepository.findByBuyerId(buyer.getId(), pageable).map(o -> modelMapper.map(o, ResponseOrderDTO.class));
     }
 
     @Transactional(readOnly = true)
-    public OrderResponse findById(Long id, String requesterEmail) {
+    public ResponseOrderDTO findById(Long id, String requesterEmail) {
         Order order = findOrThrow(id);
         ensureBuyerOrSeller(order, requesterEmail);
-        return modelMapper.map(order, OrderResponse.class);
+        return modelMapper.map(order, ResponseOrderDTO.class);
     }
 
     @Transactional
-    public OrderResponse confirm(Long id, String sellerEmail) {
+    public ResponseOrderDTO confirm(Long id, String sellerEmail) {
         Order order = findOrThrow(id);
         if (!order.getSeller().getEmail().equals(sellerEmail)) {
             throw new UnauthorizedException("Only the seller of this order can confirm it");
@@ -103,11 +103,11 @@ public class OrderService {
                 saved.getId(), saved.getBuyer().getId(), saved.getSeller().getId()));
 
         log.info("Order {} confirmed by seller {}", saved.getId(), sellerEmail);
-        return modelMapper.map(saved, OrderResponse.class);
+        return modelMapper.map(saved, ResponseOrderDTO.class);
     }
 
     @Transactional
-    public OrderResponse cancel(Long id, String requesterEmail) {
+    public ResponseOrderDTO cancel(Long id, String requesterEmail) {
         Order order = findOrThrow(id);
         boolean isBuyer = order.getBuyer().getEmail().equals(requesterEmail);
         boolean isSeller = order.getSeller().getEmail().equals(requesterEmail);
@@ -127,7 +127,7 @@ public class OrderService {
         listingRepository.save(listing);
 
         log.info("Order {} cancelled by {}", saved.getId(), requesterEmail);
-        return modelMapper.map(saved, OrderResponse.class);
+        return modelMapper.map(saved, ResponseOrderDTO.class);
     }
 
     private Order findOrThrow(Long id) {

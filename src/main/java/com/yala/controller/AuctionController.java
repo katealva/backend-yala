@@ -3,9 +3,9 @@ import com.yala.service.*;
 import com.yala.repository.*;
 import com.yala.model.*;
 
-import com.yala.auction.dto.AuctionResponse;
-import com.yala.auction.dto.AuctionSummaryResponse;
-import com.yala.auction.dto.CreateAuctionRequest;
+import com.yala.dto.auction.ResponseAuctionDTO;
+import com.yala.dto.auction.ResponseAuctionSummaryDTO;
+import com.yala.dto.auction.RequestAuctionDTO;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -29,19 +29,19 @@ public class AuctionController {
     private final AuctionService auctionService;
 
     @GetMapping
-    public ResponseEntity<Page<AuctionSummaryResponse>> findAllActive(
+    public ResponseEntity<Page<ResponseAuctionSummaryDTO>> findAllActive(
             @PageableDefault(size = 20, sort = "endsAt") Pageable pageable) {
         return ResponseEntity.ok(auctionService.findAllActive(pageable));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<AuctionResponse> findById(@PathVariable Long id) {
+    public ResponseEntity<ResponseAuctionDTO> findById(@PathVariable Long id) {
         return ResponseEntity.ok(auctionService.findById(id));
     }
 
     @PostMapping
-    public ResponseEntity<AuctionResponse> create(
-            @Valid @RequestBody CreateAuctionRequest request, Authentication auth) {
+    public ResponseEntity<ResponseAuctionDTO> create(
+            @Valid @RequestBody RequestAuctionDTO request, Authentication auth) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(auctionService.create(request, auth.getName()));
     }

@@ -2,9 +2,9 @@ package com.yala.service;
 import com.yala.repository.*;
 import com.yala.model.*;
 
-import com.yala.auction.dto.AuctionResponse;
-import com.yala.auction.dto.AuctionSummaryResponse;
-import com.yala.auction.dto.CreateAuctionRequest;
+import com.yala.dto.auction.ResponseAuctionDTO;
+import com.yala.dto.auction.ResponseAuctionSummaryDTO;
+import com.yala.dto.auction.RequestAuctionDTO;
 import com.yala.repository.BidRepository;
 import com.yala.event.AuctionFinishedEvent;
 import com.yala.exceptions.DuplicateResourceException;
@@ -39,7 +39,7 @@ public class AuctionService {
     private final ModelMapper modelMapper;
 
     @Transactional
-    public AuctionResponse create(CreateAuctionRequest request, String sellerEmail) {
+    public ResponseAuctionDTO create(RequestAuctionDTO request, String sellerEmail) {
         Listing listing = listingRepository.findById(request.listingId())
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Listing not found with id: " + request.listingId()));
@@ -68,18 +68,18 @@ public class AuctionService {
                 .status(AuctionStatus.ACTIVE)
                 .build());
 
-        return modelMapper.map(saved, AuctionResponse.class);
+        return modelMapper.map(saved, ResponseAuctionDTO.class);
     }
 
     @Transactional(readOnly = true)
-    public AuctionResponse findById(Long id) {
-        return modelMapper.map(findOrThrow(id), AuctionResponse.class);
+    public ResponseAuctionDTO findById(Long id) {
+        return modelMapper.map(findOrThrow(id), ResponseAuctionDTO.class);
     }
 
     @Transactional(readOnly = true)
-    public Page<AuctionSummaryResponse> findAllActive(Pageable pageable) {
+    public Page<ResponseAuctionSummaryDTO> findAllActive(Pageable pageable) {
         return auctionRepository.findByStatus(AuctionStatus.ACTIVE, pageable)
-                .map(a -> modelMapper.map(a, AuctionSummaryResponse.class));
+                .map(a -> modelMapper.map(a, ResponseAuctionSummaryDTO.class));
     }
 
     @Transactional

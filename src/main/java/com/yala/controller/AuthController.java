@@ -1,10 +1,10 @@
 package com.yala.controller;
 import com.yala.service.*;
 
-import com.yala.auth.dto.AuthResponse;
-import com.yala.auth.dto.LoginRequest;
-import com.yala.auth.dto.RefreshTokenRequest;
-import com.yala.auth.dto.RegisterRequest;
+import com.yala.dto.auth.ResponseAuthDTO;
+import com.yala.dto.auth.RequestLoginDTO;
+import com.yala.dto.auth.RequestRefreshTokenDTO;
+import com.yala.dto.auth.RequestRegisterDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -28,20 +28,20 @@ public class AuthController {
 
     @PostMapping("/register")
     @Operation(summary = "Registra un nuevo usuario y devuelve los tokens JWT")
-    public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
+    public ResponseEntity<ResponseAuthDTO> register(@Valid @RequestBody RequestRegisterDTO request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(authService.register(request));
     }
 
     @PostMapping("/login")
     @Operation(summary = "Autentica un usuario y devuelve los tokens JWT")
-    public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
+    public ResponseEntity<ResponseAuthDTO> login(@Valid @RequestBody RequestLoginDTO request) {
         return ResponseEntity.ok(authService.login(request));
     }
 
     @PostMapping("/refresh-token")
     @Operation(summary = "Renueva el access token a partir de un refresh token válido")
-    public ResponseEntity<AuthResponse> refreshToken(
-            @Valid @RequestBody RefreshTokenRequest request) {
+    public ResponseEntity<ResponseAuthDTO> refreshToken(
+            @Valid @RequestBody RequestRefreshTokenDTO request) {
         return ResponseEntity.ok(authService.refreshToken(request));
     }
 }

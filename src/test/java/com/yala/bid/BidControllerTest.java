@@ -10,8 +10,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yala.security.JwtService;
-import com.yala.bid.dto.BidResponse;
-import com.yala.bid.dto.CreateBidRequest;
+import com.yala.dto.bid.ResponseBidDTO;
+import com.yala.dto.bid.RequestBidDTO;
 import com.yala.exceptions.AuctionNotActiveException;
 import com.yala.exceptions.InvalidBidException;
 import java.security.Principal;
@@ -49,19 +49,19 @@ class BidControllerTest {
                 email, null, List.of(new SimpleGrantedAuthority("ROLE_USER")));
     }
 
-    private BidResponse sampleBid(Long id, Float amount) {
-        return new BidResponse(id, amount, LocalDateTime.now(), null);
+    private ResponseBidDTO sampleBid(Long id, Float amount) {
+        return new ResponseBidDTO(id, amount, LocalDateTime.now(), null);
     }
 
     @Test
     void shouldReturn201WhenPlaceBidIsValid() throws Exception {
-        when(bidService.placeBid(any(CreateBidRequest.class), eq("ada@yala.pe")))
+        when(bidService.placeBid(any(RequestBidDTO.class), eq("ada@yala.pe")))
                 .thenReturn(sampleBid(999L, 200f));
 
         mockMvc.perform(post("/api/v1/bids")
                         .principal(principal("ada@yala.pe"))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new CreateBidRequest(100L, 200f))))
+                        .content(objectMapper.writeValueAsString(new RequestBidDTO(100L, 200f))))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(999L))
                 .andExpect(jsonPath("$.amount").value(200f));
@@ -69,25 +69,25 @@ class BidControllerTest {
 
     @Test
     void shouldReturn400WhenBidAmountIsTooLow() throws Exception {
-        when(bidService.placeBid(any(CreateBidRequest.class), eq("ada@yala.pe")))
+        when(bidService.placeBid(any(RequestBidDTO.class), eq("ada@yala.pe")))
                 .thenThrow(new InvalidBidException("Bid must be greater than current price: 150.0"));
 
         mockMvc.perform(post("/api/v1/bids")
                         .principal(principal("ada@yala.pe"))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new CreateBidRequest(100L, 100f))))
+                        .content(objectMapper.writeValueAsString(new RequestBidDTO(100L, 100f))))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
     void shouldReturn409WhenAuctionIsNotActive() throws Exception {
-        when(bidService.placeBid(any(CreateBidRequest.class), eq("ada@yala.pe")))
+        when(bidService.placeBid(any(RequestBidDTO.class), eq("ada@yala.pe")))
                 .thenThrow(new AuctionNotActiveException("Auction 100 is not active"));
 
         mockMvc.perform(post("/api/v1/bids")
                         .principal(principal("ada@yala.pe"))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new CreateBidRequest(100L, 200f))))
+                        .content(objectMapper.writeValueAsString(new RequestBidDTO(100L, 200f))))
                 .andExpect(status().isConflict());
     }
 

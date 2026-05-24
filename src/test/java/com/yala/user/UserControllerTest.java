@@ -11,8 +11,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yala.security.JwtService;
 import com.yala.exceptions.ResourceNotFoundException;
-import com.yala.user.dto.UpdateUserRequest;
-import com.yala.user.dto.UserResponse;
+import com.yala.dto.user.RequestUpdateUserDTO;
+import com.yala.dto.user.ResponseUserDTO;
 import java.security.Principal;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,8 +43,8 @@ class UserControllerTest {
     private final Principal principal =
             new UsernamePasswordAuthenticationToken("ada@yala.pe", null);
 
-    private UserResponse sampleResponse() {
-        return new UserResponse(1L, "Ada Lovelace", "ada@yala.pe",
+    private ResponseUserDTO sampleResponse() {
+        return new ResponseUserDTO(1L, "Ada Lovelace", "ada@yala.pe",
                 "https://img.yala.pe/avatar.png", 4.5f, false, Role.USER);
     }
 
@@ -59,11 +59,11 @@ class UserControllerTest {
 
     @Test
     void shouldReturn200WhenProfileIsUpdated() throws Exception {
-        UpdateUserRequest request =
-                new UpdateUserRequest("Ada L.", "https://img.yala.pe/new.png");
-        UserResponse updated = new UserResponse(1L, "Ada L.", "ada@yala.pe",
+        RequestUpdateUserDTO request =
+                new RequestUpdateUserDTO("Ada L.", "https://img.yala.pe/new.png");
+        ResponseUserDTO updated = new ResponseUserDTO(1L, "Ada L.", "ada@yala.pe",
                 "https://img.yala.pe/new.png", 4.5f, false, Role.USER);
-        when(userService.updateCurrentUser(eq("ada@yala.pe"), any(UpdateUserRequest.class)))
+        when(userService.updateCurrentUser(eq("ada@yala.pe"), any(RequestUpdateUserDTO.class)))
                 .thenReturn(updated);
 
         mockMvc.perform(put("/api/v1/users/me")

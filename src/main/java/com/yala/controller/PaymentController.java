@@ -3,8 +3,8 @@ import com.yala.service.*;
 import com.yala.repository.*;
 import com.yala.model.*;
 
-import com.yala.payment.dto.CreatePaymentPreferenceRequest;
-import com.yala.payment.dto.PaymentPreferenceResponse;
+import com.yala.dto.payment.RequestPaymentPreferenceDTO;
+import com.yala.dto.payment.ResponsePaymentPreferenceDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -28,8 +28,8 @@ public class PaymentController {
 
     @PostMapping("/preference")
     @Operation(summary = "Crea una Preference MercadoPago (stub) para una orden PENDING del buyer autenticado")
-    public ResponseEntity<PaymentPreferenceResponse> createPreference(
-            @Valid @RequestBody CreatePaymentPreferenceRequest request, Authentication auth) {
+    public ResponseEntity<ResponsePaymentPreferenceDTO> createPreference(
+            @Valid @RequestBody RequestPaymentPreferenceDTO request, Authentication auth) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(paymentService.createPreference(request, auth.getName()));
     }

@@ -3,8 +3,8 @@ import com.yala.service.*;
 import com.yala.repository.*;
 import com.yala.model.*;
 
-import com.yala.review.dto.CreateReviewRequest;
-import com.yala.review.dto.ReviewResponse;
+import com.yala.dto.review.RequestReviewDTO;
+import com.yala.dto.review.ResponseReviewDTO;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -28,14 +28,14 @@ public class ReviewController {
     private final ReviewService reviewService;
 
     @PostMapping
-    public ResponseEntity<ReviewResponse> create(
-            @Valid @RequestBody CreateReviewRequest request, Authentication auth) {
+    public ResponseEntity<ResponseReviewDTO> create(
+            @Valid @RequestBody RequestReviewDTO request, Authentication auth) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(reviewService.create(request, auth.getName()));
     }
 
     @GetMapping("/user/{recipientId}")
-    public ResponseEntity<Page<ReviewResponse>> findByRecipient(
+    public ResponseEntity<Page<ResponseReviewDTO>> findByRecipient(
             @PathVariable Long recipientId,
             @PageableDefault(size = 10, sort = "createdAt") Pageable pageable) {
         return ResponseEntity.ok(reviewService.findByRecipient(recipientId, pageable));

@@ -5,8 +5,8 @@ import com.yala.model.*;
 import com.yala.model.Auction;
 import com.yala.repository.AuctionRepository;
 import com.yala.model.AuctionStatus;
-import com.yala.bid.dto.BidResponse;
-import com.yala.bid.dto.CreateBidRequest;
+import com.yala.dto.bid.ResponseBidDTO;
+import com.yala.dto.bid.RequestBidDTO;
 import com.yala.event.NewBidEvent;
 import com.yala.exceptions.AuctionNotActiveException;
 import com.yala.exceptions.InvalidBidException;
@@ -41,7 +41,7 @@ public class BidService {
     private final ModelMapper modelMapper;
 
     @Transactional
-    public BidResponse placeBid(CreateBidRequest request, String bidderEmail) {
+    public ResponseBidDTO placeBid(RequestBidDTO request, String bidderEmail) {
         Auction auction = auctionRepository.findById(request.auctionId())
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Auction not found with id: " + request.auctionId()));
@@ -89,7 +89,7 @@ public class BidService {
 
         log.info("Bid {} placed on auction {} by {} for amount {}",
                 bid.getId(), auction.getId(), bidder.getEmail(), request.amount());
-        return modelMapper.map(bid, BidResponse.class);
+        return modelMapper.map(bid, ResponseBidDTO.class);
     }
 
     @SuppressWarnings("unused")
@@ -98,21 +98,21 @@ public class BidService {
     }
 
     @Transactional(readOnly = true)
-    public Page<BidResponse> findByAuction(Long auctionId, Pageable pageable) {
+    public Page<ResponseBidDTO> findByAuction(Long auctionId, Pageable pageable) {
         if (!auctionRepository.existsById(auctionId)) {
             throw new ResourceNotFoundException("Auction not found with id: " + auctionId);
         }
         return bidRepository.findByAuctionId(auctionId, pageable)
-                .map(b -> modelMapper.map(b, BidResponse.class));
+                .map(b -> modelMapper.map(b, ResponseBidDTO.class));
     }
 
     @Transactional(readOnly = true)
-    public BidResponse findHighest(Long auctionId) {
+    public ResponseBidDTO findHighest(Long auctionId) {
         if (!auctionRepository.existsById(auctionId)) {
             throw new ResourceNotFoundException("Auction not found with id: " + auctionId);
         }
         return bidRepository.findFirstByAuctionIdOrderByAmountDesc(auctionId)
-                .map(b -> modelMapper.map(b, BidResponse.class))
+                .map(b -> modelMapper.map(b, ResponseBidDTO.class))
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "No bids found for auction: " + auctionId));
     }

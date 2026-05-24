@@ -2,8 +2,8 @@ package com.yala.service;
 import com.yala.repository.*;
 import com.yala.model.*;
 
-import com.yala.category.dto.CategoryResponse;
-import com.yala.category.dto.CreateCategoryRequest;
+import com.yala.dto.category.ResponseCategoryDTO;
+import com.yala.dto.category.RequestCategoryDTO;
 import com.yala.exceptions.DuplicateResourceException;
 import java.util.List;
 import org.modelmapper.ModelMapper;
@@ -23,14 +23,14 @@ public class CategoryService {
     }
 
     @Transactional(readOnly = true)
-    public List<CategoryResponse> findAll() {
+    public List<ResponseCategoryDTO> findAll() {
         return categoryRepository.findAll().stream()
-                .map(category -> modelMapper.map(category, CategoryResponse.class))
+                .map(category -> modelMapper.map(category, ResponseCategoryDTO.class))
                 .toList();
     }
 
     @Transactional
-    public CategoryResponse create(CreateCategoryRequest request) {
+    public ResponseCategoryDTO create(RequestCategoryDTO request) {
         if (categoryRepository.existsByName(request.name())) {
             throw new DuplicateResourceException(
                     "Category already exists with name: " + request.name());
@@ -39,6 +39,6 @@ public class CategoryService {
                 .name(request.name())
                 .description(request.description())
                 .build();
-        return modelMapper.map(categoryRepository.save(category), CategoryResponse.class);
+        return modelMapper.map(categoryRepository.save(category), ResponseCategoryDTO.class);
     }
 }

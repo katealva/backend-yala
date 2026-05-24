@@ -7,8 +7,8 @@ import com.yala.repository.CategoryRepository;
 import com.yala.exceptions.InvalidBidException;
 import com.yala.exceptions.ResourceNotFoundException;
 import com.yala.exceptions.UnauthorizedException;
-import com.yala.listing.dto.CreateListingRequest;
-import com.yala.listing.dto.ListingResponse;
+import com.yala.dto.listing.RequestListingDTO;
+import com.yala.dto.listing.ResponseListingDTO;
 import com.yala.model.Tag;
 import com.yala.repository.TagRepository;
 import com.yala.model.Role;
@@ -37,7 +37,7 @@ public class ListingService {
     private final ModelMapper modelMapper;
 
     @Transactional
-    public ListingResponse create(CreateListingRequest request, String sellerEmail) {
+    public ResponseListingDTO create(RequestListingDTO request, String sellerEmail) {
         User seller = userRepository.findByEmail(sellerEmail)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
@@ -63,16 +63,16 @@ public class ListingService {
                 .build());
 
         log.info("Listing {} created by seller {}", saved.getId(), seller.getEmail());
-        return modelMapper.map(saved, ListingResponse.class);
+        return modelMapper.map(saved, ResponseListingDTO.class);
     }
 
     @Transactional(readOnly = true)
-    public ListingResponse findById(Long id) {
-        return modelMapper.map(findOrThrow(id), ListingResponse.class);
+    public ResponseListingDTO findById(Long id) {
+        return modelMapper.map(findOrThrow(id), ResponseListingDTO.class);
     }
 
     @Transactional(readOnly = true)
-    public Page<ListingResponse> findAll(
+    public Page<ResponseListingDTO> findAll(
             Pageable pageable,
             String category,
             String mode,
@@ -94,11 +94,11 @@ public class ListingService {
                 .reduce(Specification::and)
                 .orElse(null);
 
-        return listingRepository.findAll(combined, pageable).map(l -> modelMapper.map(l, ListingResponse.class));
+        return listingRepository.findAll(combined, pageable).map(l -> modelMapper.map(l, ResponseListingDTO.class));
     }
 
     @Transactional
-    public ListingResponse update(Long id, CreateListingRequest request, String requesterEmail) {
+    public ResponseListingDTO update(Long id, RequestListingDTO request, String requesterEmail) {
         Listing listing = findOrThrow(id);
         ensureOwner(listing, requesterEmail);
 
@@ -117,7 +117,7 @@ public class ListingService {
         listing.setCategory(category);
         listing.setTags(resolveTags(request.tags()));
 
-        return modelMapper.map(listingRepository.save(listing), ListingResponse.class);
+        return modelMapper.map(listingRepository.save(listing), ResponseListingDTO.class);
     }
 
     @Transactional

@@ -8,9 +8,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.yala.auction.dto.AuctionResponse;
-import com.yala.auction.dto.AuctionSummaryResponse;
-import com.yala.auction.dto.CreateAuctionRequest;
+import com.yala.dto.auction.ResponseAuctionDTO;
+import com.yala.dto.auction.ResponseAuctionSummaryDTO;
+import com.yala.dto.auction.RequestAuctionDTO;
 import com.yala.model.Bid;
 import com.yala.repository.BidRepository;
 import com.yala.config.ModelMapperConfig;
@@ -81,8 +81,8 @@ class AuctionServiceTest {
         when(auctionRepository.findByListingId(10L)).thenReturn(Optional.empty());
         when(auctionRepository.save(any(Auction.class))).thenReturn(saved);
 
-        AuctionResponse response = auctionService.create(
-                new CreateAuctionRequest(10L, 100f, LocalDateTime.now().plusDays(1)), "bob@yala.pe");
+        ResponseAuctionDTO response = auctionService.create(
+                new RequestAuctionDTO(10L, 100f, LocalDateTime.now().plusDays(1)), "bob@yala.pe");
 
         assertThat(response.id()).isEqualTo(100L);
         assertThat(response.currentPrice()).isEqualTo(100f);
@@ -94,7 +94,7 @@ class AuctionServiceTest {
         when(listingRepository.findById(99L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> auctionService.create(
-                new CreateAuctionRequest(99L, 100f, LocalDateTime.now().plusDays(1)), "bob@yala.pe"))
+                new RequestAuctionDTO(99L, 100f, LocalDateTime.now().plusDays(1)), "bob@yala.pe"))
                 .isInstanceOf(ResourceNotFoundException.class);
         verify(auctionRepository, never()).save(any());
     }
@@ -109,7 +109,7 @@ class AuctionServiceTest {
         when(userRepository.findByEmail("eve@yala.pe")).thenReturn(Optional.of(other));
 
         assertThatThrownBy(() -> auctionService.create(
-                new CreateAuctionRequest(10L, 100f, LocalDateTime.now().plusDays(1)), "eve@yala.pe"))
+                new RequestAuctionDTO(10L, 100f, LocalDateTime.now().plusDays(1)), "eve@yala.pe"))
                 .isInstanceOf(UnauthorizedException.class);
         verify(auctionRepository, never()).save(any());
     }
@@ -125,7 +125,7 @@ class AuctionServiceTest {
         when(auctionRepository.findByListingId(10L)).thenReturn(Optional.of(existing));
 
         assertThatThrownBy(() -> auctionService.create(
-                new CreateAuctionRequest(10L, 100f, LocalDateTime.now().plusDays(1)), "bob@yala.pe"))
+                new RequestAuctionDTO(10L, 100f, LocalDateTime.now().plusDays(1)), "bob@yala.pe"))
                 .isInstanceOf(DuplicateResourceException.class);
         verify(auctionRepository, never()).save(any());
     }
@@ -140,7 +140,7 @@ class AuctionServiceTest {
         when(auctionRepository.findByListingId(10L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> auctionService.create(
-                new CreateAuctionRequest(10L, 100f, LocalDateTime.now().minusHours(1)), "bob@yala.pe"))
+                new RequestAuctionDTO(10L, 100f, LocalDateTime.now().minusHours(1)), "bob@yala.pe"))
                 .isInstanceOf(InvalidBidException.class)
                 .hasMessageContaining("future");
         verify(auctionRepository, never()).save(any());
@@ -151,7 +151,7 @@ class AuctionServiceTest {
         Auction auction = activeAuction(listing(seller()));
         when(auctionRepository.findById(100L)).thenReturn(Optional.of(auction));
 
-        AuctionResponse response = auctionService.findById(100L);
+        ResponseAuctionDTO response = auctionService.findById(100L);
 
         assertThat(response.id()).isEqualTo(100L);
         assertThat(response.status()).isEqualTo("ACTIVE");
@@ -172,7 +172,7 @@ class AuctionServiceTest {
         when(auctionRepository.findByStatus(AuctionStatus.ACTIVE, PageRequest.of(0, 20)))
                 .thenReturn(page);
 
-        Page<AuctionSummaryResponse> result = auctionService.findAllActive(PageRequest.of(0, 20));
+        Page<ResponseAuctionSummaryDTO> result = auctionService.findAllActive(PageRequest.of(0, 20));
 
         assertThat(result.getContent()).hasSize(1);
         assertThat(result.getContent().get(0).id()).isEqualTo(100L);

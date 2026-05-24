@@ -3,8 +3,8 @@ import com.yala.service.*;
 import com.yala.repository.*;
 import com.yala.model.*;
 
-import com.yala.order.dto.CreateOrderRequest;
-import com.yala.order.dto.OrderResponse;
+import com.yala.dto.order.RequestOrderDTO;
+import com.yala.dto.order.ResponseOrderDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -35,15 +35,15 @@ public class OrderController {
 
     @PostMapping
     @Operation(summary = "Crea una orden de compra directa sobre un listing FIXED activo")
-    public ResponseEntity<OrderResponse> create(
-            @Valid @RequestBody CreateOrderRequest request, Authentication auth) {
+    public ResponseEntity<ResponseOrderDTO> create(
+            @Valid @RequestBody RequestOrderDTO request, Authentication auth) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(orderService.create(request, auth.getName()));
     }
 
     @GetMapping("/my-orders")
     @Operation(summary = "Lista paginada de órdenes del comprador autenticado")
-    public ResponseEntity<Page<OrderResponse>> findMyOrders(
+    public ResponseEntity<Page<ResponseOrderDTO>> findMyOrders(
             Authentication auth,
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC)
                     Pageable pageable) {
@@ -52,20 +52,20 @@ public class OrderController {
 
     @GetMapping("/{id}")
     @Operation(summary = "Obtiene una orden por id (solo buyer o seller involucrados)")
-    public ResponseEntity<OrderResponse> findById(@PathVariable Long id, Authentication auth) {
+    public ResponseEntity<ResponseOrderDTO> findById(@PathVariable Long id, Authentication auth) {
         return ResponseEntity.ok(orderService.findById(id, auth.getName()));
     }
 
     @PutMapping("/{id}/confirm")
     @PreAuthorize("hasRole('SELLER')")
     @Operation(summary = "Confirma la orden (solo el seller)")
-    public ResponseEntity<OrderResponse> confirm(@PathVariable Long id, Authentication auth) {
+    public ResponseEntity<ResponseOrderDTO> confirm(@PathVariable Long id, Authentication auth) {
         return ResponseEntity.ok(orderService.confirm(id, auth.getName()));
     }
 
     @PutMapping("/{id}/cancel")
     @Operation(summary = "Cancela la orden (buyer o seller, solo si PENDING)")
-    public ResponseEntity<OrderResponse> cancel(@PathVariable Long id, Authentication auth) {
+    public ResponseEntity<ResponseOrderDTO> cancel(@PathVariable Long id, Authentication auth) {
         return ResponseEntity.ok(orderService.cancel(id, auth.getName()));
     }
 }

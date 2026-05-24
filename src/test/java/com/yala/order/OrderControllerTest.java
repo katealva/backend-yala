@@ -13,8 +13,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yala.security.JwtService;
 import com.yala.exceptions.OrderNotConfirmableException;
 import com.yala.exceptions.UnauthorizedException;
-import com.yala.order.dto.CreateOrderRequest;
-import com.yala.order.dto.OrderResponse;
+import com.yala.dto.order.RequestOrderDTO;
+import com.yala.dto.order.ResponseOrderDTO;
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -60,20 +60,20 @@ class OrderControllerTest {
                 email, null, List.of(new SimpleGrantedAuthority("ROLE_" + role)));
     }
 
-    private OrderResponse sampleResponse(Long id, String status) {
-        return new OrderResponse(id, 250f, status, LocalDateTime.now(), null, null, null);
+    private ResponseOrderDTO sampleResponse(Long id, String status) {
+        return new ResponseOrderDTO(id, 250f, status, LocalDateTime.now(), null, null, null);
     }
 
     @Test
     @WithMockUser(username = "ada@yala.pe", roles = "USER")
     void shouldReturn201WhenBuyerCreatesOrder() throws Exception {
-        when(orderService.create(any(CreateOrderRequest.class), eq("ada@yala.pe")))
+        when(orderService.create(any(RequestOrderDTO.class), eq("ada@yala.pe")))
                 .thenReturn(sampleResponse(99L, "PENDING"));
 
         mockMvc.perform(post("/api/v1/orders")
                         .principal(principal("ada@yala.pe", "USER"))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new CreateOrderRequest(10L))))
+                        .content(objectMapper.writeValueAsString(new RequestOrderDTO(10L))))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(99L))
                 .andExpect(jsonPath("$.status").value("PENDING"));
@@ -82,13 +82,13 @@ class OrderControllerTest {
     @Test
     @WithMockUser(username = "ada@yala.pe", roles = "USER")
     void shouldReturn409WhenListingIsNotFixed() throws Exception {
-        when(orderService.create(any(CreateOrderRequest.class), eq("ada@yala.pe")))
+        when(orderService.create(any(RequestOrderDTO.class), eq("ada@yala.pe")))
                 .thenThrow(new OrderNotConfirmableException("Direct purchase is only allowed on FIXED listings"));
 
         mockMvc.perform(post("/api/v1/orders")
                         .principal(principal("ada@yala.pe", "USER"))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new CreateOrderRequest(11L))))
+                        .content(objectMapper.writeValueAsString(new RequestOrderDTO(11L))))
                 .andExpect(status().isConflict());
     }
 

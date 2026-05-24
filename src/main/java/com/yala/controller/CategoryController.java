@@ -3,8 +3,8 @@ import com.yala.service.*;
 import com.yala.repository.*;
 import com.yala.model.*;
 
-import com.yala.category.dto.CategoryResponse;
-import com.yala.category.dto.CreateCategoryRequest;
+import com.yala.dto.category.ResponseCategoryDTO;
+import com.yala.dto.category.RequestCategoryDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -31,15 +31,15 @@ public class CategoryController {
 
     @GetMapping
     @Operation(summary = "Lista todas las categorías")
-    public ResponseEntity<List<CategoryResponse>> findAll() {
+    public ResponseEntity<List<ResponseCategoryDTO>> findAll() {
         return ResponseEntity.ok(categoryService.findAll());
     }
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Crea una nueva categoría (solo ADMIN)")
-    public ResponseEntity<CategoryResponse> create(
-            @Valid @RequestBody CreateCategoryRequest request) {
+    public ResponseEntity<ResponseCategoryDTO> create(
+            @Valid @RequestBody RequestCategoryDTO request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(categoryService.create(request));
     }
 }

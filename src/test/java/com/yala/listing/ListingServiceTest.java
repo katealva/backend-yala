@@ -13,8 +13,8 @@ import com.yala.config.ModelMapperConfig;
 import com.yala.exceptions.InvalidBidException;
 import com.yala.exceptions.ResourceNotFoundException;
 import com.yala.exceptions.UnauthorizedException;
-import com.yala.listing.dto.CreateListingRequest;
-import com.yala.listing.dto.ListingResponse;
+import com.yala.dto.listing.RequestListingDTO;
+import com.yala.dto.listing.ResponseListingDTO;
 import com.yala.repository.TagRepository;
 import com.yala.model.Role;
 import com.yala.model.User;
@@ -70,13 +70,13 @@ class ListingServiceTest {
         return Category.builder().id(10L).name("Pokémon TCG").build();
     }
 
-    private CreateListingRequest fixedRequest() {
-        return new CreateListingRequest(
+    private RequestListingDTO fixedRequest() {
+        return new RequestListingDTO(
                 "Charizard Holo", "Near mint", "FIXED", 250.0f, "USED", 10L, List.of("rare"));
     }
 
-    private CreateListingRequest auctionRequest() {
-        return new CreateListingRequest(
+    private RequestListingDTO auctionRequest() {
+        return new RequestListingDTO(
                 "Pikachu Illustrator", "1998 promo", "AUCTION", null, "NEW", 10L, List.of());
     }
 
@@ -93,7 +93,7 @@ class ListingServiceTest {
             return l;
         });
 
-        ListingResponse response = listingService.create(fixedRequest(), "ada@yala.pe");
+        ResponseListingDTO response = listingService.create(fixedRequest(), "ada@yala.pe");
 
         assertThat(response.id()).isEqualTo(99L);
         assertThat(response.mode()).isEqualTo("FIXED");
@@ -113,7 +113,7 @@ class ListingServiceTest {
             return l;
         });
 
-        ListingResponse response = listingService.create(auctionRequest(), "ada@yala.pe");
+        ResponseListingDTO response = listingService.create(auctionRequest(), "ada@yala.pe");
 
         assertThat(response.id()).isEqualTo(100L);
         assertThat(response.mode()).isEqualTo("AUCTION");
@@ -141,7 +141,7 @@ class ListingServiceTest {
     @Test
     void shouldThrowInvalidBidExceptionWhenFixedModeHasNullPrice() {
         when(userRepository.findByEmail("ada@yala.pe")).thenReturn(Optional.of(verifiedSeller()));
-        CreateListingRequest req = new CreateListingRequest(
+        RequestListingDTO req = new RequestListingDTO(
                 "Card", "desc", "FIXED", null, "USED", 10L, List.of());
 
         assertThatThrownBy(() -> listingService.create(req, "ada@yala.pe"))
@@ -153,7 +153,7 @@ class ListingServiceTest {
     @Test
     void shouldThrowInvalidBidExceptionWhenAuctionModeDeclaresFixedPrice() {
         when(userRepository.findByEmail("ada@yala.pe")).thenReturn(Optional.of(verifiedSeller()));
-        CreateListingRequest req = new CreateListingRequest(
+        RequestListingDTO req = new RequestListingDTO(
                 "Card", "desc", "AUCTION", 100.0f, "USED", 10L, List.of());
 
         assertThatThrownBy(() -> listingService.create(req, "ada@yala.pe"))
@@ -164,7 +164,7 @@ class ListingServiceTest {
     @Test
     void shouldThrowInvalidBidExceptionWhenModeIsUnknown() {
         when(userRepository.findByEmail("ada@yala.pe")).thenReturn(Optional.of(verifiedSeller()));
-        CreateListingRequest req = new CreateListingRequest(
+        RequestListingDTO req = new RequestListingDTO(
                 "Card", "desc", "BARTER", null, "USED", 10L, List.of());
 
         assertThatThrownBy(() -> listingService.create(req, "ada@yala.pe"))
@@ -189,7 +189,7 @@ class ListingServiceTest {
                 .seller(verifiedSeller()).category(sampleCategory()).build();
         when(listingRepository.findById(5L)).thenReturn(Optional.of(listing));
 
-        ListingResponse response = listingService.findById(5L);
+        ResponseListingDTO response = listingService.findById(5L);
 
         assertThat(response.id()).isEqualTo(5L);
         assertThat(response.title()).isEqualTo("Charizard");
@@ -213,7 +213,7 @@ class ListingServiceTest {
         when(listingRepository.findAll(any(Specification.class), any(Pageable.class)))
                 .thenReturn(new PageImpl<>(List.of(l)));
 
-        Page<ListingResponse> page = listingService.findAll(
+        Page<ResponseListingDTO> page = listingService.findAll(
                 pageable, "Pokémon TCG", "FIXED", "USED", 50f, 200f, "card");
 
         assertThat(page.getContent()).hasSize(1);
@@ -231,9 +231,9 @@ class ListingServiceTest {
         when(categoryRepository.findById(10L)).thenReturn(Optional.of(sampleCategory()));
         when(listingRepository.save(any(Listing.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        ListingResponse response = listingService.update(
+        ResponseListingDTO response = listingService.update(
                 7L,
-                new CreateListingRequest(
+                new RequestListingDTO(
                         "New Title", "desc", "FIXED", 150f, "USED", 10L, List.of()),
                 "ada@yala.pe");
 
@@ -298,7 +298,7 @@ class ListingServiceTest {
             return l;
         });
 
-        ListingResponse response = listingService.create(fixedRequest(), "admin@yala.pe");
+        ResponseListingDTO response = listingService.create(fixedRequest(), "admin@yala.pe");
 
         assertThat(response.id()).isEqualTo(101L);
     }

@@ -5,7 +5,7 @@ import com.yala.model.*;
 import com.yala.exceptions.ImageLimitExceededException;
 import com.yala.exceptions.ResourceNotFoundException;
 import com.yala.exceptions.UnauthorizedException;
-import com.yala.image.dto.ImageResponse;
+import com.yala.dto.image.ResponseImageDTO;
 import com.yala.model.Listing;
 import com.yala.repository.ListingRepository;
 import com.yala.model.User;
@@ -43,7 +43,7 @@ public class ImageService {
     private String region;
 
     @Transactional
-    public ImageResponse upload(Long listingId, MultipartFile file,
+    public ResponseImageDTO upload(Long listingId, MultipartFile file,
             Integer sortOrder, String sellerEmail) {
         Listing listing = listingRepository.findById(listingId)
                 .orElseThrow(() -> new ResourceNotFoundException(
@@ -70,13 +70,13 @@ public class ImageService {
                 .listing(listing)
                 .build());
 
-        return modelMapper.map(saved, ImageResponse.class);
+        return modelMapper.map(saved, ResponseImageDTO.class);
     }
 
     @Transactional(readOnly = true)
-    public List<ImageResponse> findByListing(Long listingId) {
+    public List<ResponseImageDTO> findByListing(Long listingId) {
         return imageRepository.findByListingIdOrderBySortOrderAsc(listingId).stream()
-                .map(image -> modelMapper.map(image, ImageResponse.class))
+                .map(image -> modelMapper.map(image, ResponseImageDTO.class))
                 .toList();
     }
 

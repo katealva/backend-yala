@@ -11,10 +11,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yala.security.JwtService;
 import com.yala.exceptions.ReviewNotAllowedException;
-import com.yala.review.dto.CreateReviewRequest;
-import com.yala.review.dto.ReviewResponse;
+import com.yala.dto.review.RequestReviewDTO;
+import com.yala.dto.review.ResponseReviewDTO;
 import com.yala.model.Role;
-import com.yala.user.dto.UserResponse;
+import com.yala.dto.user.ResponseUserDTO;
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -49,20 +49,20 @@ class ReviewControllerTest {
     private final Principal principal =
             new UsernamePasswordAuthenticationToken("ada@yala.pe", null);
 
-    private UserResponse sampleAuthor() {
-        return new UserResponse(1L, "Ada Lovelace", "ada@yala.pe",
+    private ResponseUserDTO sampleAuthor() {
+        return new ResponseUserDTO(1L, "Ada Lovelace", "ada@yala.pe",
                 null, 4.5f, false, Role.USER);
     }
 
-    private ReviewResponse sampleReview() {
-        return new ReviewResponse(10L, 5, "Excelente vendedor",
+    private ResponseReviewDTO sampleReview() {
+        return new ResponseReviewDTO(10L, 5, "Excelente vendedor",
                 LocalDateTime.of(2026, 5, 24, 12, 0), sampleAuthor());
     }
 
     @Test
     void shouldReturn201WhenReviewIsCreatedOnConfirmedOrder() throws Exception {
-        CreateReviewRequest request = new CreateReviewRequest(50L, 5, "Excelente vendedor");
-        when(reviewService.create(any(CreateReviewRequest.class), eq("ada@yala.pe")))
+        RequestReviewDTO request = new RequestReviewDTO(50L, 5, "Excelente vendedor");
+        when(reviewService.create(any(RequestReviewDTO.class), eq("ada@yala.pe")))
                 .thenReturn(sampleReview());
 
         mockMvc.perform(post("/api/v1/reviews")
@@ -77,8 +77,8 @@ class ReviewControllerTest {
 
     @Test
     void shouldReturn403WhenOrderIsNotConfirmed() throws Exception {
-        CreateReviewRequest request = new CreateReviewRequest(50L, 5, "Excelente");
-        when(reviewService.create(any(CreateReviewRequest.class), eq("ada@yala.pe")))
+        RequestReviewDTO request = new RequestReviewDTO(50L, 5, "Excelente");
+        when(reviewService.create(any(RequestReviewDTO.class), eq("ada@yala.pe")))
                 .thenThrow(new ReviewNotAllowedException(
                         "Order must be CONFIRMED before reviewing"));
 
@@ -91,7 +91,7 @@ class ReviewControllerTest {
 
     @Test
     void shouldReturn200WithUserReviews() throws Exception {
-        Page<ReviewResponse> page = new PageImpl<>(List.of(sampleReview()));
+        Page<ResponseReviewDTO> page = new PageImpl<>(List.of(sampleReview()));
         when(reviewService.findByRecipient(eq(2L), any(Pageable.class))).thenReturn(page);
 
         mockMvc.perform(get("/api/v1/reviews/user/2"))
@@ -103,7 +103,7 @@ class ReviewControllerTest {
 
     @Test
     void shouldReturn400WhenCreateRequestIsInvalid() throws Exception {
-        CreateReviewRequest invalid = new CreateReviewRequest(50L, 0, "");
+        RequestReviewDTO invalid = new RequestReviewDTO(50L, 0, "");
 
         mockMvc.perform(post("/api/v1/reviews")
                         .principal(principal)

@@ -4,7 +4,7 @@ import com.yala.model.*;
 
 import com.yala.exceptions.ResourceNotFoundException;
 import com.yala.exceptions.UnauthorizedException;
-import com.yala.notification.dto.NotificationResponse;
+import com.yala.dto.notification.ResponseNotificationDTO;
 import com.yala.model.User;
 import com.yala.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +27,7 @@ public class NotificationService {
     private final ModelMapper modelMapper;
 
     @Transactional
-    public NotificationResponse createNotification(
+    public ResponseNotificationDTO createNotification(
             Long userId, NotificationType type, String message) {
         User recipient = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException(
@@ -40,7 +40,7 @@ public class NotificationService {
                 .user(recipient)
                 .build());
 
-        NotificationResponse response = modelMapper.map(saved, NotificationResponse.class);
+        ResponseNotificationDTO response = modelMapper.map(saved, ResponseNotificationDTO.class);
         messagingTemplate.convertAndSend("/topic/notifications/" + userId, response);
 
         log.info("Notification {} of type {} delivered to user {}",
@@ -49,14 +49,14 @@ public class NotificationService {
     }
 
     @Transactional(readOnly = true)
-    public Page<NotificationResponse> findMine(String userEmail, Pageable pageable) {
+    public Page<ResponseNotificationDTO> findMine(String userEmail, Pageable pageable) {
         User user = resolveUser(userEmail);
         return notificationRepository.findByUserId(user.getId(), pageable)
-                .map(n -> modelMapper.map(n, NotificationResponse.class));
+                .map(n -> modelMapper.map(n, ResponseNotificationDTO.class));
     }
 
     @Transactional
-    public NotificationResponse markAsRead(Long id, String userEmail) {
+    public ResponseNotificationDTO markAsRead(Long id, String userEmail) {
         Notification notification = notificationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Notification not found with id: " + id));
@@ -64,7 +64,7 @@ public class NotificationService {
             throw new UnauthorizedException("You can only mark your own notifications as read");
         }
         notification.setIsRead(true);
-        return modelMapper.map(notificationRepository.save(notification), NotificationResponse.class);
+        return modelMapper.map(notificationRepository.save(notification), ResponseNotificationDTO.class);
     }
 
     @Transactional

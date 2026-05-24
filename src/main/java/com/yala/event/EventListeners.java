@@ -2,8 +2,8 @@ package com.yala.event;
 
 import com.yala.model.Auction;
 import com.yala.repository.AuctionRepository;
-import com.yala.auction.dto.AuctionUpdateMessage;
-import com.yala.auction.dto.LatestBidInfo;
+import com.yala.dto.auction.AuctionUpdateMessage;
+import com.yala.dto.auction.LatestBidInfo;
 import com.yala.model.Bid;
 import com.yala.service.EmailService;
 import com.yala.exceptions.ResourceNotFoundException;

@@ -3,9 +3,9 @@ import com.yala.service.*;
 import com.yala.repository.*;
 import com.yala.model.*;
 
-import com.yala.listing.dto.ListingResponse;
-import com.yala.user.dto.UpdateUserRequest;
-import com.yala.user.dto.UserResponse;
+import com.yala.dto.listing.ResponseListingDTO;
+import com.yala.dto.user.RequestUpdateUserDTO;
+import com.yala.dto.user.ResponseUserDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -33,28 +33,28 @@ public class UserController {
 
     @GetMapping("/me")
     @Operation(summary = "Devuelve el perfil del usuario autenticado")
-    public ResponseEntity<UserResponse> getCurrentUser(Authentication authentication) {
+    public ResponseEntity<ResponseUserDTO> getCurrentUser(Authentication authentication) {
         return ResponseEntity.ok(userService.getCurrentUser(authentication.getName()));
     }
 
     @PutMapping("/me")
     @Operation(summary = "Actualiza el nombre y avatar del usuario autenticado")
-    public ResponseEntity<UserResponse> updateCurrentUser(
+    public ResponseEntity<ResponseUserDTO> updateCurrentUser(
             Authentication authentication,
-            @Valid @RequestBody UpdateUserRequest request) {
+            @Valid @RequestBody RequestUpdateUserDTO request) {
         return ResponseEntity.ok(
                 userService.updateCurrentUser(authentication.getName(), request));
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Devuelve el perfil público de un usuario")
-    public ResponseEntity<UserResponse> getById(@PathVariable Long id) {
+    public ResponseEntity<ResponseUserDTO> getById(@PathVariable Long id) {
         return ResponseEntity.ok(userService.getById(id));
     }
 
     @GetMapping("/{id}/listings")
     @Operation(summary = "Lista paginada de las publicaciones de un usuario")
-    public ResponseEntity<Page<ListingResponse>> getListingsByUser(
+    public ResponseEntity<Page<ResponseListingDTO>> getListingsByUser(
             @PathVariable Long id, Pageable pageable) {
         return ResponseEntity.ok(userService.getListingsByUser(id, pageable));
     }

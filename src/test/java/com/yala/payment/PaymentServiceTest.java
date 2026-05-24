@@ -22,8 +22,8 @@ import com.yala.model.Listing;
 import com.yala.model.Order;
 import com.yala.repository.OrderRepository;
 import com.yala.model.OrderStatus;
-import com.yala.payment.dto.CreatePaymentPreferenceRequest;
-import com.yala.payment.dto.PaymentPreferenceResponse;
+import com.yala.dto.payment.RequestPaymentPreferenceDTO;
+import com.yala.dto.payment.ResponsePaymentPreferenceDTO;
 import com.yala.model.Role;
 import com.yala.model.User;
 import java.util.Optional;
@@ -90,8 +90,8 @@ class PaymentServiceTest {
             return p;
         });
 
-        PaymentPreferenceResponse response = paymentService.createPreference(
-                new CreatePaymentPreferenceRequest(50L), "ada@yala.pe");
+        ResponsePaymentPreferenceDTO response = paymentService.createPreference(
+                new RequestPaymentPreferenceDTO(50L), "ada@yala.pe");
 
         assertThat(response.preferenceId()).isEqualTo("123456789");
         assertThat(response.initPoint()).contains("pref_id=123456789");
@@ -103,7 +103,7 @@ class PaymentServiceTest {
         when(orderRepository.findById(50L)).thenReturn(Optional.of(pendingOrder()));
 
         assertThatThrownBy(() -> paymentService.createPreference(
-                new CreatePaymentPreferenceRequest(50L), "intruder@yala.pe"))
+                new RequestPaymentPreferenceDTO(50L), "intruder@yala.pe"))
                 .isInstanceOf(UnauthorizedException.class);
         verify(paymentRepository, never()).save(any());
     }
@@ -115,7 +115,7 @@ class PaymentServiceTest {
         when(orderRepository.findById(50L)).thenReturn(Optional.of(order));
 
         assertThatThrownBy(() -> paymentService.createPreference(
-                new CreatePaymentPreferenceRequest(50L), "ada@yala.pe"))
+                new RequestPaymentPreferenceDTO(50L), "ada@yala.pe"))
                 .isInstanceOf(OrderNotConfirmableException.class);
     }
 
@@ -124,7 +124,7 @@ class PaymentServiceTest {
         when(orderRepository.findById(404L)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> paymentService.createPreference(
-                new CreatePaymentPreferenceRequest(404L), "ada@yala.pe"))
+                new RequestPaymentPreferenceDTO(404L), "ada@yala.pe"))
                 .isInstanceOf(ResourceNotFoundException.class);
     }
 
@@ -134,7 +134,7 @@ class PaymentServiceTest {
         when(orderRepository.findById(50L)).thenReturn(Optional.of(pendingOrder()));
 
         assertThatThrownBy(() -> paymentService.createPreference(
-                new CreatePaymentPreferenceRequest(50L), "ada@yala.pe"))
+                new RequestPaymentPreferenceDTO(50L), "ada@yala.pe"))
                 .isInstanceOf(PaymentException.class)
                 .hasMessageContaining("not configured");
         verify(paymentRepository, never()).save(any());
@@ -149,7 +149,7 @@ class PaymentServiceTest {
                 .thenThrow(new MPApiException("Bad request", mpResponse));
 
         assertThatThrownBy(() -> paymentService.createPreference(
-                new CreatePaymentPreferenceRequest(50L), "ada@yala.pe"))
+                new RequestPaymentPreferenceDTO(50L), "ada@yala.pe"))
                 .isInstanceOf(PaymentException.class)
                 .hasMessageContaining("Mercado Pago");
         verify(paymentRepository, never()).save(any());

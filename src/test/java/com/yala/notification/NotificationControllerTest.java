@@ -11,7 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.yala.security.JwtService;
 import com.yala.exceptions.ResourceNotFoundException;
 import com.yala.exceptions.UnauthorizedException;
-import com.yala.notification.dto.NotificationResponse;
+import com.yala.dto.notification.ResponseNotificationDTO;
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -44,8 +44,8 @@ class NotificationControllerTest {
                 email, null, List.of(new SimpleGrantedAuthority("ROLE_USER")));
     }
 
-    private NotificationResponse sample(Long id, boolean isRead) {
-        return new NotificationResponse(
+    private ResponseNotificationDTO sample(Long id, boolean isRead) {
+        return new ResponseNotificationDTO(
                 id, "NEW_BID", "You have a new bid", isRead, LocalDateTime.now());
     }
 

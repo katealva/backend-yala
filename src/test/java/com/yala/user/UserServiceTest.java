@@ -12,9 +12,9 @@ import com.yala.exceptions.ResourceNotFoundException;
 import com.yala.model.Listing;
 import com.yala.model.ListingMode;
 import com.yala.repository.ListingRepository;
-import com.yala.listing.dto.ListingResponse;
-import com.yala.user.dto.UpdateUserRequest;
-import com.yala.user.dto.UserResponse;
+import com.yala.dto.listing.ResponseListingDTO;
+import com.yala.dto.user.RequestUpdateUserDTO;
+import com.yala.dto.user.ResponseUserDTO;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -60,7 +60,7 @@ class UserServiceTest {
     void shouldReturnUserWhenIdExists() {
         when(userRepository.findById(1L)).thenReturn(Optional.of(sampleUser()));
 
-        UserResponse response = userService.getById(1L);
+        ResponseUserDTO response = userService.getById(1L);
 
         assertThat(response.id()).isEqualTo(1L);
         assertThat(response.email()).isEqualTo("ada@yala.pe");
@@ -79,7 +79,7 @@ class UserServiceTest {
         when(userRepository.findByEmail("ada@yala.pe"))
                 .thenReturn(Optional.of(sampleUser()));
 
-        UserResponse response = userService.getCurrentUser("ada@yala.pe");
+        ResponseUserDTO response = userService.getCurrentUser("ada@yala.pe");
 
         assertThat(response.name()).isEqualTo("Ada Lovelace");
     }
@@ -97,10 +97,10 @@ class UserServiceTest {
         User user = sampleUser();
         when(userRepository.findByEmail("ada@yala.pe")).thenReturn(Optional.of(user));
         when(userRepository.save(any(User.class))).thenAnswer(inv -> inv.getArgument(0));
-        UpdateUserRequest request =
-                new UpdateUserRequest("Ada L.", "https://img.yala.pe/avatar.png");
+        RequestUpdateUserDTO request =
+                new RequestUpdateUserDTO("Ada L.", "https://img.yala.pe/avatar.png");
 
-        UserResponse response = userService.updateCurrentUser("ada@yala.pe", request);
+        ResponseUserDTO response = userService.updateCurrentUser("ada@yala.pe", request);
 
         assertThat(response.name()).isEqualTo("Ada L.");
         assertThat(response.avatarUrl()).isEqualTo("https://img.yala.pe/avatar.png");
@@ -120,7 +120,7 @@ class UserServiceTest {
         when(listingRepository.findBySellerId(1L, pageable))
                 .thenReturn(new PageImpl<>(List.of(listing)));
 
-        Page<ListingResponse> result = userService.getListingsByUser(1L, pageable);
+        Page<ResponseListingDTO> result = userService.getListingsByUser(1L, pageable);
 
         assertThat(result.getTotalElements()).isEqualTo(1);
         assertThat(result.getContent().get(0).title()).isEqualTo("Charizard PSA 10");

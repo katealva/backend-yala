@@ -1,9 +1,9 @@
 package com.yala.service;
 
-import com.yala.auth.dto.AuthResponse;
-import com.yala.auth.dto.LoginRequest;
-import com.yala.auth.dto.RefreshTokenRequest;
-import com.yala.auth.dto.RegisterRequest;
+import com.yala.dto.auth.ResponseAuthDTO;
+import com.yala.dto.auth.RequestLoginDTO;
+import com.yala.dto.auth.RequestRefreshTokenDTO;
+import com.yala.dto.auth.RequestRegisterDTO;
 import com.yala.exceptions.EmailAlreadyExistsException;
 import com.yala.exceptions.UnauthorizedException;
 import com.yala.security.JwtService;
@@ -29,7 +29,7 @@ public class AuthService {
     }
 
     @Transactional
-    public AuthResponse register(RegisterRequest request) {
+    public ResponseAuthDTO register(RequestRegisterDTO request) {
         if (userRepository.existsByEmail(request.email())) {
             throw new EmailAlreadyExistsException(
                     "Email already registered: " + request.email());
@@ -46,7 +46,7 @@ public class AuthService {
     }
 
     @Transactional(readOnly = true)
-    public AuthResponse login(LoginRequest request) {
+    public ResponseAuthDTO login(RequestLoginDTO request) {
         User user = userRepository.findByEmail(request.email())
                 .orElseThrow(() -> new UnauthorizedException("Invalid email or password"));
         if (!passwordEncoder.matches(request.password(), user.getPasswordHash())) {
@@ -56,7 +56,7 @@ public class AuthService {
     }
 
     @Transactional(readOnly = true)
-    public AuthResponse refreshToken(RefreshTokenRequest request) {
+    public ResponseAuthDTO refreshToken(RequestRefreshTokenDTO request) {
         String token = request.refreshToken();
         if (!jwtService.isTokenValid(token)) {
             throw new UnauthorizedException("Invalid or expired refresh token");
@@ -66,12 +66,12 @@ public class AuthService {
                 .orElseThrow(() ->
                         new UnauthorizedException("Invalid or expired refresh token"));
         String accessToken = jwtService.generateAccessToken(user);
-        return AuthResponse.of(user, accessToken, token);
+        return ResponseAuthDTO.of(user, accessToken, token);
     }
 
-    private AuthResponse buildAuthResponse(User user) {
+    private ResponseAuthDTO buildAuthResponse(User user) {
         String accessToken = jwtService.generateAccessToken(user);
         String refreshToken = jwtService.generateRefreshToken(user);
-        return AuthResponse.of(user, accessToken, refreshToken);
+        return ResponseAuthDTO.of(user, accessToken, refreshToken);
     }
 }

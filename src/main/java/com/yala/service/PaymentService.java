@@ -18,8 +18,8 @@ import com.yala.exceptions.UnauthorizedException;
 import com.yala.model.Order;
 import com.yala.repository.OrderRepository;
 import com.yala.model.OrderStatus;
-import com.yala.payment.dto.CreatePaymentPreferenceRequest;
-import com.yala.payment.dto.PaymentPreferenceResponse;
+import com.yala.dto.payment.RequestPaymentPreferenceDTO;
+import com.yala.dto.payment.ResponsePaymentPreferenceDTO;
 import java.math.BigDecimal;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -59,8 +59,8 @@ public class PaymentService {
     private String accessToken;
 
     @Transactional
-    public PaymentPreferenceResponse createPreference(
-            CreatePaymentPreferenceRequest request, String buyerEmail) {
+    public ResponsePaymentPreferenceDTO createPreference(
+            RequestPaymentPreferenceDTO request, String buyerEmail) {
         Order order = orderRepository.findById(request.orderId())
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Order not found with id: " + request.orderId()));
@@ -119,7 +119,7 @@ public class PaymentService {
 
         log.info("Mercado Pago Preference {} created for order {} amount {} PEN",
                 preference.getId(), order.getId(), order.getAmount());
-        return new PaymentPreferenceResponse(preference.getInitPoint(), preference.getId());
+        return new ResponsePaymentPreferenceDTO(preference.getInitPoint(), preference.getId());
     }
 
     @Transactional

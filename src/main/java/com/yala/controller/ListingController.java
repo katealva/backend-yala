@@ -3,8 +3,8 @@ import com.yala.service.*;
 import com.yala.repository.*;
 import com.yala.model.*;
 
-import com.yala.listing.dto.CreateListingRequest;
-import com.yala.listing.dto.ListingResponse;
+import com.yala.dto.listing.RequestListingDTO;
+import com.yala.dto.listing.ResponseListingDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -38,15 +38,15 @@ public class ListingController {
     @PostMapping
     @PreAuthorize("hasAnyRole('SELLER','ADMIN')")
     @Operation(summary = "Crea un listing (solo SELLER verificado o ADMIN)")
-    public ResponseEntity<ListingResponse> create(
-            @Valid @RequestBody CreateListingRequest request, Authentication auth) {
+    public ResponseEntity<ResponseListingDTO> create(
+            @Valid @RequestBody RequestListingDTO request, Authentication auth) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(listingService.create(request, auth.getName()));
     }
 
     @GetMapping
     @Operation(summary = "Lista listings activos paginados con filtros opcionales")
-    public ResponseEntity<Page<ListingResponse>> findAll(
+    public ResponseEntity<Page<ResponseListingDTO>> findAll(
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC)
                     Pageable pageable,
             @RequestParam(required = false) String category,
@@ -61,15 +61,15 @@ public class ListingController {
 
     @GetMapping("/{id}")
     @Operation(summary = "Obtiene un listing por id")
-    public ResponseEntity<ListingResponse> findById(@PathVariable Long id) {
+    public ResponseEntity<ResponseListingDTO> findById(@PathVariable Long id) {
         return ResponseEntity.ok(listingService.findById(id));
     }
 
     @PutMapping("/{id}")
     @Operation(summary = "Actualiza un listing existente (solo el dueño)")
-    public ResponseEntity<ListingResponse> update(
+    public ResponseEntity<ResponseListingDTO> update(
             @PathVariable Long id,
-            @Valid @RequestBody CreateListingRequest request,
+            @Valid @RequestBody RequestListingDTO request,
             Authentication auth) {
         return ResponseEntity.ok(listingService.update(id, request, auth.getName()));
     }
