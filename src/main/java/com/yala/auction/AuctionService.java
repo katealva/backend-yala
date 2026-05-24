@@ -1,4 +1,5 @@
 package com.yala.auction;
+import com.yala.model.*;
 
 import com.yala.auction.dto.AuctionResponse;
 import com.yala.auction.dto.AuctionSummaryResponse;

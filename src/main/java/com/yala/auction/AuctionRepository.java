@@ -1,4 +1,5 @@
 package com.yala.auction;
+import com.yala.model.*;
 
 import java.time.LocalDateTime;
 import java.util.List;

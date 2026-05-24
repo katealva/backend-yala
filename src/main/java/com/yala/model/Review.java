@@ -1,7 +1,7 @@
-package com.yala.review;
+package com.yala.model;
 
-import com.yala.order.Order;
-import com.yala.user.User;
+import com.yala.model.Order;
+import com.yala.model.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;

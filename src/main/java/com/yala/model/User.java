@@ -1,10 +1,10 @@
-package com.yala.user;
+package com.yala.model;
 
-import com.yala.bid.Bid;
-import com.yala.listing.Listing;
-import com.yala.notification.Notification;
-import com.yala.order.Order;
-import com.yala.review.Review;
+import com.yala.model.Bid;
+import com.yala.model.Listing;
+import com.yala.model.Notification;
+import com.yala.model.Order;
+import com.yala.model.Review;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

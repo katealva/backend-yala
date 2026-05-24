@@ -1,4 +1,5 @@
 package com.yala.notification;
+import com.yala.model.*;
 
 import com.yala.notification.dto.NotificationResponse;
 import org.springframework.data.domain.Page;

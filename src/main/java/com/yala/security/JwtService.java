@@ -1,6 +1,6 @@
 package com.yala.security;
 
-import com.yala.user.User;
+import com.yala.model.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;

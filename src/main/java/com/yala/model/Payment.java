@@ -1,10 +1,6 @@
-package com.yala.order;
+package com.yala.model;
 
-import com.yala.listing.Listing;
-import com.yala.payment.Payment;
-import com.yala.review.Review;
-import com.yala.user.User;
-import jakarta.persistence.CascadeType;
+import com.yala.model.Order;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -15,13 +11,10 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -30,17 +23,23 @@ import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
 @Entity
-@Table(name = "orders")
+@Table(name = "payments")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Order {
+public class Payment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @NotNull
+    @Column(nullable = false)
+    private String gateway;
+
+    private String externalReference;
 
     @NotNull
     @Min(0)
@@ -50,32 +49,14 @@ public class Order {
     @NotNull
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private OrderStatus status;
+    private PaymentStatus status;
 
     @CreationTimestamp
     @Column(updatable = false)
-    private LocalDateTime createdAt;
+    private LocalDateTime attemptedAt;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "listing_id", nullable = false)
-    private Listing listing;
-
-    @NotNull
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "buyer_id", nullable = false)
-    private User buyer;
-
-    @NotNull
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "seller_id", nullable = false)
-    private User seller;
-
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @Builder.Default
-    private List<Payment> payments = new ArrayList<>();
-
-    @OneToMany(mappedBy = "order", fetch = FetchType.LAZY)
-    @Builder.Default
-    private List<Review> reviews = new ArrayList<>();
+    @JoinColumn(name = "order_id", nullable = false)
+    private Order order;
 }

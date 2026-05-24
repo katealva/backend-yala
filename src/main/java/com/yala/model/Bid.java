@@ -1,7 +1,7 @@
-package com.yala.bid;
+package com.yala.model;
 
-import com.yala.auction.Auction;
-import com.yala.user.User;
+import com.yala.model.Auction;
+import com.yala.model.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;

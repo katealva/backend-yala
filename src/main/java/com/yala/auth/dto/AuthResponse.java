@@ -1,7 +1,7 @@
 package com.yala.auth.dto;
 
-import com.yala.user.Role;
-import com.yala.user.User;
+import com.yala.model.Role;
+import com.yala.model.User;
 
 public record AuthResponse(
         String accessToken,

@@ -1,4 +1,5 @@
 package com.yala.payment;
+import com.yala.model.*;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -13,9 +14,9 @@ import com.yala.exceptions.OrderNotConfirmableException;
 import com.yala.exceptions.PaymentException;
 import com.yala.exceptions.ResourceNotFoundException;
 import com.yala.exceptions.UnauthorizedException;
-import com.yala.order.Order;
+import com.yala.model.Order;
 import com.yala.order.OrderRepository;
-import com.yala.order.OrderStatus;
+import com.yala.model.OrderStatus;
 import com.yala.payment.dto.CreatePaymentPreferenceRequest;
 import com.yala.payment.dto.PaymentPreferenceResponse;
 import java.math.BigDecimal;

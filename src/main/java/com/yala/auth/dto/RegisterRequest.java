@@ -1,6 +1,6 @@
 package com.yala.auth.dto;
 
-import com.yala.user.Role;
+import com.yala.model.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;

@@ -1,4 +1,4 @@
-package com.yala.order;
+package com.yala.model;
 
 public enum OrderStatus {
     PENDING,

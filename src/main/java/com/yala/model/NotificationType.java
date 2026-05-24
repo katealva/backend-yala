@@ -1,4 +1,4 @@
-package com.yala.notification;
+package com.yala.model;
 
 public enum NotificationType {
     BID_OUTBID,

@@ -1,20 +1,20 @@
 package com.yala.event;
 
-import com.yala.auction.Auction;
+import com.yala.model.Auction;
 import com.yala.auction.AuctionRepository;
 import com.yala.auction.dto.AuctionUpdateMessage;
 import com.yala.auction.dto.LatestBidInfo;
-import com.yala.bid.Bid;
+import com.yala.model.Bid;
 import com.yala.email.EmailService;
 import com.yala.exceptions.ResourceNotFoundException;
-import com.yala.listing.Listing;
+import com.yala.model.Listing;
 import com.yala.listing.ListingRepository;
-import com.yala.listing.ListingStatus;
+import com.yala.model.ListingStatus;
 import com.yala.notification.NotificationService;
-import com.yala.notification.NotificationType;
-import com.yala.order.Order;
+import com.yala.model.NotificationType;
+import com.yala.model.Order;
 import com.yala.order.OrderRepository;
-import com.yala.order.OrderStatus;
+import com.yala.model.OrderStatus;
 import com.yala.user.UserRepository;
 import java.util.Comparator;
 import lombok.RequiredArgsConstructor;

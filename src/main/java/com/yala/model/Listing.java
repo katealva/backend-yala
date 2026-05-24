@@ -1,11 +1,11 @@
-package com.yala.listing;
+package com.yala.model;
 
-import com.yala.auction.Auction;
-import com.yala.category.Category;
-import com.yala.image.Image;
-import com.yala.order.Order;
-import com.yala.tag.Tag;
-import com.yala.user.User;
+import com.yala.model.Auction;
+import com.yala.model.Category;
+import com.yala.model.Image;
+import com.yala.model.Order;
+import com.yala.model.Tag;
+import com.yala.model.User;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

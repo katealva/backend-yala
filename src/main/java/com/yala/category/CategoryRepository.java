@@ -1,4 +1,5 @@
 package com.yala.category;
+import com.yala.model.*;
 
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;

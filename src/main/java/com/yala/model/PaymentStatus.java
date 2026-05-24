@@ -1,4 +1,4 @@
-package com.yala.payment;
+package com.yala.model;
 
 public enum PaymentStatus {
     PENDING,

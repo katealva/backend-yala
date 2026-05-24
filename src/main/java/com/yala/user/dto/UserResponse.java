@@ -1,6 +1,6 @@
 package com.yala.user.dto;
 
-import com.yala.user.Role;
+import com.yala.model.Role;
 
 public record UserResponse(
         Long id,

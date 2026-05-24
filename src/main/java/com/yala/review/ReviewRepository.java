@@ -1,4 +1,5 @@
 package com.yala.review;
+import com.yala.model.*;
 
 import java.util.List;
 import org.springframework.data.domain.Page;

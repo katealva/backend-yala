@@ -2,10 +2,10 @@ package com.yala.listing;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import com.yala.category.Category;
+import com.yala.model.Category;
 import com.yala.category.CategoryRepository;
-import com.yala.user.Role;
-import com.yala.user.User;
+import com.yala.model.Role;
+import com.yala.model.User;
 import com.yala.user.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

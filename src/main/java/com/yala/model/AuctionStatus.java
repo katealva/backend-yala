@@ -1,4 +1,4 @@
-package com.yala.auction;
+package com.yala.model;
 
 public enum AuctionStatus {
     ACTIVE,

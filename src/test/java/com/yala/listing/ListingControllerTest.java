@@ -19,7 +19,7 @@ import com.yala.exceptions.ResourceNotFoundException;
 import com.yala.exceptions.UnauthorizedException;
 import com.yala.listing.dto.CreateListingRequest;
 import com.yala.listing.dto.ListingResponse;
-import com.yala.user.Role;
+import com.yala.model.Role;
 import com.yala.user.dto.UserResponse;
 import java.security.Principal;
 import java.time.LocalDateTime;

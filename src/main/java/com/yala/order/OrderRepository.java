@@ -1,4 +1,5 @@
 package com.yala.order;
+import com.yala.model.*;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

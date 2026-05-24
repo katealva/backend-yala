@@ -1,12 +1,13 @@
 package com.yala.image;
+import com.yala.model.*;
 
 import com.yala.exceptions.ImageLimitExceededException;
 import com.yala.exceptions.ResourceNotFoundException;
 import com.yala.exceptions.UnauthorizedException;
 import com.yala.image.dto.ImageResponse;
-import com.yala.listing.Listing;
+import com.yala.model.Listing;
 import com.yala.listing.ListingRepository;
-import com.yala.user.User;
+import com.yala.model.User;
 import com.yala.user.UserRepository;
 import java.io.IOException;
 import java.util.List;

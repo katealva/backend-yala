@@ -1,9 +1,10 @@
 package com.yala.notification;
+import com.yala.model.*;
 
 import com.yala.exceptions.ResourceNotFoundException;
 import com.yala.exceptions.UnauthorizedException;
 import com.yala.notification.dto.NotificationResponse;
-import com.yala.user.User;
+import com.yala.model.User;
 import com.yala.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

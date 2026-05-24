@@ -1,4 +1,5 @@
 package com.yala.category;
+import com.yala.model.*;
 
 import com.yala.category.dto.CategoryResponse;
 import com.yala.category.dto.CreateCategoryRequest;

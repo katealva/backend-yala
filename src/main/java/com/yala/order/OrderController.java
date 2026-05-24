@@ -1,4 +1,5 @@
 package com.yala.order;
+import com.yala.model.*;
 
 import com.yala.order.dto.CreateOrderRequest;
 import com.yala.order.dto.OrderResponse;

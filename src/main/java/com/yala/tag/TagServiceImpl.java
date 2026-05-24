@@ -1,4 +1,5 @@
 package com.yala.tag;
+import com.yala.model.*;
 
 import com.yala.exceptions.DuplicateResourceException;
 import com.yala.exceptions.ResourceNotFoundException;

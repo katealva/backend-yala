@@ -1,4 +1,4 @@
-package com.yala.listing;
+package com.yala.model;
 
 public enum ListingStatus {
     ACTIVE,

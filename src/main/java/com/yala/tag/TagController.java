@@ -1,4 +1,5 @@
 package com.yala.tag;
+import com.yala.model.*;
 
 import com.yala.tag.dto.TagRequest;
 import com.yala.tag.dto.TagResponse;

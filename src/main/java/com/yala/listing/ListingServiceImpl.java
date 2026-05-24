@@ -1,16 +1,17 @@
 package com.yala.listing;
+import com.yala.model.*;
 
-import com.yala.category.Category;
+import com.yala.model.Category;
 import com.yala.category.CategoryRepository;
 import com.yala.exceptions.InvalidBidException;
 import com.yala.exceptions.ResourceNotFoundException;
 import com.yala.exceptions.UnauthorizedException;
 import com.yala.listing.dto.CreateListingRequest;
 import com.yala.listing.dto.ListingResponse;
-import com.yala.tag.Tag;
+import com.yala.model.Tag;
 import com.yala.tag.TagRepository;
-import com.yala.user.Role;
-import com.yala.user.User;
+import com.yala.model.Role;
+import com.yala.model.User;
 import com.yala.user.UserRepository;
 import java.util.ArrayList;
 import java.util.List;

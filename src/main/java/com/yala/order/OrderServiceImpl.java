@@ -1,16 +1,17 @@
 package com.yala.order;
+import com.yala.model.*;
 
 import com.yala.event.OrderConfirmedEvent;
 import com.yala.exceptions.OrderNotConfirmableException;
 import com.yala.exceptions.ResourceNotFoundException;
 import com.yala.exceptions.UnauthorizedException;
-import com.yala.listing.Listing;
-import com.yala.listing.ListingMode;
+import com.yala.model.Listing;
+import com.yala.model.ListingMode;
 import com.yala.listing.ListingRepository;
-import com.yala.listing.ListingStatus;
+import com.yala.model.ListingStatus;
 import com.yala.order.dto.CreateOrderRequest;
 import com.yala.order.dto.OrderResponse;
-import com.yala.user.User;
+import com.yala.model.User;
 import com.yala.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

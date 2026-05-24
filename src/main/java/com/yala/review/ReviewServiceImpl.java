@@ -1,13 +1,14 @@
 package com.yala.review;
+import com.yala.model.*;
 
 import com.yala.exceptions.ResourceNotFoundException;
 import com.yala.exceptions.ReviewNotAllowedException;
-import com.yala.order.Order;
+import com.yala.model.Order;
 import com.yala.order.OrderRepository;
-import com.yala.order.OrderStatus;
+import com.yala.model.OrderStatus;
 import com.yala.review.dto.CreateReviewRequest;
 import com.yala.review.dto.ReviewResponse;
-import com.yala.user.User;
+import com.yala.model.User;
 import com.yala.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;

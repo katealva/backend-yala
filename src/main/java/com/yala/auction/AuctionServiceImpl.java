@@ -1,4 +1,5 @@
 package com.yala.auction;
+import com.yala.model.*;
 
 import com.yala.auction.dto.AuctionResponse;
 import com.yala.auction.dto.AuctionSummaryResponse;
@@ -9,9 +10,9 @@ import com.yala.exceptions.DuplicateResourceException;
 import com.yala.exceptions.InvalidBidException;
 import com.yala.exceptions.ResourceNotFoundException;
 import com.yala.exceptions.UnauthorizedException;
-import com.yala.listing.Listing;
+import com.yala.model.Listing;
 import com.yala.listing.ListingRepository;
-import com.yala.user.User;
+import com.yala.model.User;
 import com.yala.user.UserRepository;
 import java.time.LocalDateTime;
 import java.util.List;

@@ -9,8 +9,8 @@ import static org.mockito.Mockito.when;
 
 import com.yala.config.ModelMapperConfig;
 import com.yala.exceptions.ResourceNotFoundException;
-import com.yala.listing.Listing;
-import com.yala.listing.ListingMode;
+import com.yala.model.Listing;
+import com.yala.model.ListingMode;
 import com.yala.listing.ListingRepository;
 import com.yala.listing.dto.ListingResponse;
 import com.yala.user.dto.UpdateUserRequest;

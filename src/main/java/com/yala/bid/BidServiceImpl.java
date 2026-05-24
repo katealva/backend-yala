@@ -1,15 +1,16 @@
 package com.yala.bid;
+import com.yala.model.*;
 
-import com.yala.auction.Auction;
+import com.yala.model.Auction;
 import com.yala.auction.AuctionRepository;
-import com.yala.auction.AuctionStatus;
+import com.yala.model.AuctionStatus;
 import com.yala.bid.dto.BidResponse;
 import com.yala.bid.dto.CreateBidRequest;
 import com.yala.event.NewBidEvent;
 import com.yala.exceptions.AuctionNotActiveException;
 import com.yala.exceptions.InvalidBidException;
 import com.yala.exceptions.ResourceNotFoundException;
-import com.yala.user.User;
+import com.yala.model.User;
 import com.yala.user.UserRepository;
 import java.time.LocalDateTime;
 import java.util.Optional;

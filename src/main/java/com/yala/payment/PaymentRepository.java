@@ -1,4 +1,5 @@
 package com.yala.payment;
+import com.yala.model.*;
 
 import java.util.List;
 import java.util.Optional;

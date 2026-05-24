@@ -1,4 +1,5 @@
 package com.yala.user;
+import com.yala.model.*;
 
 import com.yala.exceptions.ResourceNotFoundException;
 import com.yala.listing.ListingRepository;

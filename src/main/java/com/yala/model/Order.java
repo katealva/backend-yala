@@ -1,8 +1,10 @@
-package com.yala.auction;
+package com.yala.model;
 
-import com.yala.bid.Bid;
-import com.yala.listing.Listing;
-import com.yala.user.User;
+import com.yala.model.Listing;
+import com.yala.model.Payment;
+import com.yala.model.Review;
+import com.yala.model.User;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -14,9 +16,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.Version;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
@@ -30,53 +30,52 @@ import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
 @Entity
-@Table(name = "auctions")
+@Table(name = "orders")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Auction {
+public class Order {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Version
-    private Long version;
-
     @NotNull
     @Min(0)
     @Column(nullable = false)
-    private Float startingPrice;
-
-    @NotNull
-    @Min(0)
-    @Column(nullable = false)
-    private Float currentPrice;
-
-    @CreationTimestamp
-    @Column(updatable = false)
-    private LocalDateTime startedAt;
-
-    @NotNull
-    @Column(nullable = false)
-    private LocalDateTime endsAt;
+    private Float amount;
 
     @NotNull
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private AuctionStatus status;
+    private OrderStatus status;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "listing_id")
+    @CreationTimestamp
+    @Column(updatable = false)
+    private LocalDateTime createdAt;
+
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "listing_id", nullable = false)
     private Listing listing;
 
+    @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "winner_id")
-    private User winner;
+    @JoinColumn(name = "buyer_id", nullable = false)
+    private User buyer;
 
-    @OneToMany(mappedBy = "auction", fetch = FetchType.LAZY)
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "seller_id", nullable = false)
+    private User seller;
+
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @Builder.Default
-    private List<Bid> bids = new ArrayList<>();
+    private List<Payment> payments = new ArrayList<>();
+
+    @OneToMany(mappedBy = "order", fetch = FetchType.LAZY)
+    @Builder.Default
+    private List<Review> reviews = new ArrayList<>();
 }

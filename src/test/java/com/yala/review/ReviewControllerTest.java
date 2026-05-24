@@ -13,7 +13,7 @@ import com.yala.security.JwtService;
 import com.yala.exceptions.ReviewNotAllowedException;
 import com.yala.review.dto.CreateReviewRequest;
 import com.yala.review.dto.ReviewResponse;
-import com.yala.user.Role;
+import com.yala.model.Role;
 import com.yala.user.dto.UserResponse;
 import java.security.Principal;
 import java.time.LocalDateTime;
