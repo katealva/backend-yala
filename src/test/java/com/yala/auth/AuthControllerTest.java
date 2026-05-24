@@ -13,6 +13,7 @@ import com.yala.auth.dto.RefreshTokenRequest;
 import com.yala.auth.dto.RegisterRequest;
 import com.yala.exceptions.EmailAlreadyExistsException;
 import com.yala.exceptions.UnauthorizedException;
+import com.yala.security.JwtService;
 import com.yala.user.Role;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
