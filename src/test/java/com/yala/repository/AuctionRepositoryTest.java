@@ -1,4 +1,6 @@
-package com.yala.auction;
+package com.yala.repository;
+import com.yala.repository.*;
+import com.yala.model.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
