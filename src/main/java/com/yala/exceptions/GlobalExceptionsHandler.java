@@ -1,4 +1,4 @@
-package com.yala;
+package com.yala.exceptions;
 
 import com.yala.exceptions.AuctionNotActiveException;
 import com.yala.exceptions.DuplicateResourceException;
