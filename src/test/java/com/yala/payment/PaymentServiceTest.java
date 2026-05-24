@@ -7,6 +7,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.yala.event.OrderConfirmedEvent;
 import com.yala.exception.OrderNotConfirmableException;
 import com.yala.exception.PaymentException;
 import com.yala.exception.ResourceNotFoundException;
@@ -21,15 +22,18 @@ import com.yala.user.User;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 
 @ExtendWith(MockitoExtension.class)
 class PaymentServiceTest {
 
     @Mock private PaymentRepository paymentRepository;
     @Mock private OrderRepository orderRepository;
+    @Mock private ApplicationEventPublisher eventPublisher;
 
     @InjectMocks
     private PaymentServiceImpl paymentService;
@@ -141,6 +145,60 @@ class PaymentServiceTest {
 
         assertThat(payment.getStatus()).isEqualTo(PaymentStatus.FAILED);
         assertThat(order.getStatus()).isEqualTo(OrderStatus.PENDING);
+        verify(eventPublisher, never()).publishEvent(any());
+    }
+
+    @Test
+    void shouldPublishOrderConfirmedEventWhenWebhookConfirmsPendingOrder() {
+        Order order = pendingOrder();
+        Payment payment = Payment.builder()
+                .id(2L).gateway("mercadopago").externalReference("pref_pub_ok")
+                .amount(250f).status(PaymentStatus.PENDING).order(order).build();
+        when(paymentRepository.findByExternalReference("pref_pub_ok"))
+                .thenReturn(Optional.of(payment));
+        when(paymentRepository.save(any(Payment.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(orderRepository.save(any(Order.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        String payload = """
+                {
+                    "type": "payment",
+                    "data": { "id": "pref_pub_ok", "status": "approved" }
+                }
+                """;
+        paymentService.handleWebhook(payload, "sig");
+
+        ArgumentCaptor<OrderConfirmedEvent> captor =
+                ArgumentCaptor.forClass(OrderConfirmedEvent.class);
+        verify(eventPublisher).publishEvent(captor.capture());
+        OrderConfirmedEvent event = captor.getValue();
+        assertThat(event.orderId()).isEqualTo(50L);
+        assertThat(event.buyerId()).isEqualTo(1L);
+        assertThat(event.sellerId()).isEqualTo(2L);
+    }
+
+    @Test
+    void shouldNotPublishOrderConfirmedEventWhenOrderWasAlreadyConfirmed() {
+        Order order = pendingOrder();
+        order.setStatus(OrderStatus.CONFIRMED);
+        Payment payment = Payment.builder()
+                .id(3L).gateway("mercadopago").externalReference("pref_already_ok")
+                .amount(250f).status(PaymentStatus.PENDING).order(order).build();
+        when(paymentRepository.findByExternalReference("pref_already_ok"))
+                .thenReturn(Optional.of(payment));
+        when(paymentRepository.save(any(Payment.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        String payload = """
+                {
+                    "type": "payment",
+                    "data": { "id": "pref_already_ok", "status": "approved" }
+                }
+                """;
+        paymentService.handleWebhook(payload, "sig");
+
+        assertThat(payment.getStatus()).isEqualTo(PaymentStatus.SUCCESS);
+        assertThat(order.getStatus()).isEqualTo(OrderStatus.CONFIRMED);
+        verify(orderRepository, never()).save(any());
+        verify(eventPublisher, never()).publishEvent(any());
     }
 
     @Test
