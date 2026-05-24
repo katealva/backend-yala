@@ -1,19 +1,20 @@
 package com.yala.auction;
+import com.yala.repository.*;
 import com.yala.model.*;
 
 import com.yala.auction.dto.AuctionResponse;
 import com.yala.auction.dto.AuctionSummaryResponse;
 import com.yala.auction.dto.CreateAuctionRequest;
-import com.yala.bid.BidRepository;
+import com.yala.repository.BidRepository;
 import com.yala.event.AuctionFinishedEvent;
 import com.yala.exceptions.DuplicateResourceException;
 import com.yala.exceptions.InvalidBidException;
 import com.yala.exceptions.ResourceNotFoundException;
 import com.yala.exceptions.UnauthorizedException;
 import com.yala.model.Listing;
-import com.yala.listing.ListingRepository;
+import com.yala.repository.ListingRepository;
 import com.yala.model.User;
-import com.yala.user.UserRepository;
+import com.yala.repository.UserRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;

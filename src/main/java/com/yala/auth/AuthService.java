@@ -8,7 +8,7 @@ import com.yala.exceptions.EmailAlreadyExistsException;
 import com.yala.exceptions.UnauthorizedException;
 import com.yala.security.JwtService;
 import com.yala.model.User;
-import com.yala.user.UserRepository;
+import com.yala.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

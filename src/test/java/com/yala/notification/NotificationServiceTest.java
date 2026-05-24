@@ -13,7 +13,7 @@ import com.yala.exceptions.UnauthorizedException;
 import com.yala.notification.dto.NotificationResponse;
 import com.yala.model.Role;
 import com.yala.model.User;
-import com.yala.user.UserRepository;
+import com.yala.repository.UserRepository;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;

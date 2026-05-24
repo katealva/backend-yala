@@ -1,4 +1,4 @@
-package com.yala.bid;
+package com.yala.repository;
 import com.yala.model.*;
 
 import java.util.List;

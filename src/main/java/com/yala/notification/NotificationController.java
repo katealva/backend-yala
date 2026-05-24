@@ -1,4 +1,5 @@
 package com.yala.notification;
+import com.yala.repository.*;
 import com.yala.model.*;
 
 import com.yala.notification.dto.NotificationResponse;

@@ -1,4 +1,4 @@
-package com.yala.user;
+package com.yala.repository;
 import com.yala.model.*;
 
 import java.util.Optional;

@@ -1,4 +1,5 @@
 package com.yala.listing;
+import com.yala.repository.*;
 import com.yala.model.*;
 
 import com.yala.listing.dto.CreateListingRequest;

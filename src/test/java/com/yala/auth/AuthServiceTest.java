@@ -16,7 +16,7 @@ import com.yala.exceptions.UnauthorizedException;
 import com.yala.security.JwtService;
 import com.yala.model.Role;
 import com.yala.model.User;
-import com.yala.user.UserRepository;
+import com.yala.repository.UserRepository;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

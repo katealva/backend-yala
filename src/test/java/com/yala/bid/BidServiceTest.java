@@ -9,7 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.yala.model.Auction;
-import com.yala.auction.AuctionRepository;
+import com.yala.repository.AuctionRepository;
 import com.yala.model.AuctionStatus;
 import com.yala.bid.dto.BidResponse;
 import com.yala.bid.dto.CreateBidRequest;
@@ -20,7 +20,7 @@ import com.yala.exceptions.ResourceNotFoundException;
 import com.yala.model.Listing;
 import com.yala.model.Role;
 import com.yala.model.User;
-import com.yala.user.UserRepository;
+import com.yala.repository.UserRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;

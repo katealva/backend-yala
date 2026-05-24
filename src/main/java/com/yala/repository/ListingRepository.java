@@ -1,4 +1,4 @@
-package com.yala.listing;
+package com.yala.repository;
 import com.yala.model.*;
 
 import org.springframework.data.domain.Page;

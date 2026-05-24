@@ -1,4 +1,5 @@
 package com.yala.review;
+import com.yala.repository.*;
 import com.yala.model.*;
 
 import com.yala.review.dto.CreateReviewRequest;

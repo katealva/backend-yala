@@ -1,4 +1,5 @@
 package com.yala.image;
+import com.yala.repository.*;
 import com.yala.model.*;
 
 import com.yala.image.dto.ImageResponse;

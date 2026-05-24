@@ -1,4 +1,5 @@
 package com.yala.payment;
+import com.yala.repository.*;
 import com.yala.model.*;
 
 import com.yala.payment.dto.CreatePaymentPreferenceRequest;

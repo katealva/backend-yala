@@ -1,4 +1,5 @@
 package com.yala.order;
+import com.yala.repository.*;
 import com.yala.model.*;
 
 import com.yala.event.OrderConfirmedEvent;
@@ -7,12 +8,12 @@ import com.yala.exceptions.ResourceNotFoundException;
 import com.yala.exceptions.UnauthorizedException;
 import com.yala.model.Listing;
 import com.yala.model.ListingMode;
-import com.yala.listing.ListingRepository;
+import com.yala.repository.ListingRepository;
 import com.yala.model.ListingStatus;
 import com.yala.order.dto.CreateOrderRequest;
 import com.yala.order.dto.OrderResponse;
 import com.yala.model.User;
-import com.yala.user.UserRepository;
+import com.yala.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;

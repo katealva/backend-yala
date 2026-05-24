@@ -1,4 +1,5 @@
 package com.yala.user;
+import com.yala.repository.*;
 import com.yala.model.*;
 
 import com.yala.listing.dto.ListingResponse;

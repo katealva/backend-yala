@@ -1,15 +1,16 @@
 package com.yala.review;
+import com.yala.repository.*;
 import com.yala.model.*;
 
 import com.yala.exceptions.ResourceNotFoundException;
 import com.yala.exceptions.ReviewNotAllowedException;
 import com.yala.model.Order;
-import com.yala.order.OrderRepository;
+import com.yala.repository.OrderRepository;
 import com.yala.model.OrderStatus;
 import com.yala.review.dto.CreateReviewRequest;
 import com.yala.review.dto.ReviewResponse;
 import com.yala.model.User;
-import com.yala.user.UserRepository;
+import com.yala.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;

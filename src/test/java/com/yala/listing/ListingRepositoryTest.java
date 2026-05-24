@@ -3,10 +3,10 @@ package com.yala.listing;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.yala.model.Category;
-import com.yala.category.CategoryRepository;
+import com.yala.repository.CategoryRepository;
 import com.yala.model.Role;
 import com.yala.model.User;
-import com.yala.user.UserRepository;
+import com.yala.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

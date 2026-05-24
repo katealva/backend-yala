@@ -3,14 +3,14 @@ package com.yala.auction;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.yala.model.Category;
-import com.yala.category.CategoryRepository;
+import com.yala.repository.CategoryRepository;
 import com.yala.model.Listing;
 import com.yala.model.ListingMode;
-import com.yala.listing.ListingRepository;
+import com.yala.repository.ListingRepository;
 import com.yala.model.ListingStatus;
 import com.yala.model.Role;
 import com.yala.model.User;
-import com.yala.user.UserRepository;
+import com.yala.repository.UserRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;

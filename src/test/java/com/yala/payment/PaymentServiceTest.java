@@ -20,7 +20,7 @@ import com.yala.exceptions.ResourceNotFoundException;
 import com.yala.exceptions.UnauthorizedException;
 import com.yala.model.Listing;
 import com.yala.model.Order;
-import com.yala.order.OrderRepository;
+import com.yala.repository.OrderRepository;
 import com.yala.model.OrderStatus;
 import com.yala.payment.dto.CreatePaymentPreferenceRequest;
 import com.yala.payment.dto.PaymentPreferenceResponse;

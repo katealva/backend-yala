@@ -1,4 +1,5 @@
 package com.yala.bid;
+import com.yala.repository.*;
 import com.yala.model.*;
 
 import com.yala.bid.dto.BidResponse;

@@ -1,4 +1,4 @@
-package com.yala.auction;
+package com.yala.repository;
 import com.yala.model.*;
 
 import java.time.LocalDateTime;
