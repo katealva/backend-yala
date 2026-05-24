@@ -10,6 +10,6 @@ public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
     List<Payment> findByOrderId(Long orderId);
 
-    /** Resolves a payment from the Stripe PaymentIntent id when handling webhooks. */
+    /** Resolves a payment from the MercadoPago preference id when handling webhooks. */
     Optional<Payment> findByExternalReference(String externalReference);
 }

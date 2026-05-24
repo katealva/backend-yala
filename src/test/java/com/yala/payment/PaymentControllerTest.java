@@ -12,8 +12,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yala.auth.JwtService;
 import com.yala.exception.PaymentException;
-import com.yala.payment.dto.CreatePaymentIntentRequest;
-import com.yala.payment.dto.PaymentIntentResponse;
+import com.yala.payment.dto.CreatePaymentPreferenceRequest;
+import com.yala.payment.dto.PaymentPreferenceResponse;
 import java.security.Principal;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -47,26 +47,31 @@ class PaymentControllerTest {
     }
 
     @Test
-    void shouldReturn201WhenCreateIntentInvokedByBuyer() throws Exception {
-        when(paymentService.createIntent(any(CreatePaymentIntentRequest.class), eq("ada@yala.pe")))
-                .thenReturn(new PaymentIntentResponse("pi_abc_secret_xyz", "pi_abc"));
+    void shouldReturn201WhenCreatePreferenceInvokedByBuyer() throws Exception {
+        when(paymentService.createPreference(any(CreatePaymentPreferenceRequest.class),
+                        eq("ada@yala.pe")))
+                .thenReturn(new PaymentPreferenceResponse(
+                        "https://www.mercadopago.com.pe/checkout/v1/redirect?pref_id=pref_abc",
+                        "pref_abc"));
 
-        mockMvc.perform(post("/api/v1/payments/intent")
+        mockMvc.perform(post("/api/v1/payments/preference")
                         .principal(principal("ada@yala.pe"))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(new CreatePaymentIntentRequest(50L))))
+                        .content(objectMapper.writeValueAsString(
+                                new CreatePaymentPreferenceRequest(50L))))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.paymentIntentId").value("pi_abc"))
-                .andExpect(jsonPath("$.clientSecret").value("pi_abc_secret_xyz"));
+                .andExpect(jsonPath("$.preferenceId").value("pref_abc"))
+                .andExpect(jsonPath("$.initPoint").value(
+                        "https://www.mercadopago.com.pe/checkout/v1/redirect?pref_id=pref_abc"));
     }
 
     @Test
     void shouldReturn200WhenWebhookPayloadIsAcceptedByService() throws Exception {
-        String payload = "{\"type\":\"payment_intent.succeeded\","
-                + "\"data\":{\"object\":{\"id\":\"pi_abc\"}}}";
+        String payload = "{\"type\":\"payment\",\"action\":\"payment.updated\","
+                + "\"data\":{\"id\":\"pref_abc\",\"status\":\"approved\"}}";
 
         mockMvc.perform(post("/api/v1/payments/webhook")
-                        .header("Stripe-Signature", "sig_test")
+                        .header("x-signature", "sig_test")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(payload))
                 .andExpect(status().isOk());
@@ -78,15 +83,15 @@ class PaymentControllerTest {
                 .when(paymentService).handleWebhook(anyString(), any());
 
         mockMvc.perform(post("/api/v1/payments/webhook")
-                        .header("Stripe-Signature", "sig_test")
+                        .header("x-signature", "sig_test")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"bad\":true}"))
                 .andExpect(status().isBadGateway());
     }
 
     @Test
-    void shouldReturn400WhenCreateIntentBodyMissingFields() throws Exception {
-        mockMvc.perform(post("/api/v1/payments/intent")
+    void shouldReturn400WhenCreatePreferenceBodyMissingFields() throws Exception {
+        mockMvc.perform(post("/api/v1/payments/preference")
                         .principal(principal("ada@yala.pe"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
