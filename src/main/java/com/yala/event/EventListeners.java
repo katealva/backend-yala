@@ -2,6 +2,9 @@ package com.yala.event;
 
 import com.yala.auction.Auction;
 import com.yala.auction.AuctionRepository;
+import com.yala.auction.dto.AuctionUpdateMessage;
+import com.yala.auction.dto.LatestBidInfo;
+import com.yala.bid.Bid;
 import com.yala.exception.ResourceNotFoundException;
 import com.yala.listing.Listing;
 import com.yala.listing.ListingRepository;
@@ -11,9 +14,11 @@ import com.yala.notification.NotificationType;
 import com.yala.order.Order;
 import com.yala.order.OrderRepository;
 import com.yala.order.OrderStatus;
+import java.util.Comparator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Propagation;
@@ -41,6 +46,7 @@ public class EventListeners {
     private final AuctionRepository auctionRepository;
     private final OrderRepository orderRepository;
     private final ListingRepository listingRepository;
+    private final SimpMessagingTemplate messagingTemplate;
 
     @Async
     @EventListener
@@ -53,7 +59,25 @@ public class EventListeners {
                     NotificationType.BID_OUTBID,
                     "You have been outbid! Current price: " + event.newBidAmount());
         }
-        // TODO: WebSocket broadcast cuando WebSocketConfig esté disponible (punto 14)
+
+        Auction auction = auctionRepository.findById(event.auctionId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Auction not found with id: " + event.auctionId()));
+        Bid latest = auction.getBids().stream()
+                .max(Comparator.comparing(Bid::getPlacedAt))
+                .orElse(null);
+        LatestBidInfo latestBid = latest == null ? null : new LatestBidInfo(
+                latest.getBidder().getName(),
+                latest.getAmount(),
+                latest.getPlacedAt());
+        AuctionUpdateMessage payload = new AuctionUpdateMessage(
+                auction.getId(),
+                auction.getCurrentPrice(),
+                auction.getBids().size(),
+                auction.getStatus() != null ? auction.getStatus().name() : null,
+                latestBid,
+                null);
+        messagingTemplate.convertAndSend("/topic/auction/" + auction.getId(), payload);
     }
 
     @Async
@@ -68,6 +92,15 @@ public class EventListeners {
         if (auction.getWinner() == null) {
             log.info("Auction {} closed without a winner; skipping order creation",
                     auction.getId());
+            messagingTemplate.convertAndSend(
+                    "/topic/auction/" + auction.getId(),
+                    new AuctionUpdateMessage(
+                            auction.getId(),
+                            auction.getCurrentPrice(),
+                            auction.getBids().size(),
+                            auction.getStatus() != null ? auction.getStatus().name() : null,
+                            null,
+                            null));
             return;
         }
 
@@ -91,6 +124,16 @@ public class EventListeners {
                 listing.getSeller().getId(),
                 NotificationType.SALE_CONFIRMED,
                 "Your auction was won.");
+
+        messagingTemplate.convertAndSend(
+                "/topic/auction/" + auction.getId(),
+                new AuctionUpdateMessage(
+                        auction.getId(),
+                        auction.getCurrentPrice(),
+                        auction.getBids().size(),
+                        auction.getStatus() != null ? auction.getStatus().name() : null,
+                        null,
+                        auction.getWinner().getName()));
 
         log.info("Auction {} order {} materialized for winner {}",
                 auction.getId(), order.getId(), auction.getWinner().getEmail());
