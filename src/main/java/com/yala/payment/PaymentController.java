@@ -1,7 +1,7 @@
 package com.yala.payment;
 
-import com.yala.payment.dto.CreatePaymentIntentRequest;
-import com.yala.payment.dto.PaymentIntentResponse;
+import com.yala.payment.dto.CreatePaymentPreferenceRequest;
+import com.yala.payment.dto.PaymentPreferenceResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -18,24 +18,24 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/payments")
 @RequiredArgsConstructor
-@Tag(name = "Payments", description = "Stripe PaymentIntent (stub) y webhook de reconciliación")
+@Tag(name = "Payments", description = "MercadoPago Preference (stub) y webhook de reconciliación")
 public class PaymentController {
 
     private final PaymentService paymentService;
 
-    @PostMapping("/intent")
-    @Operation(summary = "Crea un PaymentIntent (stub) para una orden PENDING del buyer autenticado")
-    public ResponseEntity<PaymentIntentResponse> createIntent(
-            @Valid @RequestBody CreatePaymentIntentRequest request, Authentication auth) {
+    @PostMapping("/preference")
+    @Operation(summary = "Crea una Preference MercadoPago (stub) para una orden PENDING del buyer autenticado")
+    public ResponseEntity<PaymentPreferenceResponse> createPreference(
+            @Valid @RequestBody CreatePaymentPreferenceRequest request, Authentication auth) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(paymentService.createIntent(request, auth.getName()));
+                .body(paymentService.createPreference(request, auth.getName()));
     }
 
     @PostMapping(value = "/webhook", consumes = "application/json")
-    @Operation(summary = "Webhook público de Stripe (reconcilia el estado del Payment)")
+    @Operation(summary = "Webhook público de MercadoPago (reconcilia el estado del Payment)")
     public ResponseEntity<Void> webhook(
             @RequestBody String payload,
-            @RequestHeader(value = "Stripe-Signature", required = false) String signature) {
+            @RequestHeader(value = "x-signature", required = false) String signature) {
         paymentService.handleWebhook(payload, signature);
         return ResponseEntity.ok().build();
     }

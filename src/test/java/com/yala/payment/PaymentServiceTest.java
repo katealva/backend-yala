@@ -14,8 +14,8 @@ import com.yala.exception.UnauthorizedException;
 import com.yala.order.Order;
 import com.yala.order.OrderRepository;
 import com.yala.order.OrderStatus;
-import com.yala.payment.dto.CreatePaymentIntentRequest;
-import com.yala.payment.dto.PaymentIntentResponse;
+import com.yala.payment.dto.CreatePaymentPreferenceRequest;
+import com.yala.payment.dto.PaymentPreferenceResponse;
 import com.yala.user.Role;
 import com.yala.user.User;
 import java.util.Optional;
@@ -49,7 +49,7 @@ class PaymentServiceTest {
     }
 
     @Test
-    void shouldCreateIntentWhenOrderIsPendingAndBuyerMatches() {
+    void shouldCreatePreferenceWhenOrderIsPendingAndBuyerMatches() {
         when(orderRepository.findById(50L)).thenReturn(Optional.of(pendingOrder()));
         when(paymentRepository.save(any(Payment.class))).thenAnswer(inv -> {
             Payment p = inv.getArgument(0);
@@ -57,11 +57,12 @@ class PaymentServiceTest {
             return p;
         });
 
-        PaymentIntentResponse response = paymentService.createIntent(
-                new CreatePaymentIntentRequest(50L), "ada@yala.pe");
+        PaymentPreferenceResponse response = paymentService.createPreference(
+                new CreatePaymentPreferenceRequest(50L), "ada@yala.pe");
 
-        assertThat(response.paymentIntentId()).startsWith("pi_");
-        assertThat(response.clientSecret()).contains("_secret_");
+        assertThat(response.preferenceId()).startsWith("pref_");
+        assertThat(response.initPoint())
+                .startsWith("https://www.mercadopago.com.pe/checkout/v1/redirect?pref_id=pref_");
         verify(paymentRepository).save(any(Payment.class));
     }
 
@@ -69,8 +70,8 @@ class PaymentServiceTest {
     void shouldThrowUnauthorizedExceptionWhenBuyerDoesNotMatch() {
         when(orderRepository.findById(50L)).thenReturn(Optional.of(pendingOrder()));
 
-        assertThatThrownBy(() -> paymentService.createIntent(
-                new CreatePaymentIntentRequest(50L), "intruder@yala.pe"))
+        assertThatThrownBy(() -> paymentService.createPreference(
+                new CreatePaymentPreferenceRequest(50L), "intruder@yala.pe"))
                 .isInstanceOf(UnauthorizedException.class);
         verify(paymentRepository, never()).save(any());
     }
@@ -81,8 +82,8 @@ class PaymentServiceTest {
         order.setStatus(OrderStatus.CONFIRMED);
         when(orderRepository.findById(50L)).thenReturn(Optional.of(order));
 
-        assertThatThrownBy(() -> paymentService.createIntent(
-                new CreatePaymentIntentRequest(50L), "ada@yala.pe"))
+        assertThatThrownBy(() -> paymentService.createPreference(
+                new CreatePaymentPreferenceRequest(50L), "ada@yala.pe"))
                 .isInstanceOf(OrderNotConfirmableException.class);
     }
 
@@ -90,25 +91,27 @@ class PaymentServiceTest {
     void shouldThrowResourceNotFoundExceptionWhenOrderDoesNotExist() {
         when(orderRepository.findById(404L)).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> paymentService.createIntent(
-                new CreatePaymentIntentRequest(404L), "ada@yala.pe"))
+        assertThatThrownBy(() -> paymentService.createPreference(
+                new CreatePaymentPreferenceRequest(404L), "ada@yala.pe"))
                 .isInstanceOf(ResourceNotFoundException.class);
     }
 
     @Test
-    void shouldUpdatePaymentToSuccessWhenWebhookHasPaymentIntentSucceeded() {
+    void shouldUpdatePaymentToSuccessWhenWebhookHasApprovedPayment() {
         Order order = pendingOrder();
         Payment payment = Payment.builder()
-                .id(1L).gateway("stripe").externalReference("pi_abc123")
+                .id(1L).gateway("mercadopago").externalReference("pref_abc123")
                 .amount(250f).status(PaymentStatus.PENDING).order(order).build();
-        when(paymentRepository.findByExternalReference("pi_abc123")).thenReturn(Optional.of(payment));
+        when(paymentRepository.findByExternalReference("pref_abc123"))
+                .thenReturn(Optional.of(payment));
         when(paymentRepository.save(any(Payment.class))).thenAnswer(inv -> inv.getArgument(0));
         when(orderRepository.save(any(Order.class))).thenAnswer(inv -> inv.getArgument(0));
 
         String payload = """
                 {
-                    "type": "payment_intent.succeeded",
-                    "data": { "object": { "id": "pi_abc123", "amount": 25000 } }
+                    "type": "payment",
+                    "action": "payment.updated",
+                    "data": { "id": "pref_abc123", "status": "approved" }
                 }
                 """;
         paymentService.handleWebhook(payload, "sig");
@@ -118,18 +121,20 @@ class PaymentServiceTest {
     }
 
     @Test
-    void shouldUpdatePaymentToFailedWhenWebhookHasPaymentIntentFailed() {
+    void shouldUpdatePaymentToFailedWhenWebhookHasRejectedPayment() {
         Order order = pendingOrder();
         Payment payment = Payment.builder()
-                .id(1L).gateway("stripe").externalReference("pi_abc456")
+                .id(1L).gateway("mercadopago").externalReference("pref_abc456")
                 .amount(250f).status(PaymentStatus.PENDING).order(order).build();
-        when(paymentRepository.findByExternalReference("pi_abc456")).thenReturn(Optional.of(payment));
+        when(paymentRepository.findByExternalReference("pref_abc456"))
+                .thenReturn(Optional.of(payment));
         when(paymentRepository.save(any(Payment.class))).thenAnswer(inv -> inv.getArgument(0));
 
         String payload = """
                 {
-                    "type": "payment_intent.payment_failed",
-                    "data": { "object": { "id": "pi_abc456" } }
+                    "type": "payment",
+                    "action": "payment.updated",
+                    "data": { "id": "pref_abc456", "status": "rejected" }
                 }
                 """;
         paymentService.handleWebhook(payload, "sig");
@@ -140,11 +145,12 @@ class PaymentServiceTest {
 
     @Test
     void shouldThrowResourceNotFoundExceptionWhenWebhookReferencesUnknownPayment() {
-        when(paymentRepository.findByExternalReference("pi_unknown")).thenReturn(Optional.empty());
+        when(paymentRepository.findByExternalReference("pref_unknown"))
+                .thenReturn(Optional.empty());
         String payload = """
                 {
-                    "type": "payment_intent.succeeded",
-                    "data": { "object": { "id": "pi_unknown" } }
+                    "type": "payment",
+                    "data": { "id": "pref_unknown", "status": "approved" }
                 }
                 """;
 
