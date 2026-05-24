@@ -24,12 +24,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 @ExtendWith(MockitoExtension.class)
 class NotificationServiceTest {
 
     @Mock private NotificationRepository notificationRepository;
     @Mock private UserRepository userRepository;
+    @Mock private SimpMessagingTemplate messagingTemplate;
 
     @InjectMocks
     private NotificationServiceImpl notificationService;
