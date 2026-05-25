@@ -1,24 +1,24 @@
 package com.yala.config;
 
-import com.yala.auction.Auction;
-import com.yala.auction.dto.AuctionResponse;
-import com.yala.auction.dto.AuctionSummaryResponse;
-import com.yala.bid.Bid;
-import com.yala.bid.dto.BidResponse;
-import com.yala.category.Category;
-import com.yala.category.dto.CategoryResponse;
-import com.yala.image.Image;
-import com.yala.image.dto.ImageResponse;
-import com.yala.listing.Listing;
-import com.yala.listing.dto.ListingResponse;
-import com.yala.notification.Notification;
-import com.yala.notification.dto.NotificationResponse;
-import com.yala.order.Order;
-import com.yala.order.dto.OrderResponse;
-import com.yala.review.Review;
-import com.yala.review.dto.ReviewResponse;
-import com.yala.user.User;
-import com.yala.user.dto.UserResponse;
+import com.yala.model.Auction;
+import com.yala.dto.auction.ResponseAuctionDTO;
+import com.yala.dto.auction.ResponseAuctionSummaryDTO;
+import com.yala.model.Bid;
+import com.yala.dto.bid.ResponseBidDTO;
+import com.yala.model.Category;
+import com.yala.dto.category.ResponseCategoryDTO;
+import com.yala.model.Image;
+import com.yala.dto.image.ResponseImageDTO;
+import com.yala.model.Listing;
+import com.yala.dto.listing.ResponseListingDTO;
+import com.yala.model.Notification;
+import com.yala.dto.notification.ResponseNotificationDTO;
+import com.yala.model.Order;
+import com.yala.dto.order.ResponseOrderDTO;
+import com.yala.model.Review;
+import com.yala.dto.review.ResponseReviewDTO;
+import com.yala.model.User;
+import com.yala.dto.user.ResponseUserDTO;
 import java.util.List;
 import org.modelmapper.AbstractConverter;
 import org.modelmapper.ModelMapper;
@@ -40,63 +40,63 @@ public class ModelMapperConfig {
         ModelMapper mapper = new ModelMapper();
         mapper.getConfiguration().setMatchingStrategy(MatchingStrategies.STRICT);
 
-        mapper.addConverter(new AbstractConverter<User, UserResponse>() {
+        mapper.addConverter(new AbstractConverter<User, ResponseUserDTO>() {
             @Override
-            protected UserResponse convert(User source) {
+            protected ResponseUserDTO convert(User source) {
                 return toUserResponse(source);
             }
         });
-        mapper.addConverter(new AbstractConverter<Category, CategoryResponse>() {
+        mapper.addConverter(new AbstractConverter<Category, ResponseCategoryDTO>() {
             @Override
-            protected CategoryResponse convert(Category source) {
+            protected ResponseCategoryDTO convert(Category source) {
                 return toCategoryResponse(source);
             }
         });
-        mapper.addConverter(new AbstractConverter<Auction, AuctionSummaryResponse>() {
+        mapper.addConverter(new AbstractConverter<Auction, ResponseAuctionSummaryDTO>() {
             @Override
-            protected AuctionSummaryResponse convert(Auction source) {
+            protected ResponseAuctionSummaryDTO convert(Auction source) {
                 return toAuctionSummaryResponse(source);
             }
         });
-        mapper.addConverter(new AbstractConverter<Auction, AuctionResponse>() {
+        mapper.addConverter(new AbstractConverter<Auction, ResponseAuctionDTO>() {
             @Override
-            protected AuctionResponse convert(Auction source) {
+            protected ResponseAuctionDTO convert(Auction source) {
                 return toAuctionResponse(source);
             }
         });
-        mapper.addConverter(new AbstractConverter<Bid, BidResponse>() {
+        mapper.addConverter(new AbstractConverter<Bid, ResponseBidDTO>() {
             @Override
-            protected BidResponse convert(Bid source) {
+            protected ResponseBidDTO convert(Bid source) {
                 return toBidResponse(source);
             }
         });
-        mapper.addConverter(new AbstractConverter<Listing, ListingResponse>() {
+        mapper.addConverter(new AbstractConverter<Listing, ResponseListingDTO>() {
             @Override
-            protected ListingResponse convert(Listing source) {
+            protected ResponseListingDTO convert(Listing source) {
                 return toListingResponse(source);
             }
         });
-        mapper.addConverter(new AbstractConverter<Order, OrderResponse>() {
+        mapper.addConverter(new AbstractConverter<Order, ResponseOrderDTO>() {
             @Override
-            protected OrderResponse convert(Order source) {
+            protected ResponseOrderDTO convert(Order source) {
                 return toOrderResponse(source);
             }
         });
-        mapper.addConverter(new AbstractConverter<Review, ReviewResponse>() {
+        mapper.addConverter(new AbstractConverter<Review, ResponseReviewDTO>() {
             @Override
-            protected ReviewResponse convert(Review source) {
+            protected ResponseReviewDTO convert(Review source) {
                 return toReviewResponse(source);
             }
         });
-        mapper.addConverter(new AbstractConverter<Notification, NotificationResponse>() {
+        mapper.addConverter(new AbstractConverter<Notification, ResponseNotificationDTO>() {
             @Override
-            protected NotificationResponse convert(Notification source) {
+            protected ResponseNotificationDTO convert(Notification source) {
                 return toNotificationResponse(source);
             }
         });
-        mapper.addConverter(new AbstractConverter<Image, ImageResponse>() {
+        mapper.addConverter(new AbstractConverter<Image, ResponseImageDTO>() {
             @Override
-            protected ImageResponse convert(Image source) {
+            protected ResponseImageDTO convert(Image source) {
                 return toImageResponse(source);
             }
         });
@@ -104,9 +104,9 @@ public class ModelMapperConfig {
         return mapper;
     }
 
-    private static UserResponse toUserResponse(User source) {
+    private static ResponseUserDTO toUserResponse(User source) {
         if (source == null) return null;
-        return new UserResponse(
+        return new ResponseUserDTO(
                 source.getId(),
                 source.getName(),
                 source.getEmail(),
@@ -116,23 +116,23 @@ public class ModelMapperConfig {
                 source.getRole());
     }
 
-    private static CategoryResponse toCategoryResponse(Category source) {
+    private static ResponseCategoryDTO toCategoryResponse(Category source) {
         if (source == null) return null;
-        return new CategoryResponse(source.getId(), source.getName(), source.getDescription());
+        return new ResponseCategoryDTO(source.getId(), source.getName(), source.getDescription());
     }
 
-    private static AuctionSummaryResponse toAuctionSummaryResponse(Auction source) {
+    private static ResponseAuctionSummaryDTO toAuctionSummaryResponse(Auction source) {
         if (source == null) return null;
-        return new AuctionSummaryResponse(
+        return new ResponseAuctionSummaryDTO(
                 source.getId(),
                 source.getCurrentPrice(),
                 source.getEndsAt(),
                 source.getStatus() != null ? source.getStatus().name() : null);
     }
 
-    private static AuctionResponse toAuctionResponse(Auction source) {
+    private static ResponseAuctionDTO toAuctionResponse(Auction source) {
         if (source == null) return null;
-        return new AuctionResponse(
+        return new ResponseAuctionDTO(
                 source.getId(),
                 source.getStartingPrice(),
                 source.getCurrentPrice(),
@@ -143,21 +143,21 @@ public class ModelMapperConfig {
                 source.getBids() != null ? source.getBids().size() : 0);
     }
 
-    private static BidResponse toBidResponse(Bid source) {
+    private static ResponseBidDTO toBidResponse(Bid source) {
         if (source == null) return null;
-        return new BidResponse(
+        return new ResponseBidDTO(
                 source.getId(),
                 source.getAmount(),
                 source.getPlacedAt(),
                 toUserResponse(source.getBidder()));
     }
 
-    private static ListingResponse toListingResponse(Listing source) {
+    private static ResponseListingDTO toListingResponse(Listing source) {
         if (source == null) return null;
         List<String> imageUrls = source.getImages() != null
                 ? source.getImages().stream().map(Image::getUrl).toList()
                 : List.of();
-        return new ListingResponse(
+        return new ResponseListingDTO(
                 source.getId(),
                 source.getTitle(),
                 source.getDescription(),
@@ -172,9 +172,9 @@ public class ModelMapperConfig {
                 toAuctionSummaryResponse(source.getAuction()));
     }
 
-    private static OrderResponse toOrderResponse(Order source) {
+    private static ResponseOrderDTO toOrderResponse(Order source) {
         if (source == null) return null;
-        return new OrderResponse(
+        return new ResponseOrderDTO(
                 source.getId(),
                 source.getAmount(),
                 source.getStatus() != null ? source.getStatus().name() : null,
@@ -184,9 +184,9 @@ public class ModelMapperConfig {
                 toUserResponse(source.getSeller()));
     }
 
-    private static ReviewResponse toReviewResponse(Review source) {
+    private static ResponseReviewDTO toReviewResponse(Review source) {
         if (source == null) return null;
-        return new ReviewResponse(
+        return new ResponseReviewDTO(
                 source.getId(),
                 source.getRating(),
                 source.getComment(),
@@ -194,9 +194,9 @@ public class ModelMapperConfig {
                 toUserResponse(source.getAuthor()));
     }
 
-    private static NotificationResponse toNotificationResponse(Notification source) {
+    private static ResponseNotificationDTO toNotificationResponse(Notification source) {
         if (source == null) return null;
-        return new NotificationResponse(
+        return new ResponseNotificationDTO(
                 source.getId(),
                 source.getType() != null ? source.getType().name() : null,
                 source.getMessage(),
@@ -204,9 +204,9 @@ public class ModelMapperConfig {
                 source.getCreatedAt());
     }
 
-    private static ImageResponse toImageResponse(Image source) {
+    private static ResponseImageDTO toImageResponse(Image source) {
         if (source == null) return null;
-        return new ImageResponse(
+        return new ResponseImageDTO(
                 source.getId(),
                 source.getUrl(),
                 source.getSortOrder(),
