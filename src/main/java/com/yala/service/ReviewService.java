@@ -1,0 +1,76 @@
+package com.yala.service;
+import com.yala.repository.*;
+import com.yala.model.*;
+
+import com.yala.exceptions.ResourceNotFoundException;
+import com.yala.exceptions.ReviewNotAllowedException;
+import com.yala.model.Order;
+import com.yala.repository.OrderRepository;
+import com.yala.model.OrderStatus;
+import com.yala.dto.review.RequestReviewDTO;
+import com.yala.dto.review.ResponseReviewDTO;
+import com.yala.model.User;
+import com.yala.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+@RequiredArgsConstructor
+public class ReviewService {
+
+    private final ReviewRepository reviewRepository;
+    private final OrderRepository orderRepository;
+    private final UserRepository userRepository;
+    private final ModelMapper modelMapper;
+
+    @Transactional
+    public ResponseReviewDTO create(RequestReviewDTO request, String authorEmail) {
+        User author = userRepository.findByEmail(authorEmail)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        Order order = orderRepository.findById(request.orderId())
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Order not found with id: " + request.orderId()));
+
+        if (!order.getBuyer().getId().equals(author.getId())) {
+            throw new ReviewNotAllowedException("Only the buyer of this order can leave a review");
+        }
+
+        if (order.getStatus() != OrderStatus.CONFIRMED) {
+            throw new ReviewNotAllowedException("Reviews are only allowed on confirmed orders");
+        }
+
+        boolean alreadyReviewed = order.getReviews().stream()
+                .anyMatch(r -> r.getAuthor().getId().equals(author.getId()));
+        if (alreadyReviewed) {
+            throw new ReviewNotAllowedException("You have already reviewed this order");
+        }
+
+        Review saved = reviewRepository.save(Review.builder()
+                .rating(request.rating())
+                .comment(request.comment())
+                .order(order)
+                .author(author)
+                .recipient(order.getSeller())
+                .build());
+
+        Double avg = reviewRepository.averageRatingByRecipientId(order.getSeller().getId());
+        if (avg != null) {
+            User seller = order.getSeller();
+            seller.setReputation(avg.floatValue());
+            userRepository.save(seller);
+        }
+
+        return modelMapper.map(saved, ResponseReviewDTO.class);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<ResponseReviewDTO> findByRecipient(Long recipientId, Pageable pageable) {
+        return reviewRepository.findByRecipientId(recipientId, pageable)
+                .map(r -> modelMapper.map(r, ResponseReviewDTO.class));
+    }
+}
