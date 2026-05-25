@@ -1,0 +1,3832 @@
+{
+  "info": {
+    "_postman_id": "c905936e-5a75-4545-a0f0-0b686bf0f464",
+    "name": "Yala — Marketplace de Subastas",
+    "description": "API REST para el marketplace de subastas de coleccionables Yala",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "14375363"
+  },
+  "item": [
+    {
+      "name": "api",
+      "item": [
+        {
+          "name": "v1",
+          "item": [
+            {
+              "name": "users",
+              "item": [
+                {
+                  "name": "me",
+                  "item": [
+                    {
+                      "name": "Devuelve el perfil del usuario autenticado",
+                      "request": {
+                        "method": "GET",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "*/*"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{baseUrl}}/api/v1/users/me",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "v1",
+                            "users",
+                            "me"
+                          ]
+                        }
+                      },
+                      "response": [
+                        {
+                          "name": "OK",
+                          "originalRequest": {
+                            "method": "GET",
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "*/*"
+                              },
+                              {
+                                "description": "Added as a part of security scheme: bearer",
+                                "key": "Authorization",
+                                "value": "Bearer <token>"
+                              }
+                            ],
+                            "url": {
+                              "raw": "{{baseUrl}}/api/v1/users/me",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "api",
+                                "v1",
+                                "users",
+                                "me"
+                              ]
+                            }
+                          },
+                          "status": "OK",
+                          "code": 200,
+                          "_postman_previewlanguage": "text",
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "*/*"
+                            }
+                          ],
+                          "cookie": [],
+                          "body": "{\n  \"id\": 42,\n  \"name\": \"Ana Torres\",\n  \"email\": \"ana@yala.pe\",\n  \"avatarUrl\": \"https://yala-collectibles.s3.amazonaws.com/avatars/42.jpg\",\n  \"reputation\": 8958.763788651755,\n  \"isVerifiedSeller\": true,\n  \"role\": \"SELLER\"\n}"
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Actualiza el nombre y avatar del usuario autenticado",
+                      "request": {
+                        "method": "PUT",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "*/*"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"name\": \"Ana Torres\",\n  \"avatarUrl\": \"https://yala-collectibles.s3.amazonaws.com/avatars/42.jpg\"\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/api/v1/users/me",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "v1",
+                            "users",
+                            "me"
+                          ]
+                        }
+                      },
+                      "response": [
+                        {
+                          "name": "OK",
+                          "originalRequest": {
+                            "method": "PUT",
+                            "header": [
+                              {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                              },
+                              {
+                                "key": "Accept",
+                                "value": "*/*"
+                              },
+                              {
+                                "description": "Added as a part of security scheme: bearer",
+                                "key": "Authorization",
+                                "value": "Bearer <token>"
+                              }
+                            ],
+                            "body": {
+                              "mode": "raw",
+                              "raw": "{\n  \"name\": \"Ana Torres\",\n  \"avatarUrl\": \"https://yala-collectibles.s3.amazonaws.com/avatars/42.jpg\"\n}",
+                              "options": {
+                                "raw": {
+                                  "headerFamily": "json",
+                                  "language": "json"
+                                }
+                              }
+                            },
+                            "url": {
+                              "raw": "{{baseUrl}}/api/v1/users/me",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "api",
+                                "v1",
+                                "users",
+                                "me"
+                              ]
+                            }
+                          },
+                          "status": "OK",
+                          "code": 200,
+                          "_postman_previewlanguage": "text",
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "*/*"
+                            }
+                          ],
+                          "cookie": [],
+                          "body": "{\n  \"id\": 42,\n  \"name\": \"Ana Torres\",\n  \"email\": \"ana@yala.pe\",\n  \"avatarUrl\": \"https://yala-collectibles.s3.amazonaws.com/avatars/42.jpg\",\n  \"reputation\": 8958.763788651755,\n  \"isVerifiedSeller\": true,\n  \"role\": \"SELLER\"\n}"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "{id}",
+                  "item": [
+                    {
+                      "name": "listings",
+                      "item": [
+                        {
+                          "name": "Lista paginada de las publicaciones de un usuario",
+                          "request": {
+                            "method": "GET",
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "*/*"
+                              }
+                            ],
+                            "url": {
+                              "raw": "{{baseUrl}}/api/v1/users/:id/listings?page=3215&size=983&sort=string,string",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "api",
+                                "v1",
+                                "users",
+                                ":id",
+                                "listings"
+                              ],
+                              "query": [
+                                {
+                                  "key": "page",
+                                  "value": "3215"
+                                },
+                                {
+                                  "key": "size",
+                                  "value": "983"
+                                },
+                                {
+                                  "key": "sort",
+                                  "value": "string,string"
+                                }
+                              ],
+                              "variable": [
+                                {
+                                  "key": "id",
+                                  "value": "3239"
+                                }
+                              ]
+                            }
+                          },
+                          "response": [
+                            {
+                              "name": "OK",
+                              "originalRequest": {
+                                "method": "GET",
+                                "header": [
+                                  {
+                                    "key": "Accept",
+                                    "value": "*/*"
+                                  },
+                                  {
+                                    "description": "Added as a part of security scheme: bearer",
+                                    "key": "Authorization",
+                                    "value": "Bearer <token>"
+                                  }
+                                ],
+                                "url": {
+                                  "raw": "{{baseUrl}}/api/v1/users/:id/listings?page=3215&size=983&sort=string,string",
+                                  "host": [
+                                    "{{baseUrl}}"
+                                  ],
+                                  "path": [
+                                    "api",
+                                    "v1",
+                                    "users",
+                                    ":id",
+                                    "listings"
+                                  ],
+                                  "query": [
+                                    {
+                                      "key": "page",
+                                      "value": "3215"
+                                    },
+                                    {
+                                      "key": "size",
+                                      "value": "983"
+                                    },
+                                    {
+                                      "key": "sort",
+                                      "value": "string,string"
+                                    }
+                                  ],
+                                  "variable": [
+                                    {
+                                      "key": "id",
+                                      "value": "3239"
+                                    }
+                                  ]
+                                }
+                              },
+                              "status": "OK",
+                              "code": 200,
+                              "_postman_previewlanguage": "text",
+                              "header": [
+                                {
+                                  "key": "Content-Type",
+                                  "value": "*/*"
+                                }
+                              ],
+                              "cookie": [],
+                              "body": "{\n  \"totalElements\": 9233,\n  \"totalPages\": 9544,\n  \"first\": false,\n  \"last\": true,\n  \"size\": 524,\n  \"content\": [\n    {\n      \"id\": 101,\n      \"title\": \"Charizard PSA 9 — 1st Edition\",\n      \"description\": \"Carta en excelente estado…\",\n      \"mode\": \"AUCTION\",\n      \"fixedPrice\": 3596.6249566317397,\n      \"condition\": \"PSA 9 — Mint\",\n      \"status\": \"ACTIVE\",\n      \"createdAt\": \"2026-05-19T14:32:00\",\n      \"seller\": {\n        \"id\": 42,\n        \"name\": \"Ana Torres\",\n        \"email\": \"ana@yala.pe\",\n        \"avatarUrl\": \"https://yala-collectibles.s3.amazonaws.com/avatars/42.jpg\",\n        \"reputation\": 9743.128534193625,\n        \"isVerifiedSeller\": true,\n        \"role\": \"SELLER\"\n      },\n      \"category\": {\n        \"id\": 1,\n        \"name\": \"Pokémon TCG\",\n        \"description\": \"Cartas oficiales del Trading Card Game de Pokémon\"\n      },\n      \"imageUrls\": [\n        \"https://yala.s3.amazonaws.com/listings/101/0.jpg\"\n      ],\n      \"auction\": {\n        \"id\": 501,\n        \"currentPrice\": 9849.282764919271,\n        \"endsAt\": \"2026-06-15T20:00:00\",\n        \"status\": \"ACTIVE\"\n      }\n    },\n    {\n      \"id\": 101,\n      \"title\": \"Charizard PSA 9 — 1st Edition\",\n      \"description\": \"Carta en excelente estado…\",\n      \"mode\": \"AUCTION\",\n      \"fixedPrice\": 399.8793186110272,\n      \"condition\": \"PSA 9 — Mint\",\n      \"status\": \"ACTIVE\",\n      \"createdAt\": \"2026-05-19T14:32:00\",\n      \"seller\": {\n        \"id\": 42,\n        \"name\": \"Ana Torres\",\n        \"email\": \"ana@yala.pe\",\n        \"avatarUrl\": \"https://yala-collectibles.s3.amazonaws.com/avatars/42.jpg\",\n        \"reputation\": 1822.5797921830022,\n        \"isVerifiedSeller\": true,\n        \"role\": \"SELLER\"\n      },\n      \"category\": {\n        \"id\": 1,\n        \"name\": \"Pokémon TCG\",\n        \"description\": \"Cartas oficiales del Trading Card Game de Pokémon\"\n      },\n      \"imageUrls\": [\n        \"https://yala.s3.amazonaws.com/listings/101/0.jpg\"\n      ],\n      \"auction\": {\n        \"id\": 501,\n        \"currentPrice\": 5432.1552145194855,\n        \"endsAt\": \"2026-06-15T20:00:00\",\n        \"status\": \"ACTIVE\"\n      }\n    }\n  ],\n  \"number\": 6692,\n  \"sort\": {\n    \"empty\": false,\n    \"sorted\": true,\n    \"unsorted\": true\n  },\n  \"numberOfElements\": 5752,\n  \"pageable\": {\n    \"offset\": 3233,\n    \"sort\": {\n      \"empty\": false,\n      \"sorted\": true,\n      \"unsorted\": true\n    },\n    \"paged\": true,\n    \"pageNumber\": 1698,\n    \"pageSize\": 947,\n    \"unpaged\": false\n  },\n  \"empty\": true\n}"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Devuelve el perfil público de un usuario",
+                      "request": {
+                        "method": "GET",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "*/*"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{baseUrl}}/api/v1/users/:id",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "v1",
+                            "users",
+                            ":id"
+                          ],
+                          "variable": [
+                            {
+                              "key": "id",
+                              "value": "3239"
+                            }
+                          ]
+                        }
+                      },
+                      "response": [
+                        {
+                          "name": "OK",
+                          "originalRequest": {
+                            "method": "GET",
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "*/*"
+                              },
+                              {
+                                "description": "Added as a part of security scheme: bearer",
+                                "key": "Authorization",
+                                "value": "Bearer <token>"
+                              }
+                            ],
+                            "url": {
+                              "raw": "{{baseUrl}}/api/v1/users/:id",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "api",
+                                "v1",
+                                "users",
+                                ":id"
+                              ],
+                              "variable": [
+                                {
+                                  "key": "id",
+                                  "value": "3239"
+                                }
+                              ]
+                            }
+                          },
+                          "status": "OK",
+                          "code": 200,
+                          "_postman_previewlanguage": "text",
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "*/*"
+                            }
+                          ],
+                          "cookie": [],
+                          "body": "{\n  \"id\": 42,\n  \"name\": \"Ana Torres\",\n  \"email\": \"ana@yala.pe\",\n  \"avatarUrl\": \"https://yala-collectibles.s3.amazonaws.com/avatars/42.jpg\",\n  \"reputation\": 8958.763788651755,\n  \"isVerifiedSeller\": true,\n  \"role\": \"SELLER\"\n}"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "tags",
+              "item": [
+                {
+                  "name": "{id}",
+                  "item": [
+                    {
+                      "name": "Detalle de un tag",
+                      "request": {
+                        "method": "GET",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "*/*"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{baseUrl}}/api/v1/tags/:id",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "v1",
+                            "tags",
+                            ":id"
+                          ],
+                          "variable": [
+                            {
+                              "key": "id",
+                              "value": "3239"
+                            }
+                          ]
+                        },
+                        "description": "Devuelve un tag por su id. Endpoint público."
+                      },
+                      "response": [
+                        {
+                          "name": "OK",
+                          "originalRequest": {
+                            "method": "GET",
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "*/*"
+                              },
+                              {
+                                "description": "Added as a part of security scheme: bearer",
+                                "key": "Authorization",
+                                "value": "Bearer <token>"
+                              }
+                            ],
+                            "url": {
+                              "raw": "{{baseUrl}}/api/v1/tags/:id",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "api",
+                                "v1",
+                                "tags",
+                                ":id"
+                              ],
+                              "variable": [
+                                {
+                                  "key": "id",
+                                  "value": "3239"
+                                }
+                              ]
+                            }
+                          },
+                          "status": "OK",
+                          "code": 200,
+                          "_postman_previewlanguage": "text",
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "*/*"
+                            }
+                          ],
+                          "cookie": [],
+                          "body": "{\n  \"id\": 7,\n  \"name\": \"holo\"\n}"
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Actualiza un tag existente",
+                      "request": {
+                        "method": "PUT",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "*/*"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"name\": \"holo\"\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/api/v1/tags/:id",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "v1",
+                            "tags",
+                            ":id"
+                          ],
+                          "variable": [
+                            {
+                              "key": "id",
+                              "value": "3239"
+                            }
+                          ]
+                        },
+                        "description": "Requiere rol ADMIN. Modifica el nombre/descripción de un tag."
+                      },
+                      "response": [
+                        {
+                          "name": "OK",
+                          "originalRequest": {
+                            "method": "PUT",
+                            "header": [
+                              {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                              },
+                              {
+                                "key": "Accept",
+                                "value": "*/*"
+                              },
+                              {
+                                "description": "Added as a part of security scheme: bearer",
+                                "key": "Authorization",
+                                "value": "Bearer <token>"
+                              }
+                            ],
+                            "body": {
+                              "mode": "raw",
+                              "raw": "{\n  \"name\": \"holo\"\n}",
+                              "options": {
+                                "raw": {
+                                  "headerFamily": "json",
+                                  "language": "json"
+                                }
+                              }
+                            },
+                            "url": {
+                              "raw": "{{baseUrl}}/api/v1/tags/:id",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "api",
+                                "v1",
+                                "tags",
+                                ":id"
+                              ],
+                              "variable": [
+                                {
+                                  "key": "id",
+                                  "value": "3239"
+                                }
+                              ]
+                            }
+                          },
+                          "status": "OK",
+                          "code": 200,
+                          "_postman_previewlanguage": "text",
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "*/*"
+                            }
+                          ],
+                          "cookie": [],
+                          "body": "{\n  \"id\": 7,\n  \"name\": \"holo\"\n}"
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Elimina un tag",
+                      "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                          "raw": "{{baseUrl}}/api/v1/tags/:id",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "v1",
+                            "tags",
+                            ":id"
+                          ],
+                          "variable": [
+                            {
+                              "key": "id",
+                              "value": "3239"
+                            }
+                          ]
+                        },
+                        "description": "Requiere rol ADMIN. Falla si el tag está asociado a listings."
+                      },
+                      "response": [
+                        {
+                          "name": "OK",
+                          "originalRequest": {
+                            "method": "DELETE",
+                            "header": [
+                              {
+                                "description": "Added as a part of security scheme: bearer",
+                                "key": "Authorization",
+                                "value": "Bearer <token>"
+                              }
+                            ],
+                            "url": {
+                              "raw": "{{baseUrl}}/api/v1/tags/:id",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "api",
+                                "v1",
+                                "tags",
+                                ":id"
+                              ],
+                              "variable": [
+                                {
+                                  "key": "id",
+                                  "value": "3239"
+                                }
+                              ]
+                            }
+                          },
+                          "status": "OK",
+                          "code": 200,
+                          "_postman_previewlanguage": "text",
+                          "header": [],
+                          "cookie": [],
+                          "body": ""
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "Lista todos los tags",
+                  "request": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "*/*"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{baseUrl}}/api/v1/tags",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "tags"
+                      ]
+                    },
+                    "description": "Devuelve el catálogo completo de tags disponibles. Endpoint público."
+                  },
+                  "response": [
+                    {
+                      "name": "OK",
+                      "originalRequest": {
+                        "method": "GET",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "*/*"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: bearer",
+                            "key": "Authorization",
+                            "value": "Bearer <token>"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{baseUrl}}/api/v1/tags",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "v1",
+                            "tags"
+                          ]
+                        }
+                      },
+                      "status": "OK",
+                      "code": 200,
+                      "_postman_previewlanguage": "text",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "*/*"
+                        }
+                      ],
+                      "cookie": [],
+                      "body": "[\n  {\n    \"id\": 7,\n    \"name\": \"holo\"\n  },\n  {\n    \"id\": 7,\n    \"name\": \"holo\"\n  }\n]"
+                    }
+                  ]
+                },
+                {
+                  "name": "Crea un nuevo tag",
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "*/*"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"name\": \"holo\"\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/v1/tags",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "tags"
+                      ]
+                    },
+                    "description": "Requiere rol ADMIN. El nombre debe ser único en el catálogo."
+                  },
+                  "response": [
+                    {
+                      "name": "OK",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "*/*"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: bearer",
+                            "key": "Authorization",
+                            "value": "Bearer <token>"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"name\": \"holo\"\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/api/v1/tags",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "v1",
+                            "tags"
+                          ]
+                        }
+                      },
+                      "status": "OK",
+                      "code": 200,
+                      "_postman_previewlanguage": "text",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "*/*"
+                        }
+                      ],
+                      "cookie": [],
+                      "body": "{\n  \"id\": 7,\n  \"name\": \"holo\"\n}"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "orders",
+              "item": [
+                {
+                  "name": "{id}",
+                  "item": [
+                    {
+                      "name": "confirm",
+                      "item": [
+                        {
+                          "name": "Confirma la orden (solo el seller)",
+                          "request": {
+                            "method": "PUT",
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "*/*"
+                              }
+                            ],
+                            "url": {
+                              "raw": "{{baseUrl}}/api/v1/orders/:id/confirm",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "api",
+                                "v1",
+                                "orders",
+                                ":id",
+                                "confirm"
+                              ],
+                              "variable": [
+                                {
+                                  "key": "id",
+                                  "value": "3239"
+                                }
+                              ]
+                            }
+                          },
+                          "response": [
+                            {
+                              "name": "OK",
+                              "originalRequest": {
+                                "method": "PUT",
+                                "header": [
+                                  {
+                                    "key": "Accept",
+                                    "value": "*/*"
+                                  },
+                                  {
+                                    "description": "Added as a part of security scheme: bearer",
+                                    "key": "Authorization",
+                                    "value": "Bearer <token>"
+                                  }
+                                ],
+                                "url": {
+                                  "raw": "{{baseUrl}}/api/v1/orders/:id/confirm",
+                                  "host": [
+                                    "{{baseUrl}}"
+                                  ],
+                                  "path": [
+                                    "api",
+                                    "v1",
+                                    "orders",
+                                    ":id",
+                                    "confirm"
+                                  ],
+                                  "variable": [
+                                    {
+                                      "key": "id",
+                                      "value": "3239"
+                                    }
+                                  ]
+                                }
+                              },
+                              "status": "OK",
+                              "code": 200,
+                              "_postman_previewlanguage": "text",
+                              "header": [
+                                {
+                                  "key": "Content-Type",
+                                  "value": "*/*"
+                                }
+                              ],
+                              "cookie": [],
+                              "body": "{\n  \"id\": 7001,\n  \"amount\": 5762.5168591703,\n  \"status\": \"PENDING\",\n  \"createdAt\": \"2026-05-20T15:00:00\",\n  \"listing\": {\n    \"id\": 101,\n    \"title\": \"Charizard PSA 9 — 1st Edition\",\n    \"description\": \"Carta en excelente estado…\",\n    \"mode\": \"AUCTION\",\n    \"fixedPrice\": 2004.9968543364405,\n    \"condition\": \"PSA 9 — Mint\",\n    \"status\": \"ACTIVE\",\n    \"createdAt\": \"2026-05-19T14:32:00\",\n    \"seller\": {\n      \"id\": 42,\n      \"name\": \"Ana Torres\",\n      \"email\": \"ana@yala.pe\",\n      \"avatarUrl\": \"https://yala-collectibles.s3.amazonaws.com/avatars/42.jpg\",\n      \"reputation\": 3531.4995945151973,\n      \"isVerifiedSeller\": true,\n      \"role\": \"SELLER\"\n    },\n    \"category\": {\n      \"id\": 1,\n      \"name\": \"Pokémon TCG\",\n      \"description\": \"Cartas oficiales del Trading Card Game de Pokémon\"\n    },\n    \"imageUrls\": [\n      \"https://yala.s3.amazonaws.com/listings/101/0.jpg\"\n    ],\n    \"auction\": {\n      \"id\": 501,\n      \"currentPrice\": 4854.394445267748,\n      \"endsAt\": \"2026-06-15T20:00:00\",\n      \"status\": \"ACTIVE\"\n    }\n  },\n  \"buyer\": {\n    \"id\": 42,\n    \"name\": \"Ana Torres\",\n    \"email\": \"ana@yala.pe\",\n    \"avatarUrl\": \"https://yala-collectibles.s3.amazonaws.com/avatars/42.jpg\",\n    \"reputation\": 7911.014860811597,\n    \"isVerifiedSeller\": true,\n    \"role\": \"SELLER\"\n  },\n  \"seller\": {\n    \"id\": 42,\n    \"name\": \"Ana Torres\",\n    \"email\": \"ana@yala.pe\",\n    \"avatarUrl\": \"https://yala-collectibles.s3.amazonaws.com/avatars/42.jpg\",\n    \"reputation\": 8371.423638008557,\n    \"isVerifiedSeller\": true,\n    \"role\": \"SELLER\"\n  }\n}"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "name": "cancel",
+                      "item": [
+                        {
+                          "name": "Cancela la orden (buyer o seller, solo si PENDING)",
+                          "request": {
+                            "method": "PUT",
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "*/*"
+                              }
+                            ],
+                            "url": {
+                              "raw": "{{baseUrl}}/api/v1/orders/:id/cancel",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "api",
+                                "v1",
+                                "orders",
+                                ":id",
+                                "cancel"
+                              ],
+                              "variable": [
+                                {
+                                  "key": "id",
+                                  "value": "3239"
+                                }
+                              ]
+                            }
+                          },
+                          "response": [
+                            {
+                              "name": "OK",
+                              "originalRequest": {
+                                "method": "PUT",
+                                "header": [
+                                  {
+                                    "key": "Accept",
+                                    "value": "*/*"
+                                  },
+                                  {
+                                    "description": "Added as a part of security scheme: bearer",
+                                    "key": "Authorization",
+                                    "value": "Bearer <token>"
+                                  }
+                                ],
+                                "url": {
+                                  "raw": "{{baseUrl}}/api/v1/orders/:id/cancel",
+                                  "host": [
+                                    "{{baseUrl}}"
+                                  ],
+                                  "path": [
+                                    "api",
+                                    "v1",
+                                    "orders",
+                                    ":id",
+                                    "cancel"
+                                  ],
+                                  "variable": [
+                                    {
+                                      "key": "id",
+                                      "value": "3239"
+                                    }
+                                  ]
+                                }
+                              },
+                              "status": "OK",
+                              "code": 200,
+                              "_postman_previewlanguage": "text",
+                              "header": [
+                                {
+                                  "key": "Content-Type",
+                                  "value": "*/*"
+                                }
+                              ],
+                              "cookie": [],
+                              "body": "{\n  \"id\": 7001,\n  \"amount\": 5762.5168591703,\n  \"status\": \"PENDING\",\n  \"createdAt\": \"2026-05-20T15:00:00\",\n  \"listing\": {\n    \"id\": 101,\n    \"title\": \"Charizard PSA 9 — 1st Edition\",\n    \"description\": \"Carta en excelente estado…\",\n    \"mode\": \"AUCTION\",\n    \"fixedPrice\": 2004.9968543364405,\n    \"condition\": \"PSA 9 — Mint\",\n    \"status\": \"ACTIVE\",\n    \"createdAt\": \"2026-05-19T14:32:00\",\n    \"seller\": {\n      \"id\": 42,\n      \"name\": \"Ana Torres\",\n      \"email\": \"ana@yala.pe\",\n      \"avatarUrl\": \"https://yala-collectibles.s3.amazonaws.com/avatars/42.jpg\",\n      \"reputation\": 3531.4995945151973,\n      \"isVerifiedSeller\": true,\n      \"role\": \"SELLER\"\n    },\n    \"category\": {\n      \"id\": 1,\n      \"name\": \"Pokémon TCG\",\n      \"description\": \"Cartas oficiales del Trading Card Game de Pokémon\"\n    },\n    \"imageUrls\": [\n      \"https://yala.s3.amazonaws.com/listings/101/0.jpg\"\n    ],\n    \"auction\": {\n      \"id\": 501,\n      \"currentPrice\": 4854.394445267748,\n      \"endsAt\": \"2026-06-15T20:00:00\",\n      \"status\": \"ACTIVE\"\n    }\n  },\n  \"buyer\": {\n    \"id\": 42,\n    \"name\": \"Ana Torres\",\n    \"email\": \"ana@yala.pe\",\n    \"avatarUrl\": \"https://yala-collectibles.s3.amazonaws.com/avatars/42.jpg\",\n    \"reputation\": 7911.014860811597,\n    \"isVerifiedSeller\": true,\n    \"role\": \"SELLER\"\n  },\n  \"seller\": {\n    \"id\": 42,\n    \"name\": \"Ana Torres\",\n    \"email\": \"ana@yala.pe\",\n    \"avatarUrl\": \"https://yala-collectibles.s3.amazonaws.com/avatars/42.jpg\",\n    \"reputation\": 8371.423638008557,\n    \"isVerifiedSeller\": true,\n    \"role\": \"SELLER\"\n  }\n}"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Obtiene una orden por id (solo buyer o seller involucrados)",
+                      "request": {
+                        "method": "GET",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "*/*"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{baseUrl}}/api/v1/orders/:id",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "v1",
+                            "orders",
+                            ":id"
+                          ],
+                          "variable": [
+                            {
+                              "key": "id",
+                              "value": "3239"
+                            }
+                          ]
+                        }
+                      },
+                      "response": [
+                        {
+                          "name": "OK",
+                          "originalRequest": {
+                            "method": "GET",
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "*/*"
+                              },
+                              {
+                                "description": "Added as a part of security scheme: bearer",
+                                "key": "Authorization",
+                                "value": "Bearer <token>"
+                              }
+                            ],
+                            "url": {
+                              "raw": "{{baseUrl}}/api/v1/orders/:id",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "api",
+                                "v1",
+                                "orders",
+                                ":id"
+                              ],
+                              "variable": [
+                                {
+                                  "key": "id",
+                                  "value": "3239"
+                                }
+                              ]
+                            }
+                          },
+                          "status": "OK",
+                          "code": 200,
+                          "_postman_previewlanguage": "text",
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "*/*"
+                            }
+                          ],
+                          "cookie": [],
+                          "body": "{\n  \"id\": 7001,\n  \"amount\": 5762.5168591703,\n  \"status\": \"PENDING\",\n  \"createdAt\": \"2026-05-20T15:00:00\",\n  \"listing\": {\n    \"id\": 101,\n    \"title\": \"Charizard PSA 9 — 1st Edition\",\n    \"description\": \"Carta en excelente estado…\",\n    \"mode\": \"AUCTION\",\n    \"fixedPrice\": 2004.9968543364405,\n    \"condition\": \"PSA 9 — Mint\",\n    \"status\": \"ACTIVE\",\n    \"createdAt\": \"2026-05-19T14:32:00\",\n    \"seller\": {\n      \"id\": 42,\n      \"name\": \"Ana Torres\",\n      \"email\": \"ana@yala.pe\",\n      \"avatarUrl\": \"https://yala-collectibles.s3.amazonaws.com/avatars/42.jpg\",\n      \"reputation\": 3531.4995945151973,\n      \"isVerifiedSeller\": true,\n      \"role\": \"SELLER\"\n    },\n    \"category\": {\n      \"id\": 1,\n      \"name\": \"Pokémon TCG\",\n      \"description\": \"Cartas oficiales del Trading Card Game de Pokémon\"\n    },\n    \"imageUrls\": [\n      \"https://yala.s3.amazonaws.com/listings/101/0.jpg\"\n    ],\n    \"auction\": {\n      \"id\": 501,\n      \"currentPrice\": 4854.394445267748,\n      \"endsAt\": \"2026-06-15T20:00:00\",\n      \"status\": \"ACTIVE\"\n    }\n  },\n  \"buyer\": {\n    \"id\": 42,\n    \"name\": \"Ana Torres\",\n    \"email\": \"ana@yala.pe\",\n    \"avatarUrl\": \"https://yala-collectibles.s3.amazonaws.com/avatars/42.jpg\",\n    \"reputation\": 7911.014860811597,\n    \"isVerifiedSeller\": true,\n    \"role\": \"SELLER\"\n  },\n  \"seller\": {\n    \"id\": 42,\n    \"name\": \"Ana Torres\",\n    \"email\": \"ana@yala.pe\",\n    \"avatarUrl\": \"https://yala-collectibles.s3.amazonaws.com/avatars/42.jpg\",\n    \"reputation\": 8371.423638008557,\n    \"isVerifiedSeller\": true,\n    \"role\": \"SELLER\"\n  }\n}"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "my-orders",
+                  "item": [
+                    {
+                      "name": "Lista paginada de órdenes del comprador autenticado",
+                      "request": {
+                        "method": "GET",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "*/*"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{baseUrl}}/api/v1/orders/my-orders?page=3215&size=983&sort=string,string",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "v1",
+                            "orders",
+                            "my-orders"
+                          ],
+                          "query": [
+                            {
+                              "key": "page",
+                              "value": "3215"
+                            },
+                            {
+                              "key": "size",
+                              "value": "983"
+                            },
+                            {
+                              "key": "sort",
+                              "value": "string,string"
+                            }
+                          ]
+                        }
+                      },
+                      "response": [
+                        {
+                          "name": "OK",
+                          "originalRequest": {
+                            "method": "GET",
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "*/*"
+                              },
+                              {
+                                "description": "Added as a part of security scheme: bearer",
+                                "key": "Authorization",
+                                "value": "Bearer <token>"
+                              }
+                            ],
+                            "url": {
+                              "raw": "{{baseUrl}}/api/v1/orders/my-orders?page=3215&size=983&sort=string,string",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "api",
+                                "v1",
+                                "orders",
+                                "my-orders"
+                              ],
+                              "query": [
+                                {
+                                  "key": "page",
+                                  "value": "3215"
+                                },
+                                {
+                                  "key": "size",
+                                  "value": "983"
+                                },
+                                {
+                                  "key": "sort",
+                                  "value": "string,string"
+                                }
+                              ]
+                            }
+                          },
+                          "status": "OK",
+                          "code": 200,
+                          "_postman_previewlanguage": "text",
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "*/*"
+                            }
+                          ],
+                          "cookie": [],
+                          "body": "{\n  \"totalElements\": 5877,\n  \"totalPages\": 3540,\n  \"first\": false,\n  \"last\": false,\n  \"size\": 4915,\n  \"content\": [\n    {\n      \"id\": 7001,\n      \"amount\": 6750.811841027556,\n      \"status\": \"PENDING\",\n      \"createdAt\": \"2026-05-20T15:00:00\",\n      \"listing\": {\n        \"id\": 101,\n        \"title\": \"Charizard PSA 9 — 1st Edition\",\n        \"description\": \"Carta en excelente estado…\",\n        \"mode\": \"AUCTION\",\n        \"fixedPrice\": 5895.262483208567,\n        \"condition\": \"PSA 9 — Mint\",\n        \"status\": \"ACTIVE\",\n        \"createdAt\": \"2026-05-19T14:32:00\",\n        \"seller\": {\n          \"id\": 42,\n          \"name\": \"Ana Torres\",\n          \"email\": \"ana@yala.pe\",\n          \"avatarUrl\": \"https://yala-collectibles.s3.amazonaws.com/avatars/42.jpg\",\n          \"reputation\": 9986.522552473403,\n          \"isVerifiedSeller\": true,\n          \"role\": \"SELLER\"\n        },\n        \"category\": {\n          \"id\": 1,\n          \"name\": \"Pokémon TCG\",\n          \"description\": \"Cartas oficiales del Trading Card Game de Pokémon\"\n        },\n        \"imageUrls\": [\n          \"https://yala.s3.amazonaws.com/listings/101/0.jpg\"\n        ],\n        \"auction\": {\n          \"id\": 501,\n          \"currentPrice\": 1699.0097707047357,\n          \"endsAt\": \"2026-06-15T20:00:00\",\n          \"status\": \"ACTIVE\"\n        }\n      },\n      \"buyer\": {\n        \"id\": 42,\n        \"name\": \"Ana Torres\",\n        \"email\": \"ana@yala.pe\",\n        \"avatarUrl\": \"https://yala-collectibles.s3.amazonaws.com/avatars/42.jpg\",\n        \"reputation\": 1835.2608493098999,\n        \"isVerifiedSeller\": true,\n        \"role\": \"SELLER\"\n      },\n      \"seller\": {\n        \"id\": 42,\n        \"name\": \"Ana Torres\",\n        \"email\": \"ana@yala.pe\",\n        \"avatarUrl\": \"https://yala-collectibles.s3.amazonaws.com/avatars/42.jpg\",\n        \"reputation\": 4623.087713570122,\n        \"isVerifiedSeller\": true,\n        \"role\": \"SELLER\"\n      }\n    },\n    {\n      \"id\": 7001,\n      \"amount\": 2821.311752750325,\n      \"status\": \"PENDING\",\n      \"createdAt\": \"2026-05-20T15:00:00\",\n      \"listing\": {\n        \"id\": 101,\n        \"title\": \"Charizard PSA 9 — 1st Edition\",\n        \"description\": \"Carta en excelente estado…\",\n        \"mode\": \"AUCTION\",\n        \"fixedPrice\": 4331.085544734093,\n        \"condition\": \"PSA 9 — Mint\",\n        \"status\": \"ACTIVE\",\n        \"createdAt\": \"2026-05-19T14:32:00\",\n        \"seller\": {\n          \"id\": 42,\n          \"name\": \"Ana Torres\",\n          \"email\": \"ana@yala.pe\",\n          \"avatarUrl\": \"https://yala-collectibles.s3.amazonaws.com/avatars/42.jpg\",\n          \"reputation\": 2078.4584459282883,\n          \"isVerifiedSeller\": true,\n          \"role\": \"SELLER\"\n        },\n        \"category\": {\n          \"id\": 1,\n          \"name\": \"Pokémon TCG\",\n          \"description\": \"Cartas oficiales del Trading Card Game de Pokémon\"\n        },\n        \"imageUrls\": [\n          \"https://yala.s3.amazonaws.com/listings/101/0.jpg\"\n        ],\n        \"auction\": {\n          \"id\": 501,\n          \"currentPrice\": 5785.894714953628,\n          \"endsAt\": \"2026-06-15T20:00:00\",\n          \"status\": \"ACTIVE\"\n        }\n      },\n      \"buyer\": {\n        \"id\": 42,\n        \"name\": \"Ana Torres\",\n        \"email\": \"ana@yala.pe\",\n        \"avatarUrl\": \"https://yala-collectibles.s3.amazonaws.com/avatars/42.jpg\",\n        \"reputation\": 8261.763894845044,\n        \"isVerifiedSeller\": true,\n        \"role\": \"SELLER\"\n      },\n      \"seller\": {\n        \"id\": 42,\n        \"name\": \"Ana Torres\",\n        \"email\": \"ana@yala.pe\",\n        \"avatarUrl\": \"https://yala-collectibles.s3.amazonaws.com/avatars/42.jpg\",\n        \"reputation\": 2634.786532962573,\n        \"isVerifiedSeller\": true,\n        \"role\": \"SELLER\"\n      }\n    }\n  ],\n  \"number\": 1704,\n  \"sort\": {\n    \"empty\": false,\n    \"sorted\": true,\n    \"unsorted\": true\n  },\n  \"numberOfElements\": 4978,\n  \"pageable\": {\n    \"offset\": 7227,\n    \"sort\": {\n      \"empty\": false,\n      \"sorted\": true,\n      \"unsorted\": false\n    },\n    \"paged\": false,\n    \"pageNumber\": 9661,\n    \"pageSize\": 4993,\n    \"unpaged\": true\n  },\n  \"empty\": false\n}"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "Crea una orden de compra directa sobre un listing FIXED activo",
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "*/*"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"listingId\": 101\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/v1/orders",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "orders"
+                      ]
+                    }
+                  },
+                  "response": [
+                    {
+                      "name": "OK",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "*/*"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: bearer",
+                            "key": "Authorization",
+                            "value": "Bearer <token>"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"listingId\": 101\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/api/v1/orders",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "v1",
+                            "orders"
+                          ]
+                        }
+                      },
+                      "status": "OK",
+                      "code": 200,
+                      "_postman_previewlanguage": "text",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "*/*"
+                        }
+                      ],
+                      "cookie": [],
+                      "body": "{\n  \"id\": 7001,\n  \"amount\": 5762.5168591703,\n  \"status\": \"PENDING\",\n  \"createdAt\": \"2026-05-20T15:00:00\",\n  \"listing\": {\n    \"id\": 101,\n    \"title\": \"Charizard PSA 9 — 1st Edition\",\n    \"description\": \"Carta en excelente estado…\",\n    \"mode\": \"AUCTION\",\n    \"fixedPrice\": 2004.9968543364405,\n    \"condition\": \"PSA 9 — Mint\",\n    \"status\": \"ACTIVE\",\n    \"createdAt\": \"2026-05-19T14:32:00\",\n    \"seller\": {\n      \"id\": 42,\n      \"name\": \"Ana Torres\",\n      \"email\": \"ana@yala.pe\",\n      \"avatarUrl\": \"https://yala-collectibles.s3.amazonaws.com/avatars/42.jpg\",\n      \"reputation\": 3531.4995945151973,\n      \"isVerifiedSeller\": true,\n      \"role\": \"SELLER\"\n    },\n    \"category\": {\n      \"id\": 1,\n      \"name\": \"Pokémon TCG\",\n      \"description\": \"Cartas oficiales del Trading Card Game de Pokémon\"\n    },\n    \"imageUrls\": [\n      \"https://yala.s3.amazonaws.com/listings/101/0.jpg\"\n    ],\n    \"auction\": {\n      \"id\": 501,\n      \"currentPrice\": 4854.394445267748,\n      \"endsAt\": \"2026-06-15T20:00:00\",\n      \"status\": \"ACTIVE\"\n    }\n  },\n  \"buyer\": {\n    \"id\": 42,\n    \"name\": \"Ana Torres\",\n    \"email\": \"ana@yala.pe\",\n    \"avatarUrl\": \"https://yala-collectibles.s3.amazonaws.com/avatars/42.jpg\",\n    \"reputation\": 7911.014860811597,\n    \"isVerifiedSeller\": true,\n    \"role\": \"SELLER\"\n  },\n  \"seller\": {\n    \"id\": 42,\n    \"name\": \"Ana Torres\",\n    \"email\": \"ana@yala.pe\",\n    \"avatarUrl\": \"https://yala-collectibles.s3.amazonaws.com/avatars/42.jpg\",\n    \"reputation\": 8371.423638008557,\n    \"isVerifiedSeller\": true,\n    \"role\": \"SELLER\"\n  }\n}"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "notifications",
+              "item": [
+                {
+                  "name": "{id}",
+                  "item": [
+                    {
+                      "name": "read",
+                      "item": [
+                        {
+                          "name": "Marca una notificación como leída",
+                          "request": {
+                            "method": "PUT",
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "*/*"
+                              }
+                            ],
+                            "url": {
+                              "raw": "{{baseUrl}}/api/v1/notifications/:id/read",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "api",
+                                "v1",
+                                "notifications",
+                                ":id",
+                                "read"
+                              ],
+                              "variable": [
+                                {
+                                  "key": "id",
+                                  "value": "3239"
+                                }
+                              ]
+                            }
+                          },
+                          "response": [
+                            {
+                              "name": "OK",
+                              "originalRequest": {
+                                "method": "PUT",
+                                "header": [
+                                  {
+                                    "key": "Accept",
+                                    "value": "*/*"
+                                  },
+                                  {
+                                    "description": "Added as a part of security scheme: bearer",
+                                    "key": "Authorization",
+                                    "value": "Bearer <token>"
+                                  }
+                                ],
+                                "url": {
+                                  "raw": "{{baseUrl}}/api/v1/notifications/:id/read",
+                                  "host": [
+                                    "{{baseUrl}}"
+                                  ],
+                                  "path": [
+                                    "api",
+                                    "v1",
+                                    "notifications",
+                                    ":id",
+                                    "read"
+                                  ],
+                                  "variable": [
+                                    {
+                                      "key": "id",
+                                      "value": "3239"
+                                    }
+                                  ]
+                                }
+                              },
+                              "status": "OK",
+                              "code": 200,
+                              "_postman_previewlanguage": "text",
+                              "header": [
+                                {
+                                  "key": "Content-Type",
+                                  "value": "*/*"
+                                }
+                              ],
+                              "cookie": [],
+                              "body": "{\n  \"id\": 8001,\n  \"type\": \"BID_OUTBID\",\n  \"message\": \"Tu puja fue superada en la subasta de Charizard PSA 9\",\n  \"isRead\": false,\n  \"createdAt\": \"2026-05-19T14:32:00\"\n}"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "read-all",
+                  "item": [
+                    {
+                      "name": "Marca todas las notificaciones del usuario como leídas",
+                      "request": {
+                        "method": "PUT",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "*/*"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{baseUrl}}/api/v1/notifications/read-all",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "v1",
+                            "notifications",
+                            "read-all"
+                          ]
+                        }
+                      },
+                      "response": [
+                        {
+                          "name": "OK",
+                          "originalRequest": {
+                            "method": "PUT",
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "*/*"
+                              },
+                              {
+                                "description": "Added as a part of security scheme: bearer",
+                                "key": "Authorization",
+                                "value": "Bearer <token>"
+                              }
+                            ],
+                            "url": {
+                              "raw": "{{baseUrl}}/api/v1/notifications/read-all",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "api",
+                                "v1",
+                                "notifications",
+                                "read-all"
+                              ]
+                            }
+                          },
+                          "status": "OK",
+                          "code": 200,
+                          "_postman_previewlanguage": "text",
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "*/*"
+                            }
+                          ],
+                          "cookie": [],
+                          "body": "{\n  \"key_0\": 7874\n}"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "unread-count",
+                  "item": [
+                    {
+                      "name": "Cantidad de notificaciones sin leer del usuario",
+                      "request": {
+                        "method": "GET",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "*/*"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{baseUrl}}/api/v1/notifications/unread-count",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "v1",
+                            "notifications",
+                            "unread-count"
+                          ]
+                        }
+                      },
+                      "response": [
+                        {
+                          "name": "OK",
+                          "originalRequest": {
+                            "method": "GET",
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "*/*"
+                              },
+                              {
+                                "description": "Added as a part of security scheme: bearer",
+                                "key": "Authorization",
+                                "value": "Bearer <token>"
+                              }
+                            ],
+                            "url": {
+                              "raw": "{{baseUrl}}/api/v1/notifications/unread-count",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "api",
+                                "v1",
+                                "notifications",
+                                "unread-count"
+                              ]
+                            }
+                          },
+                          "status": "OK",
+                          "code": 200,
+                          "_postman_previewlanguage": "text",
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "*/*"
+                            }
+                          ],
+                          "cookie": [],
+                          "body": "{\n  \"key_0\": 3302,\n  \"key_1\": 3268,\n  \"key_2\": 334\n}"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "Lista paginada de notificaciones del usuario autenticado",
+                  "request": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "*/*"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{baseUrl}}/api/v1/notifications?page=3215&size=983&sort=string,string",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "notifications"
+                      ],
+                      "query": [
+                        {
+                          "key": "page",
+                          "value": "3215"
+                        },
+                        {
+                          "key": "size",
+                          "value": "983"
+                        },
+                        {
+                          "key": "sort",
+                          "value": "string,string"
+                        }
+                      ]
+                    }
+                  },
+                  "response": [
+                    {
+                      "name": "OK",
+                      "originalRequest": {
+                        "method": "GET",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "*/*"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: bearer",
+                            "key": "Authorization",
+                            "value": "Bearer <token>"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{baseUrl}}/api/v1/notifications?page=3215&size=983&sort=string,string",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "v1",
+                            "notifications"
+                          ],
+                          "query": [
+                            {
+                              "key": "page",
+                              "value": "3215"
+                            },
+                            {
+                              "key": "size",
+                              "value": "983"
+                            },
+                            {
+                              "key": "sort",
+                              "value": "string,string"
+                            }
+                          ]
+                        }
+                      },
+                      "status": "OK",
+                      "code": 200,
+                      "_postman_previewlanguage": "text",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "*/*"
+                        }
+                      ],
+                      "cookie": [],
+                      "body": "{\n  \"totalElements\": 6890,\n  \"totalPages\": 5643,\n  \"first\": true,\n  \"last\": true,\n  \"size\": 5758,\n  \"content\": [\n    {\n      \"id\": 8001,\n      \"type\": \"BID_OUTBID\",\n      \"message\": \"Tu puja fue superada en la subasta de Charizard PSA 9\",\n      \"isRead\": false,\n      \"createdAt\": \"2026-05-19T14:32:00\"\n    },\n    {\n      \"id\": 8001,\n      \"type\": \"BID_OUTBID\",\n      \"message\": \"Tu puja fue superada en la subasta de Charizard PSA 9\",\n      \"isRead\": false,\n      \"createdAt\": \"2026-05-19T14:32:00\"\n    }\n  ],\n  \"number\": 7934,\n  \"sort\": {\n    \"empty\": false,\n    \"sorted\": false,\n    \"unsorted\": false\n  },\n  \"numberOfElements\": 6574,\n  \"pageable\": {\n    \"offset\": 4646,\n    \"sort\": {\n      \"empty\": true,\n      \"sorted\": true,\n      \"unsorted\": false\n    },\n    \"paged\": true,\n    \"pageNumber\": 7148,\n    \"pageSize\": 7242,\n    \"unpaged\": false\n  },\n  \"empty\": true\n}"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "listings",
+              "item": [
+                {
+                  "name": "{id}",
+                  "item": [
+                    {
+                      "name": "Obtiene un listing por id",
+                      "request": {
+                        "method": "GET",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "*/*"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{baseUrl}}/api/v1/listings/:id",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "v1",
+                            "listings",
+                            ":id"
+                          ],
+                          "variable": [
+                            {
+                              "key": "id",
+                              "value": "3239"
+                            }
+                          ]
+                        }
+                      },
+                      "response": [
+                        {
+                          "name": "OK",
+                          "originalRequest": {
+                            "method": "GET",
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "*/*"
+                              },
+                              {
+                                "description": "Added as a part of security scheme: bearer",
+                                "key": "Authorization",
+                                "value": "Bearer <token>"
+                              }
+                            ],
+                            "url": {
+                              "raw": "{{baseUrl}}/api/v1/listings/:id",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "api",
+                                "v1",
+                                "listings",
+                                ":id"
+                              ],
+                              "variable": [
+                                {
+                                  "key": "id",
+                                  "value": "3239"
+                                }
+                              ]
+                            }
+                          },
+                          "status": "OK",
+                          "code": 200,
+                          "_postman_previewlanguage": "text",
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "*/*"
+                            }
+                          ],
+                          "cookie": [],
+                          "body": "{\n  \"id\": 101,\n  \"title\": \"Charizard PSA 9 — 1st Edition\",\n  \"description\": \"Carta en excelente estado…\",\n  \"mode\": \"AUCTION\",\n  \"fixedPrice\": 2530.720732776013,\n  \"condition\": \"PSA 9 — Mint\",\n  \"status\": \"ACTIVE\",\n  \"createdAt\": \"2026-05-19T14:32:00\",\n  \"seller\": {\n    \"id\": 42,\n    \"name\": \"Ana Torres\",\n    \"email\": \"ana@yala.pe\",\n    \"avatarUrl\": \"https://yala-collectibles.s3.amazonaws.com/avatars/42.jpg\",\n    \"reputation\": 8879.546230530663,\n    \"isVerifiedSeller\": true,\n    \"role\": \"SELLER\"\n  },\n  \"category\": {\n    \"id\": 1,\n    \"name\": \"Pokémon TCG\",\n    \"description\": \"Cartas oficiales del Trading Card Game de Pokémon\"\n  },\n  \"imageUrls\": [\n    \"https://yala.s3.amazonaws.com/listings/101/0.jpg\"\n  ],\n  \"auction\": {\n    \"id\": 501,\n    \"currentPrice\": 5274.689683114601,\n    \"endsAt\": \"2026-06-15T20:00:00\",\n    \"status\": \"ACTIVE\"\n  }\n}"
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Actualiza un listing existente (solo el dueño)",
+                      "request": {
+                        "method": "PUT",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "*/*"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"categoryId\": 1,\n  \"condition\": \"PSA 9 — Mint\",\n  \"mode\": \"AUCTION\",\n  \"title\": \"Charizard PSA 9 — 1st Edition\",\n  \"description\": \"Carta en excelente estado, certificada por PSA con grado 9. Sin marcas ni dobleces.\",\n  \"fixedPrice\": 732.467731956259,\n  \"tags\": [\n    \"holo\",\n    \"1st-edition\",\n    \"mint\"\n  ]\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/api/v1/listings/:id",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "v1",
+                            "listings",
+                            ":id"
+                          ],
+                          "variable": [
+                            {
+                              "key": "id",
+                              "value": "3239"
+                            }
+                          ]
+                        }
+                      },
+                      "response": [
+                        {
+                          "name": "OK",
+                          "originalRequest": {
+                            "method": "PUT",
+                            "header": [
+                              {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                              },
+                              {
+                                "key": "Accept",
+                                "value": "*/*"
+                              },
+                              {
+                                "description": "Added as a part of security scheme: bearer",
+                                "key": "Authorization",
+                                "value": "Bearer <token>"
+                              }
+                            ],
+                            "body": {
+                              "mode": "raw",
+                              "raw": "{\n  \"categoryId\": 1,\n  \"condition\": \"PSA 9 — Mint\",\n  \"mode\": \"AUCTION\",\n  \"title\": \"Charizard PSA 9 — 1st Edition\",\n  \"description\": \"Carta en excelente estado, certificada por PSA con grado 9. Sin marcas ni dobleces.\",\n  \"fixedPrice\": 732.467731956259,\n  \"tags\": [\n    \"holo\",\n    \"1st-edition\",\n    \"mint\"\n  ]\n}",
+                              "options": {
+                                "raw": {
+                                  "headerFamily": "json",
+                                  "language": "json"
+                                }
+                              }
+                            },
+                            "url": {
+                              "raw": "{{baseUrl}}/api/v1/listings/:id",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "api",
+                                "v1",
+                                "listings",
+                                ":id"
+                              ],
+                              "variable": [
+                                {
+                                  "key": "id",
+                                  "value": "3239"
+                                }
+                              ]
+                            }
+                          },
+                          "status": "OK",
+                          "code": 200,
+                          "_postman_previewlanguage": "text",
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "*/*"
+                            }
+                          ],
+                          "cookie": [],
+                          "body": "{\n  \"id\": 101,\n  \"title\": \"Charizard PSA 9 — 1st Edition\",\n  \"description\": \"Carta en excelente estado…\",\n  \"mode\": \"AUCTION\",\n  \"fixedPrice\": 2530.720732776013,\n  \"condition\": \"PSA 9 — Mint\",\n  \"status\": \"ACTIVE\",\n  \"createdAt\": \"2026-05-19T14:32:00\",\n  \"seller\": {\n    \"id\": 42,\n    \"name\": \"Ana Torres\",\n    \"email\": \"ana@yala.pe\",\n    \"avatarUrl\": \"https://yala-collectibles.s3.amazonaws.com/avatars/42.jpg\",\n    \"reputation\": 8879.546230530663,\n    \"isVerifiedSeller\": true,\n    \"role\": \"SELLER\"\n  },\n  \"category\": {\n    \"id\": 1,\n    \"name\": \"Pokémon TCG\",\n    \"description\": \"Cartas oficiales del Trading Card Game de Pokémon\"\n  },\n  \"imageUrls\": [\n    \"https://yala.s3.amazonaws.com/listings/101/0.jpg\"\n  ],\n  \"auction\": {\n    \"id\": 501,\n    \"currentPrice\": 5274.689683114601,\n    \"endsAt\": \"2026-06-15T20:00:00\",\n    \"status\": \"ACTIVE\"\n  }\n}"
+                        }
+                      ]
+                    },
+                    {
+                      "name": "Cancela (soft-delete) un listing (solo el dueño)",
+                      "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                          "raw": "{{baseUrl}}/api/v1/listings/:id",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "v1",
+                            "listings",
+                            ":id"
+                          ],
+                          "variable": [
+                            {
+                              "key": "id",
+                              "value": "3239"
+                            }
+                          ]
+                        }
+                      },
+                      "response": [
+                        {
+                          "name": "OK",
+                          "originalRequest": {
+                            "method": "DELETE",
+                            "header": [
+                              {
+                                "description": "Added as a part of security scheme: bearer",
+                                "key": "Authorization",
+                                "value": "Bearer <token>"
+                              }
+                            ],
+                            "url": {
+                              "raw": "{{baseUrl}}/api/v1/listings/:id",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "api",
+                                "v1",
+                                "listings",
+                                ":id"
+                              ],
+                              "variable": [
+                                {
+                                  "key": "id",
+                                  "value": "3239"
+                                }
+                              ]
+                            }
+                          },
+                          "status": "OK",
+                          "code": 200,
+                          "_postman_previewlanguage": "text",
+                          "header": [],
+                          "cookie": [],
+                          "body": ""
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "{listingId}",
+                  "item": [
+                    {
+                      "name": "images",
+                      "item": [
+                        {
+                          "name": "Lista las imágenes de un listing",
+                          "request": {
+                            "method": "GET",
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "*/*"
+                              }
+                            ],
+                            "url": {
+                              "raw": "{{baseUrl}}/api/v1/listings/:listingId/images",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "api",
+                                "v1",
+                                "listings",
+                                ":listingId",
+                                "images"
+                              ],
+                              "variable": [
+                                {
+                                  "key": "listingId",
+                                  "value": "3239"
+                                }
+                              ]
+                            },
+                            "description": "Devuelve todas las imágenes asociadas a un listing, ordenadas por sortOrder ascendente. Endpoint público."
+                          },
+                          "response": [
+                            {
+                              "name": "OK",
+                              "originalRequest": {
+                                "method": "GET",
+                                "header": [
+                                  {
+                                    "key": "Accept",
+                                    "value": "*/*"
+                                  },
+                                  {
+                                    "description": "Added as a part of security scheme: bearer",
+                                    "key": "Authorization",
+                                    "value": "Bearer <token>"
+                                  }
+                                ],
+                                "url": {
+                                  "raw": "{{baseUrl}}/api/v1/listings/:listingId/images",
+                                  "host": [
+                                    "{{baseUrl}}"
+                                  ],
+                                  "path": [
+                                    "api",
+                                    "v1",
+                                    "listings",
+                                    ":listingId",
+                                    "images"
+                                  ],
+                                  "variable": [
+                                    {
+                                      "key": "listingId",
+                                      "value": "3239"
+                                    }
+                                  ]
+                                }
+                              },
+                              "status": "OK",
+                              "code": 200,
+                              "_postman_previewlanguage": "text",
+                              "header": [
+                                {
+                                  "key": "Content-Type",
+                                  "value": "*/*"
+                                }
+                              ],
+                              "cookie": [],
+                              "body": "[\n  {\n    \"id\": 55,\n    \"url\": \"https://yala-collectibles.s3.amazonaws.com/listings/101/0.jpg\",\n    \"sortOrder\": 0,\n    \"listingId\": 101\n  },\n  {\n    \"id\": 55,\n    \"url\": \"https://yala-collectibles.s3.amazonaws.com/listings/101/0.jpg\",\n    \"sortOrder\": 0,\n    \"listingId\": 101\n  }\n]"
+                            }
+                          ]
+                        },
+                        {
+                          "name": "Sube una imagen a un listing",
+                          "request": {
+                            "method": "POST",
+                            "header": [
+                              {
+                                "key": "Content-Type",
+                                "value": "multipart/form-data"
+                              },
+                              {
+                                "key": "Accept",
+                                "value": "*/*"
+                              }
+                            ],
+                            "body": {
+                              "mode": "formdata",
+                              "formdata": [
+                                {
+                                  "key": "file",
+                                  "type": "file",
+                                  "value": null
+                                }
+                              ]
+                            },
+                            "url": {
+                              "raw": "{{baseUrl}}/api/v1/listings/:listingId/images?sortOrder=9460",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "api",
+                                "v1",
+                                "listings",
+                                ":listingId",
+                                "images"
+                              ],
+                              "query": [
+                                {
+                                  "key": "sortOrder",
+                                  "value": "9460"
+                                }
+                              ],
+                              "variable": [
+                                {
+                                  "key": "listingId",
+                                  "value": "3239"
+                                }
+                              ]
+                            },
+                            "description": "Sube un archivo a AWS S3 y lo asocia al listing. Sólo el dueño del listing puede subir. Máximo 5 imágenes por listing."
+                          },
+                          "response": [
+                            {
+                              "name": "OK",
+                              "originalRequest": {
+                                "method": "POST",
+                                "header": [
+                                  {
+                                    "key": "Content-Type",
+                                    "value": "multipart/form-data"
+                                  },
+                                  {
+                                    "key": "Accept",
+                                    "value": "*/*"
+                                  },
+                                  {
+                                    "description": "Added as a part of security scheme: bearer",
+                                    "key": "Authorization",
+                                    "value": "Bearer <token>"
+                                  }
+                                ],
+                                "body": {
+                                  "mode": "formdata",
+                                  "formdata": [
+                                    {
+                                      "key": "file",
+                                      "type": "file",
+                                      "src": []
+                                    }
+                                  ]
+                                },
+                                "url": {
+                                  "raw": "{{baseUrl}}/api/v1/listings/:listingId/images?sortOrder=9460",
+                                  "host": [
+                                    "{{baseUrl}}"
+                                  ],
+                                  "path": [
+                                    "api",
+                                    "v1",
+                                    "listings",
+                                    ":listingId",
+                                    "images"
+                                  ],
+                                  "query": [
+                                    {
+                                      "key": "sortOrder",
+                                      "value": "9460"
+                                    }
+                                  ],
+                                  "variable": [
+                                    {
+                                      "key": "listingId",
+                                      "value": "3239"
+                                    }
+                                  ]
+                                }
+                              },
+                              "status": "OK",
+                              "code": 200,
+                              "_postman_previewlanguage": "text",
+                              "header": [
+                                {
+                                  "key": "Content-Type",
+                                  "value": "*/*"
+                                }
+                              ],
+                              "cookie": [],
+                              "body": "{\n  \"id\": 55,\n  \"url\": \"https://yala-collectibles.s3.amazonaws.com/listings/101/0.jpg\",\n  \"sortOrder\": 0,\n  \"listingId\": 101\n}"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "Lista listings activos paginados con filtros opcionales",
+                  "request": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "*/*"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{baseUrl}}/api/v1/listings?page=3215&size=983&sort=string,string&category=string&mode=string&condition=string&minPrice=2379.2466598710125&maxPrice=2379.2466598710125&q=string",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "listings"
+                      ],
+                      "query": [
+                        {
+                          "key": "page",
+                          "value": "3215"
+                        },
+                        {
+                          "key": "size",
+                          "value": "983"
+                        },
+                        {
+                          "key": "sort",
+                          "value": "string,string"
+                        },
+                        {
+                          "key": "category",
+                          "value": "string"
+                        },
+                        {
+                          "key": "mode",
+                          "value": "string"
+                        },
+                        {
+                          "key": "condition",
+                          "value": "string"
+                        },
+                        {
+                          "key": "minPrice",
+                          "value": "2379.2466598710125"
+                        },
+                        {
+                          "key": "maxPrice",
+                          "value": "2379.2466598710125"
+                        },
+                        {
+                          "key": "q",
+                          "value": "string"
+                        }
+                      ]
+                    }
+                  },
+                  "response": [
+                    {
+                      "name": "OK",
+                      "originalRequest": {
+                        "method": "GET",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "*/*"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: bearer",
+                            "key": "Authorization",
+                            "value": "Bearer <token>"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{baseUrl}}/api/v1/listings?page=3215&size=983&sort=string,string&category=string&mode=string&condition=string&minPrice=2379.2466598710125&maxPrice=2379.2466598710125&q=string",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "v1",
+                            "listings"
+                          ],
+                          "query": [
+                            {
+                              "key": "page",
+                              "value": "3215"
+                            },
+                            {
+                              "key": "size",
+                              "value": "983"
+                            },
+                            {
+                              "key": "sort",
+                              "value": "string,string"
+                            },
+                            {
+                              "key": "category",
+                              "value": "string"
+                            },
+                            {
+                              "key": "mode",
+                              "value": "string"
+                            },
+                            {
+                              "key": "condition",
+                              "value": "string"
+                            },
+                            {
+                              "key": "minPrice",
+                              "value": "2379.2466598710125"
+                            },
+                            {
+                              "key": "maxPrice",
+                              "value": "2379.2466598710125"
+                            },
+                            {
+                              "key": "q",
+                              "value": "string"
+                            }
+                          ]
+                        }
+                      },
+                      "status": "OK",
+                      "code": 200,
+                      "_postman_previewlanguage": "text",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "*/*"
+                        }
+                      ],
+                      "cookie": [],
+                      "body": "{\n  \"totalElements\": 9233,\n  \"totalPages\": 9544,\n  \"first\": false,\n  \"last\": true,\n  \"size\": 524,\n  \"content\": [\n    {\n      \"id\": 101,\n      \"title\": \"Charizard PSA 9 — 1st Edition\",\n      \"description\": \"Carta en excelente estado…\",\n      \"mode\": \"AUCTION\",\n      \"fixedPrice\": 3596.6249566317397,\n      \"condition\": \"PSA 9 — Mint\",\n      \"status\": \"ACTIVE\",\n      \"createdAt\": \"2026-05-19T14:32:00\",\n      \"seller\": {\n        \"id\": 42,\n        \"name\": \"Ana Torres\",\n        \"email\": \"ana@yala.pe\",\n        \"avatarUrl\": \"https://yala-collectibles.s3.amazonaws.com/avatars/42.jpg\",\n        \"reputation\": 9743.128534193625,\n        \"isVerifiedSeller\": true,\n        \"role\": \"SELLER\"\n      },\n      \"category\": {\n        \"id\": 1,\n        \"name\": \"Pokémon TCG\",\n        \"description\": \"Cartas oficiales del Trading Card Game de Pokémon\"\n      },\n      \"imageUrls\": [\n        \"https://yala.s3.amazonaws.com/listings/101/0.jpg\"\n      ],\n      \"auction\": {\n        \"id\": 501,\n        \"currentPrice\": 9849.282764919271,\n        \"endsAt\": \"2026-06-15T20:00:00\",\n        \"status\": \"ACTIVE\"\n      }\n    },\n    {\n      \"id\": 101,\n      \"title\": \"Charizard PSA 9 — 1st Edition\",\n      \"description\": \"Carta en excelente estado…\",\n      \"mode\": \"AUCTION\",\n      \"fixedPrice\": 399.8793186110272,\n      \"condition\": \"PSA 9 — Mint\",\n      \"status\": \"ACTIVE\",\n      \"createdAt\": \"2026-05-19T14:32:00\",\n      \"seller\": {\n        \"id\": 42,\n        \"name\": \"Ana Torres\",\n        \"email\": \"ana@yala.pe\",\n        \"avatarUrl\": \"https://yala-collectibles.s3.amazonaws.com/avatars/42.jpg\",\n        \"reputation\": 1822.5797921830022,\n        \"isVerifiedSeller\": true,\n        \"role\": \"SELLER\"\n      },\n      \"category\": {\n        \"id\": 1,\n        \"name\": \"Pokémon TCG\",\n        \"description\": \"Cartas oficiales del Trading Card Game de Pokémon\"\n      },\n      \"imageUrls\": [\n        \"https://yala.s3.amazonaws.com/listings/101/0.jpg\"\n      ],\n      \"auction\": {\n        \"id\": 501,\n        \"currentPrice\": 5432.1552145194855,\n        \"endsAt\": \"2026-06-15T20:00:00\",\n        \"status\": \"ACTIVE\"\n      }\n    }\n  ],\n  \"number\": 6692,\n  \"sort\": {\n    \"empty\": false,\n    \"sorted\": true,\n    \"unsorted\": true\n  },\n  \"numberOfElements\": 5752,\n  \"pageable\": {\n    \"offset\": 3233,\n    \"sort\": {\n      \"empty\": false,\n      \"sorted\": true,\n      \"unsorted\": true\n    },\n    \"paged\": true,\n    \"pageNumber\": 1698,\n    \"pageSize\": 947,\n    \"unpaged\": false\n  },\n  \"empty\": true\n}"
+                    }
+                  ]
+                },
+                {
+                  "name": "Crea un listing (solo SELLER verificado o ADMIN)",
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "*/*"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"categoryId\": 1,\n  \"condition\": \"PSA 9 — Mint\",\n  \"mode\": \"AUCTION\",\n  \"title\": \"Charizard PSA 9 — 1st Edition\",\n  \"description\": \"Carta en excelente estado, certificada por PSA con grado 9. Sin marcas ni dobleces.\",\n  \"fixedPrice\": 732.467731956259,\n  \"tags\": [\n    \"holo\",\n    \"1st-edition\",\n    \"mint\"\n  ]\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/v1/listings",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "listings"
+                      ]
+                    }
+                  },
+                  "response": [
+                    {
+                      "name": "OK",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "*/*"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: bearer",
+                            "key": "Authorization",
+                            "value": "Bearer <token>"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"categoryId\": 1,\n  \"condition\": \"PSA 9 — Mint\",\n  \"mode\": \"AUCTION\",\n  \"title\": \"Charizard PSA 9 — 1st Edition\",\n  \"description\": \"Carta en excelente estado, certificada por PSA con grado 9. Sin marcas ni dobleces.\",\n  \"fixedPrice\": 732.467731956259,\n  \"tags\": [\n    \"holo\",\n    \"1st-edition\",\n    \"mint\"\n  ]\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/api/v1/listings",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "v1",
+                            "listings"
+                          ]
+                        }
+                      },
+                      "status": "OK",
+                      "code": 200,
+                      "_postman_previewlanguage": "text",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "*/*"
+                        }
+                      ],
+                      "cookie": [],
+                      "body": "{\n  \"id\": 101,\n  \"title\": \"Charizard PSA 9 — 1st Edition\",\n  \"description\": \"Carta en excelente estado…\",\n  \"mode\": \"AUCTION\",\n  \"fixedPrice\": 2530.720732776013,\n  \"condition\": \"PSA 9 — Mint\",\n  \"status\": \"ACTIVE\",\n  \"createdAt\": \"2026-05-19T14:32:00\",\n  \"seller\": {\n    \"id\": 42,\n    \"name\": \"Ana Torres\",\n    \"email\": \"ana@yala.pe\",\n    \"avatarUrl\": \"https://yala-collectibles.s3.amazonaws.com/avatars/42.jpg\",\n    \"reputation\": 8879.546230530663,\n    \"isVerifiedSeller\": true,\n    \"role\": \"SELLER\"\n  },\n  \"category\": {\n    \"id\": 1,\n    \"name\": \"Pokémon TCG\",\n    \"description\": \"Cartas oficiales del Trading Card Game de Pokémon\"\n  },\n  \"imageUrls\": [\n    \"https://yala.s3.amazonaws.com/listings/101/0.jpg\"\n  ],\n  \"auction\": {\n    \"id\": 501,\n    \"currentPrice\": 5274.689683114601,\n    \"endsAt\": \"2026-06-15T20:00:00\",\n    \"status\": \"ACTIVE\"\n  }\n}"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "reviews",
+              "item": [
+                {
+                  "name": "user",
+                  "item": [
+                    {
+                      "name": "{recipientId}",
+                      "item": [
+                        {
+                          "name": "Lista las reseñas recibidas por un usuario",
+                          "request": {
+                            "method": "GET",
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "*/*"
+                              }
+                            ],
+                            "url": {
+                              "raw": "{{baseUrl}}/api/v1/reviews/user/:recipientId?page=3215&size=983&sort=string,string",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "api",
+                                "v1",
+                                "reviews",
+                                "user",
+                                ":recipientId"
+                              ],
+                              "query": [
+                                {
+                                  "key": "page",
+                                  "value": "3215"
+                                },
+                                {
+                                  "key": "size",
+                                  "value": "983"
+                                },
+                                {
+                                  "key": "sort",
+                                  "value": "string,string"
+                                }
+                              ],
+                              "variable": [
+                                {
+                                  "key": "recipientId",
+                                  "value": "3239"
+                                }
+                              ]
+                            },
+                            "description": "Devuelve las reseñas que un usuario ha recibido, paginadas y ordenadas por fecha descendente. Endpoint público."
+                          },
+                          "response": [
+                            {
+                              "name": "OK",
+                              "originalRequest": {
+                                "method": "GET",
+                                "header": [
+                                  {
+                                    "key": "Accept",
+                                    "value": "*/*"
+                                  },
+                                  {
+                                    "description": "Added as a part of security scheme: bearer",
+                                    "key": "Authorization",
+                                    "value": "Bearer <token>"
+                                  }
+                                ],
+                                "url": {
+                                  "raw": "{{baseUrl}}/api/v1/reviews/user/:recipientId?page=3215&size=983&sort=string,string",
+                                  "host": [
+                                    "{{baseUrl}}"
+                                  ],
+                                  "path": [
+                                    "api",
+                                    "v1",
+                                    "reviews",
+                                    "user",
+                                    ":recipientId"
+                                  ],
+                                  "query": [
+                                    {
+                                      "key": "page",
+                                      "value": "3215"
+                                    },
+                                    {
+                                      "key": "size",
+                                      "value": "983"
+                                    },
+                                    {
+                                      "key": "sort",
+                                      "value": "string,string"
+                                    }
+                                  ],
+                                  "variable": [
+                                    {
+                                      "key": "recipientId",
+                                      "value": "3239"
+                                    }
+                                  ]
+                                }
+                              },
+                              "status": "OK",
+                              "code": 200,
+                              "_postman_previewlanguage": "text",
+                              "header": [
+                                {
+                                  "key": "Content-Type",
+                                  "value": "*/*"
+                                }
+                              ],
+                              "cookie": [],
+                              "body": "{\n  \"totalElements\": 6074,\n  \"totalPages\": 6392,\n  \"first\": false,\n  \"last\": false,\n  \"size\": 8748,\n  \"content\": [\n    {\n      \"id\": 3001,\n      \"rating\": 5,\n      \"comment\": \"Excelente vendedor, envío rápido y producto tal como se describe.\",\n      \"createdAt\": \"2026-05-21T10:00:00\",\n      \"author\": {\n        \"id\": 42,\n        \"name\": \"Ana Torres\",\n        \"email\": \"ana@yala.pe\",\n        \"avatarUrl\": \"https://yala-collectibles.s3.amazonaws.com/avatars/42.jpg\",\n        \"reputation\": 3779.6153153851587,\n        \"isVerifiedSeller\": true,\n        \"role\": \"SELLER\"\n      }\n    },\n    {\n      \"id\": 3001,\n      \"rating\": 5,\n      \"comment\": \"Excelente vendedor, envío rápido y producto tal como se describe.\",\n      \"createdAt\": \"2026-05-21T10:00:00\",\n      \"author\": {\n        \"id\": 42,\n        \"name\": \"Ana Torres\",\n        \"email\": \"ana@yala.pe\",\n        \"avatarUrl\": \"https://yala-collectibles.s3.amazonaws.com/avatars/42.jpg\",\n        \"reputation\": 298.77681776503294,\n        \"isVerifiedSeller\": true,\n        \"role\": \"SELLER\"\n      }\n    }\n  ],\n  \"number\": 766,\n  \"sort\": {\n    \"empty\": false,\n    \"sorted\": false,\n    \"unsorted\": true\n  },\n  \"numberOfElements\": 7458,\n  \"pageable\": {\n    \"offset\": 9794,\n    \"sort\": {\n      \"empty\": true,\n      \"sorted\": false,\n      \"unsorted\": false\n    },\n    \"paged\": false,\n    \"pageNumber\": 96,\n    \"pageSize\": 8976,\n    \"unpaged\": false\n  },\n  \"empty\": true\n}"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "Crea una reseña",
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "*/*"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"orderId\": 7001,\n  \"rating\": 5,\n  \"comment\": \"Excelente vendedor, envío rápido y producto tal como se describe.\"\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/v1/reviews",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "reviews"
+                      ]
+                    },
+                    "description": "Crea una review (1-5 estrellas) sobre una orden CONFIRMED. La reseña actualiza automáticamente la reputación del usuario destinatario."
+                  },
+                  "response": [
+                    {
+                      "name": "OK",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "*/*"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: bearer",
+                            "key": "Authorization",
+                            "value": "Bearer <token>"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"orderId\": 7001,\n  \"rating\": 5,\n  \"comment\": \"Excelente vendedor, envío rápido y producto tal como se describe.\"\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/api/v1/reviews",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "v1",
+                            "reviews"
+                          ]
+                        }
+                      },
+                      "status": "OK",
+                      "code": 200,
+                      "_postman_previewlanguage": "text",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "*/*"
+                        }
+                      ],
+                      "cookie": [],
+                      "body": "{\n  \"id\": 3001,\n  \"rating\": 5,\n  \"comment\": \"Excelente vendedor, envío rápido y producto tal como se describe.\",\n  \"createdAt\": \"2026-05-21T10:00:00\",\n  \"author\": {\n    \"id\": 42,\n    \"name\": \"Ana Torres\",\n    \"email\": \"ana@yala.pe\",\n    \"avatarUrl\": \"https://yala-collectibles.s3.amazonaws.com/avatars/42.jpg\",\n    \"reputation\": 4483.692431723279,\n    \"isVerifiedSeller\": true,\n    \"role\": \"SELLER\"\n  }\n}"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "payments",
+              "item": [
+                {
+                  "name": "webhook",
+                  "item": [
+                    {
+                      "name": "Webhook público de MercadoPago (reconcilia el estado del Payment)",
+                      "request": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "x-signature",
+                            "value": "string"
+                          },
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "string",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/api/v1/payments/webhook",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "v1",
+                            "payments",
+                            "webhook"
+                          ]
+                        }
+                      },
+                      "response": [
+                        {
+                          "name": "OK",
+                          "originalRequest": {
+                            "method": "POST",
+                            "header": [
+                              {
+                                "key": "x-signature",
+                                "value": "string"
+                              },
+                              {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                              },
+                              {
+                                "description": "Added as a part of security scheme: bearer",
+                                "key": "Authorization",
+                                "value": "Bearer <token>"
+                              }
+                            ],
+                            "body": {
+                              "mode": "raw",
+                              "raw": "string",
+                              "options": {
+                                "raw": {
+                                  "headerFamily": "json",
+                                  "language": "json"
+                                }
+                              }
+                            },
+                            "url": {
+                              "raw": "{{baseUrl}}/api/v1/payments/webhook",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "api",
+                                "v1",
+                                "payments",
+                                "webhook"
+                              ]
+                            }
+                          },
+                          "status": "OK",
+                          "code": 200,
+                          "_postman_previewlanguage": "text",
+                          "header": [],
+                          "cookie": [],
+                          "body": ""
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "preference",
+                  "item": [
+                    {
+                      "name": "Crea una Preference MercadoPago (stub) para una orden PENDING del buyer autenticado",
+                      "request": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "*/*"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"orderId\": 7001\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/api/v1/payments/preference",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "v1",
+                            "payments",
+                            "preference"
+                          ]
+                        }
+                      },
+                      "response": [
+                        {
+                          "name": "OK",
+                          "originalRequest": {
+                            "method": "POST",
+                            "header": [
+                              {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                              },
+                              {
+                                "key": "Accept",
+                                "value": "*/*"
+                              },
+                              {
+                                "description": "Added as a part of security scheme: bearer",
+                                "key": "Authorization",
+                                "value": "Bearer <token>"
+                              }
+                            ],
+                            "body": {
+                              "mode": "raw",
+                              "raw": "{\n  \"orderId\": 7001\n}",
+                              "options": {
+                                "raw": {
+                                  "headerFamily": "json",
+                                  "language": "json"
+                                }
+                              }
+                            },
+                            "url": {
+                              "raw": "{{baseUrl}}/api/v1/payments/preference",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "api",
+                                "v1",
+                                "payments",
+                                "preference"
+                              ]
+                            }
+                          },
+                          "status": "OK",
+                          "code": 200,
+                          "_postman_previewlanguage": "text",
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "*/*"
+                            }
+                          ],
+                          "cookie": [],
+                          "body": "{\n  \"initPoint\": \"https://www.mercadopago.com.pe/checkout/v1/redirect?pref_id=…\",\n  \"preferenceId\": \"1234567890-abc-def\"\n}"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "categories",
+              "item": [
+                {
+                  "name": "Lista todas las categorías",
+                  "request": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "*/*"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{baseUrl}}/api/v1/categories",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "categories"
+                      ]
+                    }
+                  },
+                  "response": [
+                    {
+                      "name": "OK",
+                      "originalRequest": {
+                        "method": "GET",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "*/*"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: bearer",
+                            "key": "Authorization",
+                            "value": "Bearer <token>"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{baseUrl}}/api/v1/categories",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "v1",
+                            "categories"
+                          ]
+                        }
+                      },
+                      "status": "OK",
+                      "code": 200,
+                      "_postman_previewlanguage": "text",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "*/*"
+                        }
+                      ],
+                      "cookie": [],
+                      "body": "[\n  {\n    \"id\": 1,\n    \"name\": \"Pokémon TCG\",\n    \"description\": \"Cartas oficiales del Trading Card Game de Pokémon\"\n  },\n  {\n    \"id\": 1,\n    \"name\": \"Pokémon TCG\",\n    \"description\": \"Cartas oficiales del Trading Card Game de Pokémon\"\n  }\n]"
+                    }
+                  ]
+                },
+                {
+                  "name": "Crea una nueva categoría (solo ADMIN)",
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "*/*"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"name\": \"Pokémon TCG\",\n  \"description\": \"Cartas oficiales del Trading Card Game de Pokémon\"\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/v1/categories",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "categories"
+                      ]
+                    }
+                  },
+                  "response": [
+                    {
+                      "name": "OK",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "*/*"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: bearer",
+                            "key": "Authorization",
+                            "value": "Bearer <token>"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"name\": \"Pokémon TCG\",\n  \"description\": \"Cartas oficiales del Trading Card Game de Pokémon\"\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/api/v1/categories",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "v1",
+                            "categories"
+                          ]
+                        }
+                      },
+                      "status": "OK",
+                      "code": 200,
+                      "_postman_previewlanguage": "text",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "*/*"
+                        }
+                      ],
+                      "cookie": [],
+                      "body": "{\n  \"id\": 1,\n  \"name\": \"Pokémon TCG\",\n  \"description\": \"Cartas oficiales del Trading Card Game de Pokémon\"\n}"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "bids",
+              "item": [
+                {
+                  "name": "auction",
+                  "item": [
+                    {
+                      "name": "{auctionId}",
+                      "item": [
+                        {
+                          "name": "highest",
+                          "item": [
+                            {
+                              "name": "Puja máxima vigente de una subasta",
+                              "request": {
+                                "method": "GET",
+                                "header": [
+                                  {
+                                    "key": "Accept",
+                                    "value": "*/*"
+                                  }
+                                ],
+                                "url": {
+                                  "raw": "{{baseUrl}}/api/v1/bids/auction/:auctionId/highest",
+                                  "host": [
+                                    "{{baseUrl}}"
+                                  ],
+                                  "path": [
+                                    "api",
+                                    "v1",
+                                    "bids",
+                                    "auction",
+                                    ":auctionId",
+                                    "highest"
+                                  ],
+                                  "variable": [
+                                    {
+                                      "key": "auctionId",
+                                      "value": "3239"
+                                    }
+                                  ]
+                                }
+                              },
+                              "response": [
+                                {
+                                  "name": "OK",
+                                  "originalRequest": {
+                                    "method": "GET",
+                                    "header": [
+                                      {
+                                        "key": "Accept",
+                                        "value": "*/*"
+                                      },
+                                      {
+                                        "description": "Added as a part of security scheme: bearer",
+                                        "key": "Authorization",
+                                        "value": "Bearer <token>"
+                                      }
+                                    ],
+                                    "url": {
+                                      "raw": "{{baseUrl}}/api/v1/bids/auction/:auctionId/highest",
+                                      "host": [
+                                        "{{baseUrl}}"
+                                      ],
+                                      "path": [
+                                        "api",
+                                        "v1",
+                                        "bids",
+                                        "auction",
+                                        ":auctionId",
+                                        "highest"
+                                      ],
+                                      "variable": [
+                                        {
+                                          "key": "auctionId",
+                                          "value": "3239"
+                                        }
+                                      ]
+                                    }
+                                  },
+                                  "status": "OK",
+                                  "code": 200,
+                                  "_postman_previewlanguage": "text",
+                                  "header": [
+                                    {
+                                      "key": "Content-Type",
+                                      "value": "*/*"
+                                    }
+                                  ],
+                                  "cookie": [],
+                                  "body": "{\n  \"id\": 9001,\n  \"amount\": 9872.96993458476,\n  \"placedAt\": \"2026-05-19T14:32:00\",\n  \"bidder\": {\n    \"id\": 42,\n    \"name\": \"Ana Torres\",\n    \"email\": \"ana@yala.pe\",\n    \"avatarUrl\": \"https://yala-collectibles.s3.amazonaws.com/avatars/42.jpg\",\n    \"reputation\": 486.13752935659613,\n    \"isVerifiedSeller\": true,\n    \"role\": \"SELLER\"\n  }\n}"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        {
+                          "name": "Historial paginado de pujas de una subasta",
+                          "request": {
+                            "method": "GET",
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "*/*"
+                              }
+                            ],
+                            "url": {
+                              "raw": "{{baseUrl}}/api/v1/bids/auction/:auctionId?page=3215&size=983&sort=string,string",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "api",
+                                "v1",
+                                "bids",
+                                "auction",
+                                ":auctionId"
+                              ],
+                              "query": [
+                                {
+                                  "key": "page",
+                                  "value": "3215"
+                                },
+                                {
+                                  "key": "size",
+                                  "value": "983"
+                                },
+                                {
+                                  "key": "sort",
+                                  "value": "string,string"
+                                }
+                              ],
+                              "variable": [
+                                {
+                                  "key": "auctionId",
+                                  "value": "3239"
+                                }
+                              ]
+                            }
+                          },
+                          "response": [
+                            {
+                              "name": "OK",
+                              "originalRequest": {
+                                "method": "GET",
+                                "header": [
+                                  {
+                                    "key": "Accept",
+                                    "value": "*/*"
+                                  },
+                                  {
+                                    "description": "Added as a part of security scheme: bearer",
+                                    "key": "Authorization",
+                                    "value": "Bearer <token>"
+                                  }
+                                ],
+                                "url": {
+                                  "raw": "{{baseUrl}}/api/v1/bids/auction/:auctionId?page=3215&size=983&sort=string,string",
+                                  "host": [
+                                    "{{baseUrl}}"
+                                  ],
+                                  "path": [
+                                    "api",
+                                    "v1",
+                                    "bids",
+                                    "auction",
+                                    ":auctionId"
+                                  ],
+                                  "query": [
+                                    {
+                                      "key": "page",
+                                      "value": "3215"
+                                    },
+                                    {
+                                      "key": "size",
+                                      "value": "983"
+                                    },
+                                    {
+                                      "key": "sort",
+                                      "value": "string,string"
+                                    }
+                                  ],
+                                  "variable": [
+                                    {
+                                      "key": "auctionId",
+                                      "value": "3239"
+                                    }
+                                  ]
+                                }
+                              },
+                              "status": "OK",
+                              "code": 200,
+                              "_postman_previewlanguage": "text",
+                              "header": [
+                                {
+                                  "key": "Content-Type",
+                                  "value": "*/*"
+                                }
+                              ],
+                              "cookie": [],
+                              "body": "{\n  \"totalElements\": 3045,\n  \"totalPages\": 7969,\n  \"first\": false,\n  \"last\": true,\n  \"size\": 4877,\n  \"content\": [\n    {\n      \"id\": 9001,\n      \"amount\": 6783.026902709156,\n      \"placedAt\": \"2026-05-19T14:32:00\",\n      \"bidder\": {\n        \"id\": 42,\n        \"name\": \"Ana Torres\",\n        \"email\": \"ana@yala.pe\",\n        \"avatarUrl\": \"https://yala-collectibles.s3.amazonaws.com/avatars/42.jpg\",\n        \"reputation\": 6624.564071336574,\n        \"isVerifiedSeller\": true,\n        \"role\": \"SELLER\"\n      }\n    },\n    {\n      \"id\": 9001,\n      \"amount\": 1.994792435465742,\n      \"placedAt\": \"2026-05-19T14:32:00\",\n      \"bidder\": {\n        \"id\": 42,\n        \"name\": \"Ana Torres\",\n        \"email\": \"ana@yala.pe\",\n        \"avatarUrl\": \"https://yala-collectibles.s3.amazonaws.com/avatars/42.jpg\",\n        \"reputation\": 329.0581364617795,\n        \"isVerifiedSeller\": true,\n        \"role\": \"SELLER\"\n      }\n    }\n  ],\n  \"number\": 5264,\n  \"sort\": {\n    \"empty\": true,\n    \"sorted\": true,\n    \"unsorted\": false\n  },\n  \"numberOfElements\": 630,\n  \"pageable\": {\n    \"offset\": 3835,\n    \"sort\": {\n      \"empty\": false,\n      \"sorted\": false,\n      \"unsorted\": false\n    },\n    \"paged\": false,\n    \"pageNumber\": 1615,\n    \"pageSize\": 8591,\n    \"unpaged\": true\n  },\n  \"empty\": true\n}"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "Realiza una puja en una subasta activa",
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "*/*"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"amount\": 6551.513618727357,\n  \"auctionId\": 501\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/v1/bids",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "bids"
+                      ]
+                    }
+                  },
+                  "response": [
+                    {
+                      "name": "OK",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "*/*"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: bearer",
+                            "key": "Authorization",
+                            "value": "Bearer <token>"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"amount\": 6551.513618727357,\n  \"auctionId\": 501\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/api/v1/bids",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "v1",
+                            "bids"
+                          ]
+                        }
+                      },
+                      "status": "OK",
+                      "code": 200,
+                      "_postman_previewlanguage": "text",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "*/*"
+                        }
+                      ],
+                      "cookie": [],
+                      "body": "{\n  \"id\": 9001,\n  \"amount\": 9872.96993458476,\n  \"placedAt\": \"2026-05-19T14:32:00\",\n  \"bidder\": {\n    \"id\": 42,\n    \"name\": \"Ana Torres\",\n    \"email\": \"ana@yala.pe\",\n    \"avatarUrl\": \"https://yala-collectibles.s3.amazonaws.com/avatars/42.jpg\",\n    \"reputation\": 486.13752935659613,\n    \"isVerifiedSeller\": true,\n    \"role\": \"SELLER\"\n  }\n}"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "auth",
+              "item": [
+                {
+                  "name": "register",
+                  "item": [
+                    {
+                      "name": "Registra un nuevo usuario y devuelve los tokens JWT",
+                      "request": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "*/*"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"email\": \"ana@yala.pe\",\n  \"name\": \"Ana Torres\",\n  \"password\": \"supersegura\",\n  \"role\": \"USER\"\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/api/v1/auth/register",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "v1",
+                            "auth",
+                            "register"
+                          ]
+                        }
+                      },
+                      "response": [
+                        {
+                          "name": "OK",
+                          "originalRequest": {
+                            "method": "POST",
+                            "header": [
+                              {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                              },
+                              {
+                                "key": "Accept",
+                                "value": "*/*"
+                              },
+                              {
+                                "description": "Added as a part of security scheme: bearer",
+                                "key": "Authorization",
+                                "value": "Bearer <token>"
+                              }
+                            ],
+                            "body": {
+                              "mode": "raw",
+                              "raw": "{\n  \"email\": \"ana@yala.pe\",\n  \"name\": \"Ana Torres\",\n  \"password\": \"supersegura\",\n  \"role\": \"USER\"\n}",
+                              "options": {
+                                "raw": {
+                                  "headerFamily": "json",
+                                  "language": "json"
+                                }
+                              }
+                            },
+                            "url": {
+                              "raw": "{{baseUrl}}/api/v1/auth/register",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "api",
+                                "v1",
+                                "auth",
+                                "register"
+                              ]
+                            }
+                          },
+                          "status": "OK",
+                          "code": 200,
+                          "_postman_previewlanguage": "text",
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "*/*"
+                            }
+                          ],
+                          "cookie": [],
+                          "body": "{\n  \"accessToken\": \"eyJhbGciOiJIUzI1NiJ9...\",\n  \"refreshToken\": \"eyJhbGciOiJIUzI1NiJ9...\",\n  \"userId\": 42,\n  \"email\": \"ana@yala.pe\",\n  \"name\": \"Ana Torres\",\n  \"role\": \"USER\"\n}"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "refresh-token",
+                  "item": [
+                    {
+                      "name": "Renueva el access token a partir de un refresh token válido",
+                      "request": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "*/*"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"refreshToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/api/v1/auth/refresh-token",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "v1",
+                            "auth",
+                            "refresh-token"
+                          ]
+                        }
+                      },
+                      "response": [
+                        {
+                          "name": "OK",
+                          "originalRequest": {
+                            "method": "POST",
+                            "header": [
+                              {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                              },
+                              {
+                                "key": "Accept",
+                                "value": "*/*"
+                              },
+                              {
+                                "description": "Added as a part of security scheme: bearer",
+                                "key": "Authorization",
+                                "value": "Bearer <token>"
+                              }
+                            ],
+                            "body": {
+                              "mode": "raw",
+                              "raw": "{\n  \"refreshToken\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\"\n}",
+                              "options": {
+                                "raw": {
+                                  "headerFamily": "json",
+                                  "language": "json"
+                                }
+                              }
+                            },
+                            "url": {
+                              "raw": "{{baseUrl}}/api/v1/auth/refresh-token",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "api",
+                                "v1",
+                                "auth",
+                                "refresh-token"
+                              ]
+                            }
+                          },
+                          "status": "OK",
+                          "code": 200,
+                          "_postman_previewlanguage": "text",
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "*/*"
+                            }
+                          ],
+                          "cookie": [],
+                          "body": "{\n  \"accessToken\": \"eyJhbGciOiJIUzI1NiJ9...\",\n  \"refreshToken\": \"eyJhbGciOiJIUzI1NiJ9...\",\n  \"userId\": 42,\n  \"email\": \"ana@yala.pe\",\n  \"name\": \"Ana Torres\",\n  \"role\": \"USER\"\n}"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "login",
+                  "item": [
+                    {
+                      "name": "Autentica un usuario y devuelve los tokens JWT",
+                      "request": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "*/*"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"email\": \"collector@yala.pe\",\n  \"password\": \"secret1234\"\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/api/v1/auth/login",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "v1",
+                            "auth",
+                            "login"
+                          ]
+                        }
+                      },
+                      "response": [
+                        {
+                          "name": "OK",
+                          "originalRequest": {
+                            "method": "POST",
+                            "header": [
+                              {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                              },
+                              {
+                                "key": "Accept",
+                                "value": "*/*"
+                              },
+                              {
+                                "description": "Added as a part of security scheme: bearer",
+                                "key": "Authorization",
+                                "value": "Bearer <token>"
+                              }
+                            ],
+                            "body": {
+                              "mode": "raw",
+                              "raw": "{\n  \"email\": \"collector@yala.pe\",\n  \"password\": \"secret1234\"\n}",
+                              "options": {
+                                "raw": {
+                                  "headerFamily": "json",
+                                  "language": "json"
+                                }
+                              }
+                            },
+                            "url": {
+                              "raw": "{{baseUrl}}/api/v1/auth/login",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "api",
+                                "v1",
+                                "auth",
+                                "login"
+                              ]
+                            }
+                          },
+                          "status": "OK",
+                          "code": 200,
+                          "_postman_previewlanguage": "text",
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "*/*"
+                            }
+                          ],
+                          "cookie": [],
+                          "body": "{\n  \"accessToken\": \"eyJhbGciOiJIUzI1NiJ9...\",\n  \"refreshToken\": \"eyJhbGciOiJIUzI1NiJ9...\",\n  \"userId\": 42,\n  \"email\": \"ana@yala.pe\",\n  \"name\": \"Ana Torres\",\n  \"role\": \"USER\"\n}"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "auctions",
+              "item": [
+                {
+                  "name": "{id}",
+                  "item": [
+                    {
+                      "name": "Detalle de una subasta",
+                      "request": {
+                        "method": "GET",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "*/*"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{baseUrl}}/api/v1/auctions/:id",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "v1",
+                            "auctions",
+                            ":id"
+                          ],
+                          "variable": [
+                            {
+                              "key": "id",
+                              "value": "3239"
+                            }
+                          ]
+                        },
+                        "description": "Devuelve el detalle completo de una subasta, incluyendo la puja más alta y el ganador si ya finalizó. Endpoint público."
+                      },
+                      "response": [
+                        {
+                          "name": "OK",
+                          "originalRequest": {
+                            "method": "GET",
+                            "header": [
+                              {
+                                "key": "Accept",
+                                "value": "*/*"
+                              },
+                              {
+                                "description": "Added as a part of security scheme: bearer",
+                                "key": "Authorization",
+                                "value": "Bearer <token>"
+                              }
+                            ],
+                            "url": {
+                              "raw": "{{baseUrl}}/api/v1/auctions/:id",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "api",
+                                "v1",
+                                "auctions",
+                                ":id"
+                              ],
+                              "variable": [
+                                {
+                                  "key": "id",
+                                  "value": "3239"
+                                }
+                              ]
+                            }
+                          },
+                          "status": "OK",
+                          "code": 200,
+                          "_postman_previewlanguage": "text",
+                          "header": [
+                            {
+                              "key": "Content-Type",
+                              "value": "*/*"
+                            }
+                          ],
+                          "cookie": [],
+                          "body": "{\n  \"id\": 501,\n  \"startingPrice\": 8330.11832289627,\n  \"currentPrice\": 191.93960999511762,\n  \"startedAt\": \"2026-05-01T10:00:00\",\n  \"endsAt\": \"2026-06-15T20:00:00\",\n  \"status\": \"ACTIVE\",\n  \"winner\": {\n    \"id\": 42,\n    \"name\": \"Ana Torres\",\n    \"email\": \"ana@yala.pe\",\n    \"avatarUrl\": \"https://yala-collectibles.s3.amazonaws.com/avatars/42.jpg\",\n    \"reputation\": 4267.144704874369,\n    \"isVerifiedSeller\": true,\n    \"role\": \"SELLER\"\n  },\n  \"totalBids\": 12\n}"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "Lista subastas activas paginadas",
+                  "request": {
+                    "method": "GET",
+                    "header": [
+                      {
+                        "key": "Accept",
+                        "value": "*/*"
+                      }
+                    ],
+                    "url": {
+                      "raw": "{{baseUrl}}/api/v1/auctions?page=3215&size=983&sort=string,string",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "auctions"
+                      ],
+                      "query": [
+                        {
+                          "key": "page",
+                          "value": "3215"
+                        },
+                        {
+                          "key": "size",
+                          "value": "983"
+                        },
+                        {
+                          "key": "sort",
+                          "value": "string,string"
+                        }
+                      ]
+                    },
+                    "description": "Devuelve un resumen de las subastas con status ACTIVE ordenadas por fecha de cierre. Endpoint público."
+                  },
+                  "response": [
+                    {
+                      "name": "OK",
+                      "originalRequest": {
+                        "method": "GET",
+                        "header": [
+                          {
+                            "key": "Accept",
+                            "value": "*/*"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: bearer",
+                            "key": "Authorization",
+                            "value": "Bearer <token>"
+                          }
+                        ],
+                        "url": {
+                          "raw": "{{baseUrl}}/api/v1/auctions?page=3215&size=983&sort=string,string",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "v1",
+                            "auctions"
+                          ],
+                          "query": [
+                            {
+                              "key": "page",
+                              "value": "3215"
+                            },
+                            {
+                              "key": "size",
+                              "value": "983"
+                            },
+                            {
+                              "key": "sort",
+                              "value": "string,string"
+                            }
+                          ]
+                        }
+                      },
+                      "status": "OK",
+                      "code": 200,
+                      "_postman_previewlanguage": "text",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "*/*"
+                        }
+                      ],
+                      "cookie": [],
+                      "body": "{\n  \"totalElements\": 9074,\n  \"totalPages\": 3405,\n  \"first\": false,\n  \"last\": true,\n  \"size\": 9941,\n  \"content\": [\n    {\n      \"id\": 501,\n      \"currentPrice\": 3469.1581684989515,\n      \"endsAt\": \"2026-06-15T20:00:00\",\n      \"status\": \"ACTIVE\"\n    },\n    {\n      \"id\": 501,\n      \"currentPrice\": 3104.5783248998127,\n      \"endsAt\": \"2026-06-15T20:00:00\",\n      \"status\": \"ACTIVE\"\n    }\n  ],\n  \"number\": 7067,\n  \"sort\": {\n    \"empty\": false,\n    \"sorted\": true,\n    \"unsorted\": true\n  },\n  \"numberOfElements\": 5866,\n  \"pageable\": {\n    \"offset\": 2410,\n    \"sort\": {\n      \"empty\": false,\n      \"sorted\": true,\n      \"unsorted\": false\n    },\n    \"paged\": false,\n    \"pageNumber\": 2705,\n    \"pageSize\": 7064,\n    \"unpaged\": true\n  },\n  \"empty\": false\n}"
+                    }
+                  ]
+                },
+                {
+                  "name": "Crea una nueva subasta",
+                  "request": {
+                    "method": "POST",
+                    "header": [
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Accept",
+                        "value": "*/*"
+                      }
+                    ],
+                    "body": {
+                      "mode": "raw",
+                      "raw": "{\n  \"endsAt\": \"2026-06-15T20:00:00\",\n  \"listingId\": 101,\n  \"startingPrice\": 1442.6124344615143\n}",
+                      "options": {
+                        "raw": {
+                          "headerFamily": "json",
+                          "language": "json"
+                        }
+                      }
+                    },
+                    "url": {
+                      "raw": "{{baseUrl}}/api/v1/auctions",
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "auctions"
+                      ]
+                    },
+                    "description": "Crea una subasta sobre un listing existente. Requiere autenticación y que el usuario sea SELLER o ADMIN dueño del listing."
+                  },
+                  "response": [
+                    {
+                      "name": "OK",
+                      "originalRequest": {
+                        "method": "POST",
+                        "header": [
+                          {
+                            "key": "Content-Type",
+                            "value": "application/json"
+                          },
+                          {
+                            "key": "Accept",
+                            "value": "*/*"
+                          },
+                          {
+                            "description": "Added as a part of security scheme: bearer",
+                            "key": "Authorization",
+                            "value": "Bearer <token>"
+                          }
+                        ],
+                        "body": {
+                          "mode": "raw",
+                          "raw": "{\n  \"endsAt\": \"2026-06-15T20:00:00\",\n  \"listingId\": 101,\n  \"startingPrice\": 1442.6124344615143\n}",
+                          "options": {
+                            "raw": {
+                              "headerFamily": "json",
+                              "language": "json"
+                            }
+                          }
+                        },
+                        "url": {
+                          "raw": "{{baseUrl}}/api/v1/auctions",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "v1",
+                            "auctions"
+                          ]
+                        }
+                      },
+                      "status": "OK",
+                      "code": 200,
+                      "_postman_previewlanguage": "text",
+                      "header": [
+                        {
+                          "key": "Content-Type",
+                          "value": "*/*"
+                        }
+                      ],
+                      "cookie": [],
+                      "body": "{\n  \"id\": 501,\n  \"startingPrice\": 8330.11832289627,\n  \"currentPrice\": 191.93960999511762,\n  \"startedAt\": \"2026-05-01T10:00:00\",\n  \"endsAt\": \"2026-06-15T20:00:00\",\n  \"status\": \"ACTIVE\",\n  \"winner\": {\n    \"id\": 42,\n    \"name\": \"Ana Torres\",\n    \"email\": \"ana@yala.pe\",\n    \"avatarUrl\": \"https://yala-collectibles.s3.amazonaws.com/avatars/42.jpg\",\n    \"reputation\": 4267.144704874369,\n    \"isVerifiedSeller\": true,\n    \"role\": \"SELLER\"\n  },\n  \"totalBids\": 12\n}"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "images",
+              "item": [
+                {
+                  "name": "{imageId}",
+                  "item": [
+                    {
+                      "name": "Elimina una imagen",
+                      "request": {
+                        "method": "DELETE",
+                        "header": [],
+                        "url": {
+                          "raw": "{{baseUrl}}/api/v1/images/:imageId",
+                          "host": [
+                            "{{baseUrl}}"
+                          ],
+                          "path": [
+                            "api",
+                            "v1",
+                            "images",
+                            ":imageId"
+                          ],
+                          "variable": [
+                            {
+                              "key": "imageId",
+                              "value": "3239"
+                            }
+                          ]
+                        },
+                        "description": "Elimina la imagen del listing y del bucket S3. Sólo el dueño del listing puede eliminar."
+                      },
+                      "response": [
+                        {
+                          "name": "OK",
+                          "originalRequest": {
+                            "method": "DELETE",
+                            "header": [
+                              {
+                                "description": "Added as a part of security scheme: bearer",
+                                "key": "Authorization",
+                                "value": "Bearer <token>"
+                              }
+                            ],
+                            "url": {
+                              "raw": "{{baseUrl}}/api/v1/images/:imageId",
+                              "host": [
+                                "{{baseUrl}}"
+                              ],
+                              "path": [
+                                "api",
+                                "v1",
+                                "images",
+                                ":imageId"
+                              ],
+                              "variable": [
+                                {
+                                  "key": "imageId",
+                                  "value": "3239"
+                                }
+                              ]
+                            }
+                          },
+                          "status": "OK",
+                          "code": 200,
+                          "_postman_previewlanguage": "text",
+                          "header": [],
+                          "cookie": [],
+                          "body": ""
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{bearerToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8081"
+    }
+  ]
+}
