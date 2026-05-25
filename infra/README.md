@@ -32,11 +32,32 @@ Al final imprime el ARN del rol que GitHub Actions debe asumir.
 
 ## Configurar GitHub
 
+### Secret obligatorio para el deploy
+
 1. Repo Settings → Secrets and variables → Actions → New repository secret:
    - **Name**: `AWS_DEPLOY_ROLE_ARN`
    - **Value**: el ARN que imprimió `setup-aws.sh`
 2. Mergea `develop` → `main` para disparar el primer deploy real (el workflow
    `.github/workflows/cd.yml` reemplaza la imagen bootstrap por la del backend).
+
+### Secret opcional — auto-update del homepage del repo
+
+El último step del workflow CD intenta actualizar el campo **Website** del repo
+(el link clickeable arriba del README) con la URL pública del último deploy. El
+`GITHUB_TOKEN` por default no puede modificar settings del repo, así que requiere
+un Personal Access Token (PAT) propio:
+
+1. https://github.com/settings/personal-access-tokens → **Generate new token**
+   (fine-grained).
+2. **Repository access**: Only select repositories → `katealva/backend-yala`.
+3. **Repository permissions**: Administration → **Read and write**.
+4. Generar y copiar el token.
+5. Repo Settings → Secrets and variables → Actions → New repository secret:
+   - **Name**: `REPO_HOMEPAGE_TOKEN`
+   - **Value**: el token recién creado.
+
+Si el secret no está configurado, el step se salta silenciosamente y el deploy
+sigue siendo exitoso — solo se pierde la auto-actualización del homepage.
 
 ## Verificar deploy
 
