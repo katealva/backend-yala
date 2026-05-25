@@ -7,7 +7,6 @@ on:
 permissions:
   id-token: write
   contents: read
-  administration: write
 
 jobs:
   deploy:
@@ -65,8 +64,12 @@ jobs:
 
       - name: Update repo homepage with deployed URL
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.REPO_HOMEPAGE_TOKEN }}
         run: |
+          if [ -z "$GH_TOKEN" ]; then
+            echo "::notice::REPO_HOMEPAGE_TOKEN secret no configurado; salto actualizacion del homepage"
+            exit 0
+          fi
           TASK=$(aws ecs list-tasks --cluster $ECS_CLUSTER --service-name $ECS_SERVICE \
             --region $AWS_REGION --desired-status RUNNING \
             --query 'taskArns[0]' --output text)
