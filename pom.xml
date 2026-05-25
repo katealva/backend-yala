@@ -187,6 +187,24 @@
                     </excludes>
                 </configuration>
             </plugin>
+            <!--
+              springdoc-openapi-maven-plugin: genera el archivo openapi.yaml estático.
+              No está bound a ninguna fase para no ralentizar mvn install.
+              Regeneración manual del archivo:
+                1) en una terminal:  ./mvnw spring-boot:run -Dspring-boot.run.profiles=openapi
+                2) en otra terminal: curl http://localhost:8081/v3/api-docs.yaml -o openapi.yaml
+                3) ctrl+c la primera terminal
+            -->
+            <plugin>
+                <groupId>org.springdoc</groupId>
+                <artifactId>springdoc-openapi-maven-plugin</artifactId>
+                <version>1.4</version>
+                <configuration>
+                    <apiDocsUrl>http://localhost:8081/v3/api-docs.yaml</apiDocsUrl>
+                    <outputFileName>openapi.yaml</outputFileName>
+                    <outputDir>${project.basedir}</outputDir>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
