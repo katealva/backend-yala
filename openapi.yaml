@@ -1,0 +1,1794 @@
+openapi: 3.1.0
+info:
+  title: Yala — Marketplace de Subastas
+  description: API REST para el marketplace de subastas de coleccionables Yala
+  version: 1.0.0
+servers:
+- url: http://localhost:8081
+  description: Generated server url
+security:
+- bearerAuth: []
+tags:
+- name: Images
+  description: "Subida y gestión de imágenes asociadas a un listing (almacenadas en\
+    \ AWS S3, máximo 5 por listing)"
+- name: Categories
+  description: Listado y creación de categorías
+- name: Notifications
+  description: Bandeja de notificaciones del usuario autenticado
+- name: Reviews
+  description: "Reseñas (rating + comentario) entre compradores y vendedores, asociadas\
+    \ a una orden CONFIRMED"
+- name: Payments
+  description: MercadoPago Preference (stub) y webhook de reconciliación
+- name: Bids
+  description: Pujas sobre subastas activas
+- name: Auth
+  description: "Registro, login y renovación de tokens JWT"
+- name: Tags
+  description: "Catálogo de etiquetas reutilizables (mint, holo, vintage…) que se\
+    \ asocian a los listings. Mutación restringida a ADMIN."
+- name: Users
+  description: Perfil de usuario y publicaciones
+- name: Listings
+  description: Gestión del catálogo de coleccionables
+- name: Auctions
+  description: "Gestión de subastas: crear, listar activas y consultar detalle con\
+    \ historial de pujas"
+- name: Orders
+  description: "Compra directa, confirmación y cancelación"
+paths:
+  /api/v1/users/me:
+    get:
+      tags:
+      - Users
+      summary: Devuelve el perfil del usuario autenticado
+      operationId: getCurrentUser
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ResponseUserDTO"
+    put:
+      tags:
+      - Users
+      summary: Actualiza el nombre y avatar del usuario autenticado
+      operationId: updateCurrentUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RequestUpdateUserDTO"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ResponseUserDTO"
+  /api/v1/tags/{id}:
+    get:
+      tags:
+      - Tags
+      summary: Detalle de un tag
+      description: Devuelve un tag por su id. Endpoint público.
+      operationId: findById
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ResponseTagDTO"
+    put:
+      tags:
+      - Tags
+      summary: Actualiza un tag existente
+      description: Requiere rol ADMIN. Modifica el nombre/descripción de un tag.
+      operationId: update
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RequestTagDTO"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ResponseTagDTO"
+    delete:
+      tags:
+      - Tags
+      summary: Elimina un tag
+      description: Requiere rol ADMIN. Falla si el tag está asociado a listings.
+      operationId: delete
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+  /api/v1/orders/{id}/confirm:
+    put:
+      tags:
+      - Orders
+      summary: Confirma la orden (solo el seller)
+      operationId: confirm
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ResponseOrderDTO"
+  /api/v1/orders/{id}/cancel:
+    put:
+      tags:
+      - Orders
+      summary: "Cancela la orden (buyer o seller, solo si PENDING)"
+      operationId: cancel
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ResponseOrderDTO"
+  /api/v1/notifications/{id}/read:
+    put:
+      tags:
+      - Notifications
+      summary: Marca una notificación como leída
+      operationId: markAsRead
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ResponseNotificationDTO"
+  /api/v1/notifications/read-all:
+    put:
+      tags:
+      - Notifications
+      summary: Marca todas las notificaciones del usuario como leídas
+      operationId: markAllAsRead
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: integer
+                  format: int32
+  /api/v1/listings/{id}:
+    get:
+      tags:
+      - Listings
+      summary: Obtiene un listing por id
+      operationId: findById_1
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ResponseListingDTO"
+    put:
+      tags:
+      - Listings
+      summary: Actualiza un listing existente (solo el dueño)
+      operationId: update_1
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RequestListingDTO"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ResponseListingDTO"
+    delete:
+      tags:
+      - Listings
+      summary: Cancela (soft-delete) un listing (solo el dueño)
+      operationId: cancel_1
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+  /api/v1/tags:
+    get:
+      tags:
+      - Tags
+      summary: Lista todos los tags
+      description: Devuelve el catálogo completo de tags disponibles. Endpoint público.
+      operationId: findAll
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ResponseTagDTO"
+    post:
+      tags:
+      - Tags
+      summary: Crea un nuevo tag
+      description: Requiere rol ADMIN. El nombre debe ser único en el catálogo.
+      operationId: create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RequestTagDTO"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ResponseTagDTO"
+  /api/v1/reviews:
+    post:
+      tags:
+      - Reviews
+      summary: Crea una reseña
+      description: Crea una review (1-5 estrellas) sobre una orden CONFIRMED. La reseña
+        actualiza automáticamente la reputación del usuario destinatario.
+      operationId: create_1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RequestReviewDTO"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ResponseReviewDTO"
+  /api/v1/payments/webhook:
+    post:
+      tags:
+      - Payments
+      summary: Webhook público de MercadoPago (reconcilia el estado del Payment)
+      operationId: webhook
+      parameters:
+      - name: x-signature
+        in: header
+        required: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: string
+        required: true
+      responses:
+        "200":
+          description: OK
+  /api/v1/payments/preference:
+    post:
+      tags:
+      - Payments
+      summary: Crea una Preference MercadoPago (stub) para una orden PENDING del buyer
+        autenticado
+      operationId: createPreference
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RequestPaymentPreferenceDTO"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ResponsePaymentPreferenceDTO"
+  /api/v1/orders:
+    post:
+      tags:
+      - Orders
+      summary: Crea una orden de compra directa sobre un listing FIXED activo
+      operationId: create_2
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RequestOrderDTO"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ResponseOrderDTO"
+  /api/v1/listings:
+    get:
+      tags:
+      - Listings
+      summary: Lista listings activos paginados con filtros opcionales
+      operationId: findAll_1
+      parameters:
+      - name: pageable
+        in: query
+        required: true
+        schema:
+          $ref: "#/components/schemas/Pageable"
+      - name: category
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: mode
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: condition
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: minPrice
+        in: query
+        required: false
+        schema:
+          type: number
+          format: float
+      - name: maxPrice
+        in: query
+        required: false
+        schema:
+          type: number
+          format: float
+      - name: q
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PageResponseListingDTO"
+    post:
+      tags:
+      - Listings
+      summary: Crea un listing (solo SELLER verificado o ADMIN)
+      operationId: create_3
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RequestListingDTO"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ResponseListingDTO"
+  /api/v1/listings/{listingId}/images:
+    get:
+      tags:
+      - Images
+      summary: Lista las imágenes de un listing
+      description: "Devuelve todas las imágenes asociadas a un listing, ordenadas\
+        \ por sortOrder ascendente. Endpoint público."
+      operationId: findByListing
+      parameters:
+      - name: listingId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ResponseImageDTO"
+    post:
+      tags:
+      - Images
+      summary: Sube una imagen a un listing
+      description: Sube un archivo a AWS S3 y lo asocia al listing. Sólo el dueño
+        del listing puede subir. Máximo 5 imágenes por listing.
+      operationId: upload
+      parameters:
+      - name: listingId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: sortOrder
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+              required:
+              - file
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ResponseImageDTO"
+  /api/v1/categories:
+    get:
+      tags:
+      - Categories
+      summary: Lista todas las categorías
+      operationId: findAll_2
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ResponseCategoryDTO"
+    post:
+      tags:
+      - Categories
+      summary: Crea una nueva categoría (solo ADMIN)
+      operationId: create_4
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RequestCategoryDTO"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ResponseCategoryDTO"
+  /api/v1/bids:
+    post:
+      tags:
+      - Bids
+      summary: Realiza una puja en una subasta activa
+      operationId: placeBid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RequestBidDTO"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ResponseBidDTO"
+  /api/v1/auth/register:
+    post:
+      tags:
+      - Auth
+      summary: Registra un nuevo usuario y devuelve los tokens JWT
+      operationId: register
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RequestRegisterDTO"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ResponseAuthDTO"
+  /api/v1/auth/refresh-token:
+    post:
+      tags:
+      - Auth
+      summary: Renueva el access token a partir de un refresh token válido
+      operationId: refreshToken
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RequestRefreshTokenDTO"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ResponseAuthDTO"
+  /api/v1/auth/login:
+    post:
+      tags:
+      - Auth
+      summary: Autentica un usuario y devuelve los tokens JWT
+      operationId: login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RequestLoginDTO"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ResponseAuthDTO"
+  /api/v1/auctions:
+    get:
+      tags:
+      - Auctions
+      summary: Lista subastas activas paginadas
+      description: Devuelve un resumen de las subastas con status ACTIVE ordenadas
+        por fecha de cierre. Endpoint público.
+      operationId: findAllActive
+      parameters:
+      - name: pageable
+        in: query
+        required: true
+        schema:
+          $ref: "#/components/schemas/Pageable"
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PageResponseAuctionSummaryDTO"
+    post:
+      tags:
+      - Auctions
+      summary: Crea una nueva subasta
+      description: Crea una subasta sobre un listing existente. Requiere autenticación
+        y que el usuario sea SELLER o ADMIN dueño del listing.
+      operationId: create_5
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RequestAuctionDTO"
+        required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ResponseAuctionDTO"
+  /api/v1/users/{id}:
+    get:
+      tags:
+      - Users
+      summary: Devuelve el perfil público de un usuario
+      operationId: getById
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ResponseUserDTO"
+  /api/v1/users/{id}/listings:
+    get:
+      tags:
+      - Users
+      summary: Lista paginada de las publicaciones de un usuario
+      operationId: getListingsByUser
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: pageable
+        in: query
+        required: true
+        schema:
+          $ref: "#/components/schemas/Pageable"
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PageResponseListingDTO"
+  /api/v1/reviews/user/{recipientId}:
+    get:
+      tags:
+      - Reviews
+      summary: Lista las reseñas recibidas por un usuario
+      description: "Devuelve las reseñas que un usuario ha recibido, paginadas y ordenadas\
+        \ por fecha descendente. Endpoint público."
+      operationId: findByRecipient
+      parameters:
+      - name: recipientId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: pageable
+        in: query
+        required: true
+        schema:
+          $ref: "#/components/schemas/Pageable"
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PageResponseReviewDTO"
+  /api/v1/orders/{id}:
+    get:
+      tags:
+      - Orders
+      summary: Obtiene una orden por id (solo buyer o seller involucrados)
+      operationId: findById_2
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ResponseOrderDTO"
+  /api/v1/orders/my-orders:
+    get:
+      tags:
+      - Orders
+      summary: Lista paginada de órdenes del comprador autenticado
+      operationId: findMyOrders
+      parameters:
+      - name: pageable
+        in: query
+        required: true
+        schema:
+          $ref: "#/components/schemas/Pageable"
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PageResponseOrderDTO"
+  /api/v1/notifications:
+    get:
+      tags:
+      - Notifications
+      summary: Lista paginada de notificaciones del usuario autenticado
+      operationId: findMine
+      parameters:
+      - name: pageable
+        in: query
+        required: true
+        schema:
+          $ref: "#/components/schemas/Pageable"
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PageResponseNotificationDTO"
+  /api/v1/notifications/unread-count:
+    get:
+      tags:
+      - Notifications
+      summary: Cantidad de notificaciones sin leer del usuario
+      operationId: countUnread
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: object
+                additionalProperties:
+                  type: integer
+                  format: int64
+  /api/v1/bids/auction/{auctionId}:
+    get:
+      tags:
+      - Bids
+      summary: Historial paginado de pujas de una subasta
+      operationId: findByAuction
+      parameters:
+      - name: auctionId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: pageable
+        in: query
+        required: true
+        schema:
+          $ref: "#/components/schemas/Pageable"
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PageResponseBidDTO"
+  /api/v1/bids/auction/{auctionId}/highest:
+    get:
+      tags:
+      - Bids
+      summary: Puja máxima vigente de una subasta
+      operationId: findHighest
+      parameters:
+      - name: auctionId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ResponseBidDTO"
+  /api/v1/auctions/{id}:
+    get:
+      tags:
+      - Auctions
+      summary: Detalle de una subasta
+      description: "Devuelve el detalle completo de una subasta, incluyendo la puja\
+        \ más alta y el ganador si ya finalizó. Endpoint público."
+      operationId: findById_3
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ResponseAuctionDTO"
+  /api/v1/images/{imageId}:
+    delete:
+      tags:
+      - Images
+      summary: Elimina una imagen
+      description: Elimina la imagen del listing y del bucket S3. Sólo el dueño del
+        listing puede eliminar.
+      operationId: delete_1
+      parameters:
+      - name: imageId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: OK
+components:
+  schemas:
+    RequestUpdateUserDTO:
+      type: object
+      description: Datos editables del perfil del usuario autenticado. Los campos
+        null se ignoran.
+      properties:
+        name:
+          type: string
+          description: Nuevo nombre visible del usuario (entre 2 y 100 caracteres)
+          example: Ana Torres
+          maxLength: 100
+          minLength: 2
+        avatarUrl:
+          type: string
+          description: URL pública del avatar del usuario
+          example: https://yala-collectibles.s3.amazonaws.com/avatars/42.jpg
+    ResponseUserDTO:
+      type: object
+      description: Información pública de un usuario (no incluye passwordHash ni datos
+        sensibles)
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: ID interno del usuario
+          example: 42
+        name:
+          type: string
+          description: Nombre visible del usuario
+          example: Ana Torres
+        email:
+          type: string
+          description: Email del usuario
+          example: ana@yala.pe
+        avatarUrl:
+          type: string
+          description: URL del avatar (puede ser null)
+          example: https://yala-collectibles.s3.amazonaws.com/avatars/42.jpg
+        reputation:
+          type: number
+          format: float
+          description: Reputación calculada como promedio de ratings de reseñas recibidas
+            (0.0 - 5.0)
+          example: "4.75"
+        isVerifiedSeller:
+          type: boolean
+          description: Indica si el usuario es vendedor verificado y puede crear listings/auctions
+          example: true
+        role:
+          type: string
+          description: "Rol del usuario (USER, SELLER, ADMIN)"
+          enum:
+          - USER
+          - SELLER
+          - ADMIN
+          example: SELLER
+    RequestTagDTO:
+      type: object
+      description: Datos para crear o actualizar un tag del catálogo (uso restringido
+        a ADMIN)
+      properties:
+        name:
+          type: string
+          description: "Nombre único del tag (2 a 50 caracteres). Convención: minú\
+            sculas, sin espacios"
+          example: holo
+          maxLength: 50
+          minLength: 2
+      required:
+      - name
+    ResponseTagDTO:
+      type: object
+      description: Tag del catálogo de Yala
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: ID del tag
+          example: 7
+        name:
+          type: string
+          description: Nombre del tag
+          example: holo
+    ResponseAuctionSummaryDTO:
+      type: object
+      description: Resumen ligero de una subasta para incluir embebido en listados
+        y otros DTOs
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: ID de la subasta
+          example: 501
+        currentPrice:
+          type: number
+          format: float
+          description: Precio actual (última puja válida)
+          example: "1350.00"
+        endsAt:
+          type: string
+          format: date-time
+          description: Fecha y hora en que termina la subasta
+          example: 2026-06-15T20:00:00
+        status:
+          type: string
+          description: Estado actual de la subasta
+          enum:
+          - ACTIVE
+          - FINISHED
+          - CANCELLED
+          example: ACTIVE
+    ResponseCategoryDTO:
+      type: object
+      description: Categoría del catálogo de Yala
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: ID interno de la categoría
+          example: 1
+        name:
+          type: string
+          description: Nombre de la categoría
+          example: Pokémon TCG
+        description:
+          type: string
+          description: Descripción de la categoría
+          example: Cartas oficiales del Trading Card Game de Pokémon
+    ResponseListingDTO:
+      type: object
+      description: "Detalle completo de un listing publicado en Yala, incluyendo seller,\
+        \ categoría, imágenes y resumen de subasta si aplica"
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: ID del listing
+          example: 101
+        title:
+          type: string
+          description: Título del listing
+          example: Charizard PSA 9 — 1st Edition
+        description:
+          type: string
+          description: Descripción larga
+          example: Carta en excelente estado…
+        mode:
+          type: string
+          description: Modo de venta
+          enum:
+          - FIXED
+          - AUCTION
+          example: AUCTION
+        fixedPrice:
+          type: number
+          format: float
+          description: Precio fijo en soles (sólo presente si mode = FIXED)
+          example: "499.90"
+        condition:
+          type: string
+          description: Estado físico del coleccionable
+          example: PSA 9 — Mint
+        status:
+          type: string
+          description: Estado del listing
+          enum:
+          - ACTIVE
+          - SOLD
+          - CANCELLED
+          example: ACTIVE
+        createdAt:
+          type: string
+          format: date-time
+          description: Fecha de creación
+          example: 2026-05-19T14:32:00
+        seller:
+          $ref: "#/components/schemas/ResponseUserDTO"
+          description: Vendedor que publicó el listing
+        category:
+          $ref: "#/components/schemas/ResponseCategoryDTO"
+          description: Categoría a la que pertenece el listing
+        imageUrls:
+          type: array
+          description: URLs públicas de las imágenes asociadas al listing (orden ascendente)
+          example:
+          - https://yala.s3.amazonaws.com/listings/101/0.jpg
+          items:
+            type: string
+        auction:
+          $ref: "#/components/schemas/ResponseAuctionSummaryDTO"
+          description: Resumen de la subasta asociada (presente sólo si mode = AUCTION)
+    ResponseOrderDTO:
+      type: object
+      description: Detalle de una orden de compra (proviene de compra directa o de
+        subasta ganada)
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: ID de la orden
+          example: 7001
+        amount:
+          type: number
+          format: float
+          description: Monto total de la orden en soles
+          example: "499.90"
+        status:
+          type: string
+          description: Estado de la orden
+          enum:
+          - PENDING
+          - CONFIRMED
+          - CANCELLED
+          example: PENDING
+        createdAt:
+          type: string
+          format: date-time
+          description: Fecha en que se creó la orden
+          example: 2026-05-20T15:00:00
+        listing:
+          $ref: "#/components/schemas/ResponseListingDTO"
+          description: Listing al que corresponde la orden
+        buyer:
+          $ref: "#/components/schemas/ResponseUserDTO"
+          description: Usuario que compra
+        seller:
+          $ref: "#/components/schemas/ResponseUserDTO"
+          description: Usuario que vende
+    ResponseNotificationDTO:
+      type: object
+      description: "Notificación in-app dirigida a un usuario (puja superada, subasta\
+        \ ganada, etc.)"
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: ID de la notificación
+          example: 8001
+        type:
+          type: string
+          description: Tipo de evento que originó la notificación
+          enum:
+          - BID_OUTBID
+          - AUCTION_WON
+          - SALE_CONFIRMED
+          - NEW_BID
+          example: BID_OUTBID
+        message:
+          type: string
+          description: Mensaje listo para mostrar al usuario
+          example: Tu puja fue superada en la subasta de Charizard PSA 9
+        isRead:
+          type: boolean
+          description: Indica si el usuario ya leyó la notificación
+          example: false
+        createdAt:
+          type: string
+          format: date-time
+          description: Fecha en que se generó la notificación
+          example: 2026-05-19T14:32:00
+    RequestListingDTO:
+      type: object
+      description: Datos para crear o actualizar un listing (publicación) en Yala
+      properties:
+        title:
+          type: string
+          description: Título del listing (3 a 200 caracteres)
+          example: Charizard PSA 9 — 1st Edition
+          maxLength: 200
+          minLength: 3
+        description:
+          type: string
+          description: Descripción larga del producto (máximo 2000 caracteres)
+          example: "Carta en excelente estado, certificada por PSA con grado 9. Sin\
+            \ marcas ni dobleces."
+          maxLength: 2000
+          minLength: 0
+        mode:
+          type: string
+          description: "Modo de venta. FIXED = precio fijo, AUCTION = subasta"
+          enum:
+          - FIXED
+          - AUCTION
+          example: AUCTION
+        fixedPrice:
+          type: number
+          format: float
+          description: "Precio fijo en soles (solo si mode = FIXED, ignorado en AUCTION)"
+          example: "499.90"
+          minimum: 0
+        condition:
+          type: string
+          description: Estado físico del coleccionable
+          example: PSA 9 — Mint
+        categoryId:
+          type: integer
+          format: int64
+          description: ID de la categoría a la que pertenece el listing
+          example: 1
+        tags:
+          type: array
+          description: Lista opcional de nombres de tags a asociar (se crean si no
+            existen)
+          example:
+          - holo
+          - 1st-edition
+          - mint
+          items:
+            type: string
+      required:
+      - categoryId
+      - condition
+      - mode
+      - title
+    RequestReviewDTO:
+      type: object
+      description: Datos para crear una reseña sobre una orden CONFIRMED. La reputación
+        del destinatario se recalcula automáticamente.
+      properties:
+        orderId:
+          type: integer
+          format: int64
+          description: ID de la orden sobre la que se opina (debe estar en estado
+            CONFIRMED)
+          example: 7001
+        rating:
+          type: integer
+          format: int32
+          description: Calificación entera entre 1 y 5
+          example: 5
+          maximum: 5
+          minimum: 1
+        comment:
+          type: string
+          description: Comentario opcional (máximo 1000 caracteres)
+          example: "Excelente vendedor, envío rápido y producto tal como se describe."
+          maxLength: 1000
+          minLength: 0
+      required:
+      - orderId
+      - rating
+    ResponseReviewDTO:
+      type: object
+      description: Reseña dejada por un comprador o vendedor tras una orden CONFIRMED
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: ID de la reseña
+          example: 3001
+        rating:
+          type: integer
+          format: int32
+          description: Calificación (1-5)
+          example: 5
+        comment:
+          type: string
+          description: Comentario del autor
+          example: "Excelente vendedor, envío rápido y producto tal como se describe."
+        createdAt:
+          type: string
+          format: date-time
+          description: Fecha en que se creó la reseña
+          example: 2026-05-21T10:00:00
+        author:
+          $ref: "#/components/schemas/ResponseUserDTO"
+          description: Usuario que escribió la reseña
+    RequestPaymentPreferenceDTO:
+      type: object
+      description: Datos para iniciar el flujo de pago de una orden via Mercado Pago
+      properties:
+        orderId:
+          type: integer
+          format: int64
+          description: ID de la orden a pagar (debe estar en estado PENDING)
+          example: 7001
+      required:
+      - orderId
+    ResponsePaymentPreferenceDTO:
+      type: object
+      description: Respuesta de Mercado Pago al crear una preference para procesar
+        el pago
+      properties:
+        initPoint:
+          type: string
+          description: URL al que redirigir al usuario para completar el pago en Mercado
+            Pago
+          example: https://www.mercadopago.com.pe/checkout/v1/redirect?pref_id=…
+        preferenceId:
+          type: string
+          description: ID de la preference creada en Mercado Pago (sirve para reconciliar
+            webhooks)
+          example: 1234567890-abc-def
+    RequestOrderDTO:
+      type: object
+      description: Datos para crear una orden de compra directa sobre un listing de
+        precio fijo
+      properties:
+        listingId:
+          type: integer
+          format: int64
+          description: ID del listing a comprar (mode debe ser FIXED y status ACTIVE)
+          example: 101
+      required:
+      - listingId
+    ResponseImageDTO:
+      type: object
+      description: Imagen subida a S3 asociada a un listing
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: ID de la imagen
+          example: 55
+        url:
+          type: string
+          description: URL pública del objeto en S3
+          example: https://yala-collectibles.s3.amazonaws.com/listings/101/0.jpg
+        sortOrder:
+          type: integer
+          format: int32
+          description: Orden de aparición en la galería del listing (asc)
+          example: 0
+        listingId:
+          type: integer
+          format: int64
+          description: ID del listing al que pertenece la imagen
+          example: 101
+    RequestCategoryDTO:
+      type: object
+      description: Datos para crear o actualizar una categoría del catálogo (uso restringido
+        a ADMIN)
+      properties:
+        name:
+          type: string
+          description: Nombre único de la categoría (2 a 80 caracteres)
+          example: Pokémon TCG
+          maxLength: 80
+          minLength: 2
+        description:
+          type: string
+          description: Descripción opcional de la categoría
+          example: Cartas oficiales del Trading Card Game de Pokémon
+      required:
+      - name
+    RequestBidDTO:
+      type: object
+      description: Datos para registrar una nueva puja en una subasta activa
+      properties:
+        auctionId:
+          type: integer
+          format: int64
+          description: ID de la subasta a la que se puja
+          example: 501
+        amount:
+          type: number
+          format: float
+          description: Monto de la puja en soles. Debe ser estrictamente mayor que
+            currentPrice
+          example: "1400.00"
+          minimum: 0
+      required:
+      - amount
+      - auctionId
+    ResponseBidDTO:
+      type: object
+      description: Puja registrada en una subasta
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: ID de la puja
+          example: 9001
+        amount:
+          type: number
+          format: float
+          description: Monto de la puja en soles
+          example: "1400.00"
+        placedAt:
+          type: string
+          format: date-time
+          description: Fecha y hora exacta en que se registró la puja
+          example: 2026-05-19T14:32:00
+        bidder:
+          $ref: "#/components/schemas/ResponseUserDTO"
+          description: Usuario que realizó la puja
+    RequestRegisterDTO:
+      type: object
+      description: Datos para registrar un nuevo usuario y obtener tokens JWT
+      properties:
+        name:
+          type: string
+          description: Nombre visible del usuario (2 a 100 caracteres)
+          example: Ana Torres
+          maxLength: 100
+          minLength: 2
+        email:
+          type: string
+          format: email
+          description: Email del usuario. Debe ser único en el sistema
+          example: ana@yala.pe
+        password:
+          type: string
+          description: Contraseña en texto plano (mínimo 8 caracteres). Se almacena
+            hasheada con BCrypt
+          example: supersegura
+          maxLength: 2147483647
+          minLength: 8
+        role:
+          type: string
+          default: USER
+          description: "Rol solicitado. Si se omite, se asigna USER por defecto"
+          enum:
+          - USER
+          - SELLER
+          - ADMIN
+          example: USER
+      required:
+      - email
+      - name
+      - password
+    ResponseAuthDTO:
+      type: object
+      description: Respuesta de autenticación con tokens JWT y datos básicos del usuario
+      properties:
+        accessToken:
+          type: string
+          description: "Access token JWT (expira en 1 hora). Enviar en el header Authorization:\
+            \ Bearer <token>"
+          example: eyJhbGciOiJIUzI1NiJ9...
+        refreshToken:
+          type: string
+          description: Refresh token JWT (expira en 7 días). Usar para obtener un
+            nuevo access token
+          example: eyJhbGciOiJIUzI1NiJ9...
+        userId:
+          type: integer
+          format: int64
+          description: ID interno del usuario autenticado
+          example: 42
+        email:
+          type: string
+          description: Email del usuario autenticado
+          example: ana@yala.pe
+        name:
+          type: string
+          description: Nombre visible del usuario
+          example: Ana Torres
+        role:
+          type: string
+          description: "Rol del usuario (USER, SELLER, ADMIN)"
+          enum:
+          - USER
+          - SELLER
+          - ADMIN
+          example: USER
+    RequestRefreshTokenDTO:
+      type: object
+      description: Petición para renovar el access token a partir de un refresh token
+        válido
+      properties:
+        refreshToken:
+          type: string
+          description: Refresh token JWT emitido previamente al hacer login o registro
+          example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+      required:
+      - refreshToken
+    RequestLoginDTO:
+      type: object
+      description: Credenciales para iniciar sesión y obtener tokens JWT
+      properties:
+        email:
+          type: string
+          format: email
+          description: Email del usuario registrado
+          example: collector@yala.pe
+        password:
+          type: string
+          description: Contraseña en texto plano (se valida contra el hash BCrypt
+            almacenado)
+          example: secret1234
+      required:
+      - email
+      - password
+    RequestAuctionDTO:
+      type: object
+      description: Datos para crear una nueva subasta sobre un listing existente
+      properties:
+        listingId:
+          type: integer
+          format: int64
+          description: ID del listing al que se asocia la subasta
+          example: 101
+        startingPrice:
+          type: number
+          format: float
+          description: Precio inicial de la subasta en soles. Debe ser >= 0
+          example: "100.00"
+          minimum: 0
+        endsAt:
+          type: string
+          format: date-time
+          description: Fecha y hora en que termina la subasta (ISO-8601). Debe ser
+            futura
+          example: 2026-06-15T20:00:00
+      required:
+      - endsAt
+      - listingId
+      - startingPrice
+    ResponseAuctionDTO:
+      type: object
+      description: Detalle completo de una subasta
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: ID de la subasta
+          example: 501
+        startingPrice:
+          type: number
+          format: float
+          description: Precio inicial con el que abrió la subasta
+          example: "100.00"
+        currentPrice:
+          type: number
+          format: float
+          description: Precio actual (= la puja más alta válida hasta el momento)
+          example: "1350.00"
+        startedAt:
+          type: string
+          format: date-time
+          description: Fecha en que se inició la subasta
+          example: 2026-05-01T10:00:00
+        endsAt:
+          type: string
+          format: date-time
+          description: Fecha en que termina/terminó la subasta
+          example: 2026-06-15T20:00:00
+        status:
+          type: string
+          description: Estado actual de la subasta
+          enum:
+          - ACTIVE
+          - FINISHED
+          - CANCELLED
+          example: ACTIVE
+        winner:
+          $ref: "#/components/schemas/ResponseUserDTO"
+          description: Usuario ganador (presente sólo si status = FINISHED y hubo
+            pujas)
+        totalBids:
+          type: integer
+          format: int32
+          description: Número total de pujas registradas
+          example: 12
+    Pageable:
+      type: object
+      properties:
+        page:
+          type: integer
+          format: int32
+          minimum: 0
+        size:
+          type: integer
+          format: int32
+          minimum: 1
+        sort:
+          type: array
+          items:
+            type: string
+    PageResponseListingDTO:
+      type: object
+      properties:
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+        first:
+          type: boolean
+        last:
+          type: boolean
+        size:
+          type: integer
+          format: int32
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/ResponseListingDTO"
+        number:
+          type: integer
+          format: int32
+        sort:
+          $ref: "#/components/schemas/SortObject"
+        numberOfElements:
+          type: integer
+          format: int32
+        pageable:
+          $ref: "#/components/schemas/PageableObject"
+        empty:
+          type: boolean
+    PageableObject:
+      type: object
+      properties:
+        offset:
+          type: integer
+          format: int64
+        sort:
+          $ref: "#/components/schemas/SortObject"
+        paged:
+          type: boolean
+        pageNumber:
+          type: integer
+          format: int32
+        pageSize:
+          type: integer
+          format: int32
+        unpaged:
+          type: boolean
+    SortObject:
+      type: object
+      properties:
+        empty:
+          type: boolean
+        sorted:
+          type: boolean
+        unsorted:
+          type: boolean
+    PageResponseReviewDTO:
+      type: object
+      properties:
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+        first:
+          type: boolean
+        last:
+          type: boolean
+        size:
+          type: integer
+          format: int32
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/ResponseReviewDTO"
+        number:
+          type: integer
+          format: int32
+        sort:
+          $ref: "#/components/schemas/SortObject"
+        numberOfElements:
+          type: integer
+          format: int32
+        pageable:
+          $ref: "#/components/schemas/PageableObject"
+        empty:
+          type: boolean
+    PageResponseOrderDTO:
+      type: object
+      properties:
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+        first:
+          type: boolean
+        last:
+          type: boolean
+        size:
+          type: integer
+          format: int32
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/ResponseOrderDTO"
+        number:
+          type: integer
+          format: int32
+        sort:
+          $ref: "#/components/schemas/SortObject"
+        numberOfElements:
+          type: integer
+          format: int32
+        pageable:
+          $ref: "#/components/schemas/PageableObject"
+        empty:
+          type: boolean
+    PageResponseNotificationDTO:
+      type: object
+      properties:
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+        first:
+          type: boolean
+        last:
+          type: boolean
+        size:
+          type: integer
+          format: int32
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/ResponseNotificationDTO"
+        number:
+          type: integer
+          format: int32
+        sort:
+          $ref: "#/components/schemas/SortObject"
+        numberOfElements:
+          type: integer
+          format: int32
+        pageable:
+          $ref: "#/components/schemas/PageableObject"
+        empty:
+          type: boolean
+    PageResponseBidDTO:
+      type: object
+      properties:
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+        first:
+          type: boolean
+        last:
+          type: boolean
+        size:
+          type: integer
+          format: int32
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/ResponseBidDTO"
+        number:
+          type: integer
+          format: int32
+        sort:
+          $ref: "#/components/schemas/SortObject"
+        numberOfElements:
+          type: integer
+          format: int32
+        pageable:
+          $ref: "#/components/schemas/PageableObject"
+        empty:
+          type: boolean
+    PageResponseAuctionSummaryDTO:
+      type: object
+      properties:
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+        first:
+          type: boolean
+        last:
+          type: boolean
+        size:
+          type: integer
+          format: int32
+        content:
+          type: array
+          items:
+            $ref: "#/components/schemas/ResponseAuctionSummaryDTO"
+        number:
+          type: integer
+          format: int32
+        sort:
+          $ref: "#/components/schemas/SortObject"
+        numberOfElements:
+          type: integer
+          format: int32
+        pageable:
+          $ref: "#/components/schemas/PageableObject"
+        empty:
+          type: boolean
+  securitySchemes:
+    bearerAuth:
+      type: http
+      name: bearerAuth
+      scheme: bearer
+      bearerFormat: JWT
