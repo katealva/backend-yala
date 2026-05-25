@@ -185,41 +185,22 @@
                             <artifactId>lombok</artifactId>
                         </exclude>
                     </excludes>
-                    <profiles>
-                        <profile>openapi</profile>
-                    </profiles>
-                    <jvmArguments>-Dspring.profiles.active=openapi</jvmArguments>
                 </configuration>
-                <executions>
-                    <execution>
-                        <id>pre-integration-test</id>
-                        <goals>
-                            <goal>start</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>post-integration-test</id>
-                        <goals>
-                            <goal>stop</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
+            <!--
+              springdoc-openapi-maven-plugin: genera el archivo openapi.yaml estático.
+              No está bound a ninguna fase para no ralentizar mvn install.
+              Regeneración manual del archivo:
+                1) en una terminal:  ./mvnw spring-boot:run -Dspring-boot.run.profiles=openapi
+                2) en otra terminal: curl http://localhost:8081/v3/api-docs.yaml -o openapi.yaml
+                3) ctrl+c la primera terminal
+            -->
             <plugin>
                 <groupId>org.springdoc</groupId>
                 <artifactId>springdoc-openapi-maven-plugin</artifactId>
                 <version>1.4</version>
-                <executions>
-                    <execution>
-                        <id>generate-openapi-yaml</id>
-                        <phase>integration-test</phase>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                    </execution>
-                </executions>
                 <configuration>
-                    <apiDocsUrl>http://localhost:8080/v3/api-docs.yaml</apiDocsUrl>
+                    <apiDocsUrl>http://localhost:8081/v3/api-docs.yaml</apiDocsUrl>
                     <outputFileName>openapi.yaml</outputFileName>
                     <outputDir>${project.basedir}</outputDir>
                 </configuration>
