@@ -188,7 +188,8 @@ DEPLOY_POLICY=$(cat <<EOF
 {"Version":"2012-10-17","Statement":[
   {"Effect":"Allow","Action":["ecr:GetAuthorizationToken"],"Resource":"*"},
   {"Effect":"Allow","Action":["ecr:BatchCheckLayerAvailability","ecr:CompleteLayerUpload","ecr:InitiateLayerUpload","ecr:PutImage","ecr:UploadLayerPart","ecr:BatchGetImage"],"Resource":"arn:aws:ecr:${REGION}:${ACCOUNT_ID}:repository/${ECR_REPO}"},
-  {"Effect":"Allow","Action":["ecs:DescribeServices","ecs:UpdateService","ecs:RegisterTaskDefinition","ecs:DescribeTaskDefinition"],"Resource":"*"},
+  {"Effect":"Allow","Action":["ecs:DescribeServices","ecs:UpdateService","ecs:RegisterTaskDefinition","ecs:DescribeTaskDefinition","ecs:ListTasks","ecs:DescribeTasks"],"Resource":"*"},
+  {"Effect":"Allow","Action":["ec2:DescribeNetworkInterfaces"],"Resource":"*"},
   {"Effect":"Allow","Action":["iam:PassRole"],"Resource":["arn:aws:iam::${ACCOUNT_ID}:role/yala-ecs-task-execution-role","arn:aws:iam::${ACCOUNT_ID}:role/yala-ecs-task-role"]}
 ]}
 EOF
