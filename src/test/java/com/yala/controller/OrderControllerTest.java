@@ -64,7 +64,8 @@ class OrderControllerTest {
     }
 
     private ResponseOrderDTO sampleResponse(Long id, String status) {
-        return new ResponseOrderDTO(id, 250f, status, LocalDateTime.now(), null, null, null);
+        return new ResponseOrderDTO(
+                id, 250f, status, LocalDateTime.now(), null, "Item de prueba", null, null, null);
     }
 
     @Test

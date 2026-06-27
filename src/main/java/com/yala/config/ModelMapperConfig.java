@@ -179,6 +179,8 @@ public class ModelMapperConfig {
                 source.getAmount(),
                 source.getStatus() != null ? source.getStatus().name() : null,
                 source.getCreatedAt(),
+                source.getPaymentDeadline(),
+                source.itemTitle(),
                 toListingResponse(source.getListing()),
                 toUserResponse(source.getBuyer()),
                 toUserResponse(source.getSeller()));
