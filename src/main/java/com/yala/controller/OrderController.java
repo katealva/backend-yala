@@ -50,6 +50,16 @@ public class OrderController {
         return ResponseEntity.ok(orderService.findByBuyer(auth.getName(), pageable));
     }
 
+    @GetMapping("/pending-payment")
+    @Operation(summary = "Órdenes PENDING del comprador autenticado (lista de pendientes de pago)")
+    public ResponseEntity<Page<ResponseOrderDTO>> findPendingPayment(
+            Authentication auth,
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC)
+                    Pageable pageable) {
+        return ResponseEntity.ok(
+                orderService.findByBuyerAndStatus(auth.getName(), OrderStatus.PENDING, pageable));
+    }
+
     @GetMapping("/{id}")
     @Operation(summary = "Obtiene una orden por id (solo buyer o seller involucrados)")
     public ResponseEntity<ResponseOrderDTO> findById(@PathVariable Long id, Authentication auth) {

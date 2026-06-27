@@ -38,7 +38,11 @@
         { "name": "MERCADOPAGO_PUBLIC_KEY",  "valueFrom": "arn:aws:ssm:us-east-1:__ACCOUNT_ID__:parameter/yala/prod/mp-public-key" },
         { "name": "RESEND_API_KEY",          "valueFrom": "arn:aws:ssm:us-east-1:__ACCOUNT_ID__:parameter/yala/prod/resend-api-key" },
         { "name": "RESEND_FROM",             "valueFrom": "arn:aws:ssm:us-east-1:__ACCOUNT_ID__:parameter/yala/prod/resend-from" },
-        { "name": "APP_BASE_URL",            "valueFrom": "arn:aws:ssm:us-east-1:__ACCOUNT_ID__:parameter/yala/prod/app-base-url" }
+        { "name": "APP_BASE_URL",            "valueFrom": "arn:aws:ssm:us-east-1:__ACCOUNT_ID__:parameter/yala/prod/app-base-url" },
+        { "name": "APP_WEB_URL",             "valueFrom": "arn:aws:ssm:us-east-1:__ACCOUNT_ID__:parameter/yala/prod/app-web-url" },
+        { "name": "LIVEKIT_URL",             "valueFrom": "arn:aws:ssm:us-east-1:__ACCOUNT_ID__:parameter/yala/prod/livekit-url" },
+        { "name": "LIVEKIT_API_KEY",         "valueFrom": "arn:aws:ssm:us-east-1:__ACCOUNT_ID__:parameter/yala/prod/livekit-api-key" },
+        { "name": "LIVEKIT_API_SECRET",      "valueFrom": "arn:aws:ssm:us-east-1:__ACCOUNT_ID__:parameter/yala/prod/livekit-api-secret" }
       ],
       "logConfiguration": {
         "logDriver": "awslogs",

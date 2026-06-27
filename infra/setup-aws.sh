@@ -111,6 +111,7 @@ put_param /yala/prod/db-name        String       "$DB_NAME"
 put_param /yala/prod/db-user        String       "$DB_USER"
 put_param /yala/prod/aws-s3-bucket  String       "yala-bucket-prod"
 put_param /yala/prod/app-base-url   String       "http://localhost:8081"
+put_param /yala/prod/app-web-url    String       "https://main.d3lg9y66c0qtho.amplifyapp.com"
 
 prompt_secret () {
   local key="$1" label="$2" existing
@@ -126,6 +127,9 @@ prompt_secret /yala/prod/resend-api-key   "Resend API key"
 prompt_secret /yala/prod/resend-from      "Resend from address"
 prompt_secret /yala/prod/mp-access-token  "MercadoPago access token"
 prompt_secret /yala/prod/mp-public-key    "MercadoPago public key"
+prompt_secret /yala/prod/livekit-url        "LiveKit URL (wss://...)"
+prompt_secret /yala/prod/livekit-api-key    "LiveKit API key"
+prompt_secret /yala/prod/livekit-api-secret "LiveKit API secret"
 
 # -----------------------------------------------------------------------------
 # 5) CloudWatch log group

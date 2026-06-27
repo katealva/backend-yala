@@ -18,7 +18,15 @@ public record ResponseOrderDTO(
         @Schema(description = "Fecha en que se creó la orden", example = "2026-05-20T15:00:00")
         LocalDateTime createdAt,
 
-        @Schema(description = "Listing al que corresponde la orden")
+        @Schema(description = "Fecha límite de pago (para subastas de live; null si no aplica)",
+                example = "2026-05-22T15:00:00")
+        LocalDateTime paymentDeadline,
+
+        @Schema(description = "Título del item comprado (listing o subasta flash)",
+                example = "Charizard PSA 9")
+        String itemTitle,
+
+        @Schema(description = "Listing al que corresponde la orden (null si proviene de un live)")
         ResponseListingDTO listing,
 
         @Schema(description = "Usuario que compra")

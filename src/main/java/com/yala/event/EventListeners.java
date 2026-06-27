@@ -183,19 +183,26 @@ public class EventListeners {
         notificationService.createNotification(
                 event.buyerId(),
                 NotificationType.SALE_CONFIRMED,
-                "Your order has been confirmed by the seller.");
+                "Tu pago fue confirmado. Coordina la entrega con el vendedor.");
+        notificationService.createNotification(
+                event.sellerId(),
+                NotificationType.SALE_CONFIRMED,
+                "El comprador pagó. Coordina la entrega del producto.");
 
-        orderRepository.findById(event.orderId()).ifPresent(order ->
-                userRepository.findById(event.buyerId()).ifPresent(buyer -> {
-                    Listing listing = order.getListing();
-                    String title = listing != null ? listing.getTitle() : "";
+        orderRepository.findById(event.orderId()).ifPresent(order -> {
+            String title = order.itemTitle();
+            String orderUrl = baseUrl + "/orders/" + order.getId();
+            // Confirmation email to the buyer.
+            userRepository.findById(event.buyerId()).ifPresent(buyer ->
                     emailService.sendOrderConfirmed(
-                            buyer.getEmail(),
-                            buyer.getName(),
-                            title,
-                            order.getAmount(),
-                            baseUrl + "/orders/" + order.getId(),
-                            order.getId());
-                }));
+                            buyer.getEmail(), buyer.getName(), title,
+                            order.getAmount(), orderUrl, order.getId()));
+            // Confirmation email to the seller so both parties coordinate delivery.
+            userRepository.findById(event.sellerId()).ifPresent(seller ->
+                    emailService.sendSaleConfirmed(
+                            seller.getEmail(), seller.getName(), title,
+                            order.getBuyer() != null ? order.getBuyer().getName() : "",
+                            order.getAmount(), orderUrl, order.getId()));
+        });
     }
 }

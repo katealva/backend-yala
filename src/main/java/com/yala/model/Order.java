@@ -56,10 +56,22 @@ public class Order {
     @Column(updatable = false)
     private LocalDateTime createdAt;
 
-    @NotNull
+    /**
+     * Deadline to pay the order. Set for live-auction wins (now + 48h); the
+     * scheduler cancels the order if it passes while still PENDING. Null for
+     * regular orders, which keep their previous (no-deadline) behaviour.
+     */
+    private LocalDateTime paymentDeadline;
+
+    /** Present for direct purchases and regular-auction wins; null for flash-auction wins. */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "listing_id", nullable = false)
+    @JoinColumn(name = "listing_id")
     private Listing listing;
+
+    /** Present for flash-auction wins; null otherwise. */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "live_auction_id")
+    private LiveAuction liveAuction;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
@@ -78,4 +90,15 @@ public class Order {
     @OneToMany(mappedBy = "order", fetch = FetchType.LAZY)
     @Builder.Default
     private List<Review> reviews = new ArrayList<>();
+
+    /** Human title of the purchased item, from the listing or the flash auction. */
+    public String itemTitle() {
+        if (listing != null && listing.getTitle() != null) {
+            return listing.getTitle();
+        }
+        if (liveAuction != null && liveAuction.getTitle() != null) {
+            return liveAuction.getTitle();
+        }
+        return "Order " + id;
+    }
 }
