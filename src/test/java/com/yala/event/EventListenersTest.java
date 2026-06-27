@@ -150,12 +150,15 @@ class EventListenersTest {
     }
 
     @Test
-    void shouldNotifyBuyerWhenOnOrderConfirmedInvoked() {
+    void shouldNotifyBuyerAndSellerWhenOnOrderConfirmedInvoked() {
         eventListeners.onOrderConfirmed(new OrderConfirmedEvent(50L, 10L, 20L));
 
         verify(notificationService).createNotification(
                 eq(10L), eq(NotificationType.SALE_CONFIRMED),
-                org.mockito.ArgumentMatchers.contains("confirmed"));
+                org.mockito.ArgumentMatchers.contains("pago"));
+        verify(notificationService).createNotification(
+                eq(20L), eq(NotificationType.SALE_CONFIRMED),
+                org.mockito.ArgumentMatchers.contains("entrega"));
     }
 
     @Test
