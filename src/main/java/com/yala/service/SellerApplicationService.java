@@ -58,19 +58,17 @@ public class SellerApplicationService {
         application.setCci(request.cci());
         application = sellerApplicationRepository.save(application);
 
-        // Start the Didit KYC session. Best-effort: in demo/local (Didit not configured) the
-        // application is still saved and the frontend just won't get a KYC url.
+        // Start the Didit KYC session. If Didit is configured, a failure must surface (no silent
+        // "pending"): the whole @Transactional apply rolls back so no orphan PENDING is left and the
+        // frontend shows a real error. In demo/local (Didit not configured) keep the soft path.
         String diditUrl = null;
-        String diditSessionId = application.getDiditSessionId();
-        try {
+        if (identityService.isConfigured()) {
             ResponseSessionDTO session = identityService.createSession(email);
             diditUrl = session.url();
-            diditSessionId = session.sessionId();
-            application.setDiditSessionId(diditSessionId);
+            application.setDiditSessionId(session.sessionId());
             sellerApplicationRepository.save(application);
-        } catch (Exception e) {
-            log.warn("No se pudo crear la sesión Didit para la aplicación de vendedor de {}: {}",
-                    email, e.getMessage());
+        } else {
+            log.warn("Didit no configurado — aplicación de vendedor de {} guardada sin KYC (demo)", email);
         }
 
         return toDto(application, diditUrl);
