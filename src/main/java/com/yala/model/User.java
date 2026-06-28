@@ -63,6 +63,9 @@ public class User {
     @Builder.Default
     private Boolean isVerifiedSeller = false;
 
+    @Builder.Default
+    private Boolean isIdentityVerified = false;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;

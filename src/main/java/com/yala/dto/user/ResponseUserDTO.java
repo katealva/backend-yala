@@ -26,6 +26,10 @@ public record ResponseUserDTO(
                 example = "true")
         Boolean isVerifiedSeller,
 
+        @Schema(description = "Indica si el usuario verificó su identidad (DNI vía Didit)",
+                example = "false")
+        Boolean isIdentityVerified,
+
         @Schema(description = "Rol del usuario (USER, SELLER, ADMIN)", example = "SELLER")
         Role role) {
 }
