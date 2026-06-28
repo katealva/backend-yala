@@ -1,6 +1,7 @@
 package com.yala.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.yala.dto.identity.RequestIdentityVerifyDTO;
 import com.yala.dto.identity.ResponseIdentityDTO;
 import com.yala.exceptions.ResourceNotFoundException;
@@ -10,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.HexFormat;
 import java.util.List;
@@ -83,68 +85,168 @@ public class IdentityService {
     }
 
     /**
-     * Handles the Didit status.updated webhook.
-     * Requires HMAC-SHA256 of the raw body in x-signature (hex-encoded).
-     * Rejects with 401 if didit.webhook-secret is not configured or the signature is invalid.
-     * NOTE: if Didit prefixes the signature pre-image with a timestamp, adapt verifyWebhookSignature.
+     * Handles Didit webhooks following the official spec:
+     *  1. Validates X-Timestamp freshness (≤ 5 minutes, anti-replay).
+     *  2. Verifies X-Signature-V2 (HMAC-SHA256 over canonical sorted-key JSON) preferred;
+     *     falls back to X-Signature (HMAC-SHA256 over raw bytes).
+     *  3. Processes the event by webhook_type.
      */
     @Transactional
-    public void handleWebhook(String rawBody, String signature) {
+    public void handleWebhook(String rawBody, String signatureV2, String signatureRaw, String timestamp) {
         if (diditWebhookSecret == null || diditWebhookSecret.isBlank()) {
-            log.error("Didit webhook rejected: didit.webhook-secret is not configured");
+            log.error("Didit webhook rejected: DIDIT_WEBHOOK_SECRET not configured");
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Webhook secret not configured");
         }
-        if (!verifyWebhookSignature(rawBody, signature)) {
-            log.warn("Didit webhook rejected: invalid or missing signature");
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid webhook signature");
+
+        validateTimestamp(timestamp);
+
+        if (signatureV2 != null && !signatureV2.isBlank()) {
+            if (!verifySignatureV2(rawBody, signatureV2)) {
+                log.warn("Didit webhook rejected: invalid X-Signature-V2");
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid X-Signature-V2");
+            }
+        } else if (signatureRaw != null && !signatureRaw.isBlank()) {
+            if (!verifySignatureRaw(rawBody, signatureRaw)) {
+                log.warn("Didit webhook rejected: invalid X-Signature");
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid X-Signature");
+            }
+        } else {
+            log.warn("Didit webhook rejected: no signature header present");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Missing webhook signature");
         }
+
         try {
             @SuppressWarnings("unchecked")
             Map<String, Object> payload = objectMapper.readValue(rawBody, Map.class);
+            String webhookType = (String) payload.get("webhook_type");
+            log.debug("Didit webhook received: type={}", webhookType);
 
-            Object dvObj = payload.get("database_validation");
-            if (!(dvObj instanceof Map)) return;
-            @SuppressWarnings("unchecked")
-            Map<String, Object> dv = (Map<String, Object>) dvObj;
-
-            if (!"Approved".equals(dv.get("status"))) return;
-
-            Object vendorData = payload.get("vendor_data");
-            if (vendorData == null) return;
-            Long userId = Long.parseLong(vendorData.toString());
-
-            userRepository.findById(userId).ifPresent(user -> {
-                if (!Boolean.TRUE.equals(user.getIsIdentityVerified())) {
-                    user.setIsIdentityVerified(true);
-                    userRepository.save(user);
-                    messagingTemplate.convertAndSend(
-                            "/topic/identity/" + userId,
-                            Map.of("verified", true, "userId", userId));
-                    log.info("Identity verified for user {} via Didit webhook", userId);
-                }
-            });
+            if ("status.updated".equals(webhookType)) {
+                processStatusUpdated(payload);
+            }
+            // Other types (user.status.updated, transaction.created, etc.) can be added here.
         } catch (ResponseStatusException e) {
             throw e;
         } catch (Exception e) {
-            log.warn("Error parsing Didit webhook payload: {}", e.getMessage());
+            log.warn("Error parsing Didit webhook body: {}", e.getMessage());
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Malformed webhook payload");
         }
     }
 
-    private boolean verifyWebhookSignature(String rawBody, String signature) {
-        if (signature == null || signature.isBlank()) return false;
+    // -------------------------------------------------------------------------
+    // Event processors
+    // -------------------------------------------------------------------------
+
+    private void processStatusUpdated(Map<String, Object> payload) {
+        String status = (String) payload.get("status");
+        Object vendorData = payload.get("vendor_data");
+        if (vendorData == null) {
+            log.warn("status.updated webhook missing vendor_data — skipping");
+            return;
+        }
+
+        Long userId;
+        try {
+            userId = Long.parseLong(vendorData.toString());
+        } catch (NumberFormatException e) {
+            log.warn("Invalid vendor_data in Didit webhook: {}", vendorData);
+            return;
+        }
+
+        userRepository.findById(userId).ifPresent(user -> {
+            switch (status) {
+                case "Approved" -> {
+                    if (!Boolean.TRUE.equals(user.getIsIdentityVerified())) {
+                        user.setIsIdentityVerified(true);
+                        userRepository.save(user);
+                        messagingTemplate.convertAndSend(
+                                "/topic/identity/" + userId,
+                                Map.of("verified", true, "userId", userId));
+                        log.info("Identity approved for user {} via Didit webhook", userId);
+                    }
+                }
+                case "Declined" -> {
+                    messagingTemplate.convertAndSend(
+                            "/topic/identity/" + userId,
+                            Map.of("verified", false, "status", "declined", "userId", userId));
+                    log.info("Identity declined for user {} via Didit webhook", userId);
+                }
+                case "In Review"    -> log.info("Identity in review for user {}", userId);
+                case "In Progress"  -> log.info("Identity in progress for user {}", userId);
+                case "Resubmitted"  -> log.info("Identity resubmitted for user {}", userId);
+                case "Abandoned"    -> log.info("Identity session abandoned for user {}", userId);
+                case "Expired", "KYC Expired" -> log.info("Identity session expired for user {}", userId);
+                default -> log.warn("Unknown Didit status '{}' for user {}", status, userId);
+            }
+        });
+    }
+
+    // -------------------------------------------------------------------------
+    // Signature verification
+    // -------------------------------------------------------------------------
+
+    /**
+     * X-Signature-V2: HMAC-SHA256 over the canonical JSON.
+     * Canonical = all keys sorted alphabetically (recursively), Unicode characters not escaped.
+     * Matches Didit's "sorted, Unicode-preserved canonical JSON" spec.
+     */
+    private boolean verifySignatureV2(String rawBody, String signature) {
+        try {
+            Object parsed = objectMapper.readValue(rawBody, Object.class);
+            ObjectMapper canonical = objectMapper.copy()
+                    .enable(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS);
+            String canonicalJson = canonical.writeValueAsString(parsed);
+
+            Mac mac = Mac.getInstance("HmacSHA256");
+            mac.init(new SecretKeySpec(
+                    diditWebhookSecret.getBytes(StandardCharsets.UTF_8), "HmacSHA256"));
+            byte[] expected = mac.doFinal(canonicalJson.getBytes(StandardCharsets.UTF_8));
+            byte[] actual   = HexFormat.of().parseHex(signature);
+            return MessageDigest.isEqual(expected, actual);
+        } catch (NoSuchAlgorithmException | InvalidKeyException | IllegalArgumentException e) {
+            log.warn("X-Signature-V2 verification error: {}", e.getMessage());
+            return false;
+        } catch (Exception e) {
+            log.warn("X-Signature-V2 canonical JSON error: {}", e.getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * X-Signature: HMAC-SHA256 over the exact raw bytes of the request body.
+     * Fallback for stacks that guarantee byte-perfect body delivery.
+     */
+    private boolean verifySignatureRaw(String rawBody, String signature) {
         try {
             Mac mac = Mac.getInstance("HmacSHA256");
             mac.init(new SecretKeySpec(
                     diditWebhookSecret.getBytes(StandardCharsets.UTF_8), "HmacSHA256"));
             byte[] expected = mac.doFinal(rawBody.getBytes(StandardCharsets.UTF_8));
-            byte[] actual = HexFormat.of().parseHex(signature);
+            byte[] actual   = HexFormat.of().parseHex(signature);
             return MessageDigest.isEqual(expected, actual);
         } catch (NoSuchAlgorithmException | InvalidKeyException | IllegalArgumentException e) {
-            log.warn("Webhook signature verification error: {}", e.getMessage());
+            log.warn("X-Signature verification error: {}", e.getMessage());
             return false;
         }
     }
+
+    private void validateTimestamp(String timestamp) {
+        if (timestamp == null || timestamp.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Missing X-Timestamp");
+        }
+        try {
+            long ts = Long.parseLong(timestamp.trim());
+            if (Math.abs(Instant.now().getEpochSecond() - ts) > 300) {
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Stale webhook timestamp");
+            }
+        } catch (NumberFormatException e) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid X-Timestamp format");
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // Didit Database Validation API call
+    // -------------------------------------------------------------------------
 
     @SuppressWarnings("unchecked")
     private boolean callDidit(RequestIdentityVerifyDTO request) {
