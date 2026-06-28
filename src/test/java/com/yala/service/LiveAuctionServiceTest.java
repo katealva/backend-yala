@@ -37,7 +37,7 @@ class LiveAuctionServiceTest {
     @Mock private ApplicationEventPublisher eventPublisher;
 
     @Spy
-    private LiveMapper liveMapper = new LiveMapper(new ModelMapperConfig().modelMapper());
+    private LiveMapper liveMapper = new LiveMapper();
 
     @InjectMocks
     private LiveAuctionService liveAuctionService;
