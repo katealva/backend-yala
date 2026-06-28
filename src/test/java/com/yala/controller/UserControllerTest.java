@@ -48,7 +48,7 @@ class UserControllerTest {
 
     private ResponseUserDTO sampleResponse() {
         return new ResponseUserDTO(1L, "Ada Lovelace", "ada@yala.pe",
-                "https://img.yala.pe/avatar.png", 4.5f, false, Role.USER);
+                "https://img.yala.pe/avatar.png", 4.5f, false, false, Role.USER);
     }
 
     @Test
@@ -65,7 +65,7 @@ class UserControllerTest {
         RequestUpdateUserDTO request =
                 new RequestUpdateUserDTO("Ada L.", "https://img.yala.pe/new.png");
         ResponseUserDTO updated = new ResponseUserDTO(1L, "Ada L.", "ada@yala.pe",
-                "https://img.yala.pe/new.png", 4.5f, false, Role.USER);
+                "https://img.yala.pe/new.png", 4.5f, false, false, Role.USER);
         when(userService.updateCurrentUser(eq("ada@yala.pe"), any(RequestUpdateUserDTO.class)))
                 .thenReturn(updated);
 

@@ -79,7 +79,7 @@ class ListingControllerTest {
                 "USED",
                 "ACTIVE",
                 LocalDateTime.now(),
-                new ResponseUserDTO(1L, "Ada", "ada@yala.pe", null, 0f, true, Role.SELLER),
+                new ResponseUserDTO(1L, "Ada", "ada@yala.pe", null, 0f, true, false, Role.SELLER),
                 new ResponseCategoryDTO(10L, "Pokémon TCG", "Cards"),
                 List.of(),
                 null);
