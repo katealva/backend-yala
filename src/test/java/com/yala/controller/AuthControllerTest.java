@@ -45,7 +45,7 @@ class AuthControllerTest {
     @Test
     void shouldReturn201WhenRegisterIsSuccessful() throws Exception {
         RequestRegisterDTO request = new RequestRegisterDTO(
-                "Ada Lovelace", "ada@yala.pe", "password123", Role.USER);
+                "12345678", "ada@yala.pe", "password123", "Ada", "Lovelace", "Byron");
         ResponseAuthDTO response = new ResponseAuthDTO(
                 "access-token", "refresh-token", 1L, "ada@yala.pe", "Ada Lovelace", Role.USER);
         when(authService.register(any(RequestRegisterDTO.class))).thenReturn(response);
@@ -61,7 +61,7 @@ class AuthControllerTest {
     @Test
     void shouldReturn409WhenEmailAlreadyExists() throws Exception {
         RequestRegisterDTO request = new RequestRegisterDTO(
-                "Ada Lovelace", "ada@yala.pe", "password123", Role.USER);
+                "12345678", "ada@yala.pe", "password123", "Ada", "Lovelace", "Byron");
         when(authService.register(any(RequestRegisterDTO.class)))
                 .thenThrow(new EmailAlreadyExistsException("Email already registered"));
 
@@ -115,7 +115,7 @@ class AuthControllerTest {
     @Test
     void shouldReturn400WhenRegisterRequestIsInvalid() throws Exception {
         RequestRegisterDTO request = new RequestRegisterDTO(
-                "A", "not-an-email", "short", Role.USER);
+                "123", "not-an-email", "short", "", "", "");
 
         mockMvc.perform(post("/api/v1/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)

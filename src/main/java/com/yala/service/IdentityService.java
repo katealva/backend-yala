@@ -6,9 +6,14 @@ import com.yala.dto.identity.RequestIdentityVerifyDTO;
 import com.yala.dto.identity.ResponseIdentityDTO;
 import com.yala.dto.identity.ResponseSessionDTO;
 import com.yala.exceptions.ResourceNotFoundException;
+import com.yala.model.Role;
+import com.yala.model.SellerApplication;
+import com.yala.model.SellerApplicationStatus;
 import com.yala.model.User;
+import com.yala.repository.SellerApplicationRepository;
 import com.yala.repository.UserRepository;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -34,6 +39,7 @@ import org.springframework.web.server.ResponseStatusException;
 public class IdentityService {
 
     private final UserRepository userRepository;
+    private final SellerApplicationRepository sellerApplicationRepository;
     private final SimpMessagingTemplate messagingTemplate;
     private final RestClient restClient;
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -51,9 +57,11 @@ public class IdentityService {
     private String diditCallbackUrl;
 
     public IdentityService(UserRepository userRepository,
+                           SellerApplicationRepository sellerApplicationRepository,
                            SimpMessagingTemplate messagingTemplate,
                            RestClient.Builder restClientBuilder) {
         this.userRepository = userRepository;
+        this.sellerApplicationRepository = sellerApplicationRepository;
         this.messagingTemplate = messagingTemplate;
         this.restClient = restClientBuilder.build();
     }
@@ -228,14 +236,20 @@ public class IdentityService {
             // Exact case-sensitive status literals per Didit V3 spec.
             switch (status) {
                 case "Approved" -> {
+                    boolean changed = false;
                     if (!Boolean.TRUE.equals(user.getIsIdentityVerified())) {
                         user.setIsIdentityVerified(true);
-                        userRepository.save(user);
-                        messagingTemplate.convertAndSend(
-                                "/topic/identity/" + userId,
-                                (Object) Map.of("verified", true, "userId", userId));
-                        log.info("Identity approved for user {} via Didit webhook", userId);
+                        changed = true;
                     }
+                    boolean promoted = promoteSellerIfPending(user);
+                    if (changed || promoted) {
+                        userRepository.save(user);
+                    }
+                    messagingTemplate.convertAndSend(
+                            "/topic/identity/" + userId,
+                            (Object) Map.of("verified", true, "seller", promoted, "userId", userId));
+                    log.info("Identity approved for user {} via Didit webhook (sellerPromoted={})",
+                            userId, promoted);
                 }
                 case "Declined" -> {
                     messagingTemplate.convertAndSend(
@@ -398,4 +412,26 @@ public class IdentityService {
                     "DIDIT_API_KEY not configured");
         }
     }
+
+    /**
+     * If the user has a PENDING seller application, approve it and promote the user to SELLER.
+     * The caller persists the user. Returns true when a promotion happened.
+     */
+    private boolean promoteSellerIfPending(User user) {
+        SellerApplication pending = sellerApplicationRepository
+                .findFirstByUserIdAndStatusOrderByCreatedAtDesc(
+                        user.getId(), SellerApplicationStatus.PENDING)
+                .orElse(null);
+        if (pending == null) {
+            return false;
+        }
+        pending.setStatus(SellerApplicationStatus.APPROVED);
+        pending.setDecidedAt(LocalDateTime.now());
+        sellerApplicationRepository.save(pending);
+        user.setIsVerifiedSeller(true);
+        user.setRole(Role.SELLER);
+        log.info("User {} promoted to SELLER via Didit (application {})", user.getId(), pending.getId());
+        return true;
+    }
 }
+

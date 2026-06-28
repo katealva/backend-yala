@@ -45,6 +45,12 @@ public class GlobalExceptionsHandler {
         return build(HttpStatus.BAD_REQUEST, "INVALID_BID", ex.getMessage(), request);
     }
 
+    @ExceptionHandler(IdentityValidationException.class)
+    public ResponseEntity<ErrorResponse> handleIdentityValidation(
+            IdentityValidationException ex, HttpServletRequest request) {
+        return build(HttpStatus.BAD_REQUEST, "IDENTITY_VALIDATION_FAILED", ex.getMessage(), request);
+    }
+
     @ExceptionHandler(AuctionNotActiveException.class)
     public ResponseEntity<ErrorResponse> handleAuctionNotActive(
             AuctionNotActiveException ex, HttpServletRequest request) {
