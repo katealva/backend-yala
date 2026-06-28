@@ -2,6 +2,7 @@ package com.yala.controller;
 
 import com.yala.dto.identity.RequestIdentityVerifyDTO;
 import com.yala.dto.identity.ResponseIdentityDTO;
+import com.yala.dto.identity.ResponseSessionDTO;
 import com.yala.service.IdentityService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -17,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/identity")
-@Tag(name = "Identity", description = "Verificación de identidad (DNI vía Didit/RENIEC)")
+@Tag(name = "Identity", description = "Verificación de identidad (KYC/KYB vía Didit)")
 public class IdentityController {
 
     private final IdentityService identityService;
@@ -26,8 +27,15 @@ public class IdentityController {
         this.identityService = identityService;
     }
 
+    @PostMapping("/session")
+    @Operation(summary = "Crea una sesión Didit KYB/KYC — devuelve { url, sessionId } para abrir el flujo")
+    public ResponseEntity<ResponseSessionDTO> createSession(
+            @AuthenticationPrincipal UserDetails userDetails) {
+        return ResponseEntity.ok(identityService.createSession(userDetails.getUsername()));
+    }
+
     @PostMapping("/verify")
-    @Operation(summary = "Verificar DNI del usuario autenticado contra RENIEC vía Didit")
+    @Operation(summary = "Verifica DNI del usuario autenticado contra RENIEC vía Didit Database Validation")
     public ResponseEntity<ResponseIdentityDTO> verify(
             @AuthenticationPrincipal UserDetails userDetails,
             @Valid @RequestBody RequestIdentityVerifyDTO request) {
@@ -35,7 +43,7 @@ public class IdentityController {
     }
 
     @PostMapping("/webhook")
-    @Operation(summary = "Webhook de Didit — verifica X-Signature-V2 (canonical JSON) y X-Timestamp")
+    @Operation(summary = "Webhook de Didit — X-Signature-V2 (canonical JSON + shortenFloats) y X-Timestamp")
     public ResponseEntity<Void> webhook(
             @RequestBody String rawBody,
             @RequestHeader(value = "X-Signature-V2", required = false) String signatureV2,

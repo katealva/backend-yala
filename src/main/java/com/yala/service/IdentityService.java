@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.yala.dto.identity.RequestIdentityVerifyDTO;
 import com.yala.dto.identity.ResponseIdentityDTO;
+import com.yala.dto.identity.ResponseSessionDTO;
 import com.yala.exceptions.ResourceNotFoundException;
 import com.yala.model.User;
 import com.yala.repository.UserRepository;
@@ -43,6 +44,12 @@ public class IdentityService {
     @Value("${didit.webhook-secret:}")
     private String diditWebhookSecret;
 
+    @Value("${didit.workflow-id:}")
+    private String diditWorkflowId;
+
+    @Value("${didit.callback-url:}")
+    private String diditCallbackUrl;
+
     public IdentityService(UserRepository userRepository,
                            SimpMessagingTemplate messagingTemplate,
                            RestClient.Builder restClientBuilder,
@@ -53,10 +60,68 @@ public class IdentityService {
         this.objectMapper = objectMapper;
     }
 
+    // -------------------------------------------------------------------------
+    // Session flow (KYB / full KYC)
+    // -------------------------------------------------------------------------
+
+    /**
+     * Creates a Didit verification session and returns { url, sessionId }.
+     * The frontend opens the url using the Didit SDK modal, iframe, or redirect.
+     * The decision arrives later via webhook (POST /api/v1/identity/webhook).
+     */
+    public ResponseSessionDTO createSession(String email) {
+        requireApiKey();
+        if (diditWorkflowId == null || diditWorkflowId.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
+                    "DIDIT_WORKFLOW_ID not configured");
+        }
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + email));
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("workflow_id", diditWorkflowId);
+        body.put("vendor_data", String.valueOf(user.getId()));
+        if (diditCallbackUrl != null && !diditCallbackUrl.isBlank()) {
+            body.put("callback", diditCallbackUrl);
+        }
+
+        try {
+            @SuppressWarnings("unchecked")
+            Map<String, Object> response = restClient.post()
+                    .uri("https://verification.didit.me/v3/session/")
+                    .header("x-api-key", diditApiKey)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(body)
+                    .retrieve()
+                    .body(Map.class);
+
+            if (response == null) {
+                throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,
+                        "Empty response from Didit session API");
+            }
+            log.info("Didit session created for user {}: sessionId={}", email,
+                    response.get("session_id"));
+            return new ResponseSessionDTO(
+                    (String) response.get("url"),
+                    (String) response.get("session_id"));
+        } catch (ResponseStatusException e) {
+            throw e;
+        } catch (Exception e) {
+            log.warn("Didit session creation failed: {}", e.getMessage());
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,
+                    "Didit session creation failed");
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // Standalone Database Validation (DNI vs RENIEC)
+    // -------------------------------------------------------------------------
+
     @Transactional
     public ResponseIdentityDTO verifyIdentity(String email, RequestIdentityVerifyDTO request) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + email));
 
         if (Boolean.TRUE.equals(user.getIsIdentityVerified())) {
             return new ResponseIdentityDTO(true, "already-verified", user.getId());
@@ -70,7 +135,7 @@ public class IdentityService {
             return new ResponseIdentityDTO(demoVerified, "demo", user.getId());
         }
 
-        boolean verified = callDidit(request);
+        boolean verified = callDatabaseValidation(request);
 
         if (verified) {
             user.setIsIdentityVerified(true);
@@ -78,24 +143,30 @@ public class IdentityService {
             messagingTemplate.convertAndSend(
                     "/topic/identity/" + user.getId(),
                     Map.of("verified", true, "userId", user.getId()));
-            log.info("Identity verified for user {} via Didit", email);
+            log.info("Identity verified for user {} via Didit Database Validation", email);
         }
 
         return new ResponseIdentityDTO(verified, "didit", user.getId());
     }
 
+    // -------------------------------------------------------------------------
+    // Webhook handler
+    // -------------------------------------------------------------------------
+
     /**
-     * Handles Didit webhooks following the official spec:
-     *  1. Validates X-Timestamp freshness (≤ 5 minutes, anti-replay).
-     *  2. Verifies X-Signature-V2 (HMAC-SHA256 over canonical sorted-key JSON) preferred;
-     *     falls back to X-Signature (HMAC-SHA256 over raw bytes).
-     *  3. Processes the event by webhook_type.
+     * Handles Didit webhooks per the official V3 spec:
+     *  1. X-Timestamp freshness ≤ 300 s (anti-replay).
+     *  2. X-Signature-V2: HMAC-SHA256 over shortenFloats → sortKeys → JSON.stringify
+     *     (or X-Signature fallback: HMAC over raw bytes).
+     *  3. Dispatch on webhook_type / status.
      */
     @Transactional
-    public void handleWebhook(String rawBody, String signatureV2, String signatureRaw, String timestamp) {
+    public void handleWebhook(String rawBody, String signatureV2, String signatureRaw,
+                              String timestamp) {
         if (diditWebhookSecret == null || diditWebhookSecret.isBlank()) {
             log.error("Didit webhook rejected: DIDIT_WEBHOOK_SECRET not configured");
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Webhook secret not configured");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED,
+                    "Webhook secret not configured");
         }
 
         validateTimestamp(timestamp);
@@ -111,7 +182,7 @@ public class IdentityService {
                 throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid X-Signature");
             }
         } else {
-            log.warn("Didit webhook rejected: no signature header present");
+            log.warn("Didit webhook rejected: no signature header");
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Missing webhook signature");
         }
 
@@ -119,12 +190,14 @@ public class IdentityService {
             @SuppressWarnings("unchecked")
             Map<String, Object> payload = objectMapper.readValue(rawBody, Map.class);
             String webhookType = (String) payload.get("webhook_type");
-            log.debug("Didit webhook received: type={}", webhookType);
+            log.debug("Didit webhook received: type={} status={}", webhookType,
+                    payload.get("status"));
 
             if ("status.updated".equals(webhookType)) {
                 processStatusUpdated(payload);
             }
-            // Other types (user.status.updated, transaction.created, etc.) can be added here.
+            // Future event types: user.status.updated, business.status.updated,
+            // transaction.created, transaction.status.updated, activity.created, etc.
         } catch (ResponseStatusException e) {
             throw e;
         } catch (Exception e) {
@@ -154,6 +227,7 @@ public class IdentityService {
         }
 
         userRepository.findById(userId).ifPresent(user -> {
+            // Exact case-sensitive status literals per Didit V3 spec.
             switch (status) {
                 case "Approved" -> {
                     if (!Boolean.TRUE.equals(user.getIsIdentityVerified())) {
@@ -171,11 +245,22 @@ public class IdentityService {
                             Map.of("verified", false, "status", "declined", "userId", userId));
                     log.info("Identity declined for user {} via Didit webhook", userId);
                 }
-                case "In Review"    -> log.info("Identity in review for user {}", userId);
-                case "In Progress"  -> log.info("Identity in progress for user {}", userId);
-                case "Resubmitted"  -> log.info("Identity resubmitted for user {}", userId);
-                case "Abandoned"    -> log.info("Identity session abandoned for user {}", userId);
-                case "Expired", "KYC Expired" -> log.info("Identity session expired for user {}", userId);
+                case "In Review"      -> log.info("Identity in review for user {}", userId);
+                case "In Progress"    -> log.info("Identity in progress for user {}", userId);
+                case "Awaiting User"  -> log.info("Identity awaiting user for user {}", userId);
+                case "Resubmitted"    -> log.info("Identity resubmitted for user {}", userId);
+                case "Abandoned"      -> log.info("Identity session abandoned for user {}", userId);
+                case "Expired"        -> log.info("Identity session expired for user {}", userId);
+                case "Kyc Expired"    -> {
+                    // Verified user's KYC has aged out — revoke and optionally create a new session.
+                    user.setIsIdentityVerified(false);
+                    userRepository.save(user);
+                    messagingTemplate.convertAndSend(
+                            "/topic/identity/" + userId,
+                            Map.of("verified", false, "status", "kyc-expired", "userId", userId));
+                    log.info("KYC expired for user {} — isIdentityVerified reset to false", userId);
+                }
+                case "Not Started"    -> log.debug("Identity not started for user {}", userId);
                 default -> log.warn("Unknown Didit status '{}' for user {}", status, userId);
             }
         });
@@ -187,15 +272,17 @@ public class IdentityService {
 
     /**
      * X-Signature-V2: HMAC-SHA256 over the canonical JSON.
-     * Canonical = all keys sorted alphabetically (recursively), Unicode characters not escaped.
-     * Matches Didit's "sorted, Unicode-preserved canonical JSON" spec.
+     * Canonical = shortenFloats (1.0 → 1) → sort keys alphabetically → JSON.stringify,
+     * Unicode characters NOT escaped. Matches Didit's Python server-side algorithm.
      */
     private boolean verifySignatureV2(String rawBody, String signature) {
         try {
             Object parsed = objectMapper.readValue(rawBody, Object.class);
+            Object shortened = shortenFloats(parsed);
+
             ObjectMapper canonical = objectMapper.copy()
                     .enable(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS);
-            String canonicalJson = canonical.writeValueAsString(parsed);
+            String canonicalJson = canonical.writeValueAsString(shortened);
 
             Mac mac = Mac.getInstance("HmacSHA256");
             mac.init(new SecretKeySpec(
@@ -212,10 +299,7 @@ public class IdentityService {
         }
     }
 
-    /**
-     * X-Signature: HMAC-SHA256 over the exact raw bytes of the request body.
-     * Fallback for stacks that guarantee byte-perfect body delivery.
-     */
+    /** X-Signature: HMAC-SHA256 over the exact raw request bytes (fallback). */
     private boolean verifySignatureRaw(String rawBody, String signature) {
         try {
             Mac mac = Mac.getInstance("HmacSHA256");
@@ -228,6 +312,30 @@ public class IdentityService {
             log.warn("X-Signature verification error: {}", e.getMessage());
             return false;
         }
+    }
+
+    /**
+     * Normalises whole-number floats to integers recursively.
+     * Mirrors the JS shortenFloats() helper in Didit's official Node/Next.js example.
+     * Required before computing X-Signature-V2: Didit's server uses the same transform,
+     * so without it any payload containing e.g. "score": 1.0 would fail verification.
+     */
+    @SuppressWarnings("unchecked")
+    private Object shortenFloats(Object value) {
+        if (value instanceof Map<?, ?> map) {
+            Map<String, Object> result = new java.util.LinkedHashMap<>();
+            for (var entry : map.entrySet()) {
+                result.put(String.valueOf(entry.getKey()), shortenFloats(entry.getValue()));
+            }
+            return result;
+        }
+        if (value instanceof List<?> list) {
+            return list.stream().map(this::shortenFloats).toList();
+        }
+        if (value instanceof Double d && !d.isInfinite() && !d.isNaN() && d % 1 == 0) {
+            return d.longValue();
+        }
+        return value;
     }
 
     private void validateTimestamp(String timestamp) {
@@ -245,11 +353,11 @@ public class IdentityService {
     }
 
     // -------------------------------------------------------------------------
-    // Didit Database Validation API call
+    // Didit Database Validation API (standalone DNI vs RENIEC)
     // -------------------------------------------------------------------------
 
     @SuppressWarnings("unchecked")
-    private boolean callDidit(RequestIdentityVerifyDTO request) {
+    private boolean callDatabaseValidation(RequestIdentityVerifyDTO request) {
         try {
             Map<String, Object> body = new HashMap<>();
             body.put("issuing_state", "PER");
@@ -277,8 +385,19 @@ public class IdentityService {
             Map<?, ?> dv = (Map<?, ?>) dvObj;
             return "Approved".equals(dv.get("status"));
         } catch (Exception e) {
-            log.warn("Didit API call failed: {}", e.getMessage());
+            log.warn("Didit Database Validation call failed: {}", e.getMessage());
             return false;
+        }
+    }
+
+    // -------------------------------------------------------------------------
+    // Internal helpers
+    // -------------------------------------------------------------------------
+
+    private void requireApiKey() {
+        if (diditApiKey == null || diditApiKey.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
+                    "DIDIT_API_KEY not configured");
         }
     }
 }
