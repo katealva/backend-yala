@@ -6,12 +6,12 @@ import com.yala.service.IdentityService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import java.util.Map;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -35,9 +35,11 @@ public class IdentityController {
     }
 
     @PostMapping("/webhook")
-    @Operation(summary = "Webhook de Didit (status.updated) — endpoint público para callbacks de Didit")
-    public ResponseEntity<Void> webhook(@RequestBody Map<String, Object> payload) {
-        identityService.handleWebhook(payload);
+    @Operation(summary = "Webhook de Didit — verifica firma HMAC-SHA256 en x-signature antes de procesar")
+    public ResponseEntity<Void> webhook(
+            @RequestBody String rawBody,
+            @RequestHeader(value = "x-signature", required = false) String signature) {
+        identityService.handleWebhook(rawBody, signature);
         return ResponseEntity.ok().build();
     }
 }
