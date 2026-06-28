@@ -55,6 +55,9 @@ public class EventListeners {
     @Value("${app.base-url:http://localhost:8081}")
     private String baseUrl;
 
+    @Value("${app.web-url:http://localhost:5173}")
+    private String webUrl;
+
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -154,13 +157,14 @@ public class EventListeners {
                         null,
                         auction.getWinner().getName()));
 
-        String orderUrl = baseUrl + "/orders/" + order.getId();
+        String payUrl = webUrl + "/checkout?orderId=" + order.getId();
+        String sellerUrl = webUrl + "/seller";
         emailService.sendAuctionWon(
                 auction.getWinner().getEmail(),
                 auction.getWinner().getName(),
                 listing.getTitle(),
                 auction.getCurrentPrice(),
-                orderUrl,
+                payUrl,
                 order.getId());
         emailService.sendSaleConfirmed(
                 listing.getSeller().getEmail(),
@@ -168,7 +172,7 @@ public class EventListeners {
                 listing.getTitle(),
                 auction.getWinner().getName(),
                 auction.getCurrentPrice(),
-                orderUrl,
+                sellerUrl,
                 order.getId());
 
         log.info("Auction {} order {} materialized for winner {}",
