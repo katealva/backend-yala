@@ -5,10 +5,16 @@ import com.yala.model.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import com.yala.config.ModelMapperConfig;
 import com.yala.exceptions.OrderNotConfirmableException;
 import com.yala.exceptions.ResourceNotFoundException;
@@ -231,6 +237,25 @@ class OrderServiceTest {
         ResponseOrderDTO response = orderService.findById(70L, "ada@yala.pe");
 
         assertThat(response.id()).isEqualTo(70L);
+    }
+
+    @Test
+    void shouldListSellerSalesIncludingLiveAuctionWins() {
+        User seller = seller();
+        Order liveWin = Order.builder()
+                .id(80L).amount(120f).status(OrderStatus.PENDING)
+                .liveAuction(LiveAuction.builder().id(5L).title("Sobre Pokémon 151").build())
+                .buyer(buyer()).seller(seller).build();
+        when(userRepository.findByEmail("bob@yala.pe")).thenReturn(Optional.of(seller));
+        when(orderRepository.findBySellerId(eq(2L), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(List.of(liveWin)));
+
+        Page<ResponseOrderDTO> page = orderService.findBySeller("bob@yala.pe", PageRequest.of(0, 20));
+
+        assertThat(page.getContent()).hasSize(1);
+        assertThat(page.getContent().get(0).id()).isEqualTo(80L);
+        assertThat(page.getContent().get(0).status()).isEqualTo("PENDING");
+        assertThat(page.getContent().get(0).buyer().id()).isEqualTo(1L);
     }
 
     @Test

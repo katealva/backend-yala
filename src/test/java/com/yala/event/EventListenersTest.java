@@ -210,7 +210,7 @@ class EventListenersTest {
                 any(),
                 eq("Pikachu Illustrator"),
                 eq(500f),
-                contains("/orders/999"),
+                contains("/checkout?orderId=999"),
                 eq(999L));
         verify(emailService).sendSaleConfirmed(
                 eq(seller.getEmail()),
@@ -218,7 +218,7 @@ class EventListenersTest {
                 eq("Pikachu Illustrator"),
                 any(),
                 eq(500f),
-                contains("/orders/999"),
+                contains("/seller"),
                 eq(999L));
     }
 

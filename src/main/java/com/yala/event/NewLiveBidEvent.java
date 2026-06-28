@@ -6,6 +6,7 @@ package com.yala.event;
  */
 public record NewLiveBidEvent(
         Long liveAuctionId,
+        Long bidId,
         Float newBidAmount,
         Long previousBidderId,
         Long currentBidderId) {

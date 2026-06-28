@@ -19,17 +19,17 @@
                 <p>Hola <span th:text="${recipientName}">coleccionista</span>,</p>
                 <p>
                     La subasta de <strong th:text="${listingTitle}">esta publicación</strong>
-                    ya terminó y vos sos el ganador.
+                    ya terminó y tú eres el ganador.
                 </p>
                 <p style="font-size: 18px; margin: 24px 0;">
                     Precio final:
                     <strong>S/. <span th:text="${#numbers.formatDecimal(finalPrice, 1, 2)}">0.00</span></strong>
                 </p>
-                <p>Te creamos una orden automáticamente. Revisala para coordinar el pago y la entrega con el vendedor.</p>
+                <p>Tienes <strong>48 horas</strong> para completar el pago con Mercado Pago. Haz clic abajo para pagar de forma segura.</p>
                 <p style="text-align: center; margin: 32px 0;">
                     <a th:href="${orderUrl}" href="#"
                        style="background-color: #2e7d32; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 4px; display: inline-block;">
-                        Ver mi orden
+                        Pagar ahora
                     </a>
                 </p>
             </td>

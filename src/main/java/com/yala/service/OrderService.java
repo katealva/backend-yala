@@ -79,6 +79,14 @@ public class OrderService {
     }
 
     @Transactional(readOnly = true)
+    public Page<ResponseOrderDTO> findBySeller(String sellerEmail, Pageable pageable) {
+        User seller = userRepository.findByEmail(sellerEmail)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        return orderRepository.findBySellerId(seller.getId(), pageable)
+                .map(o -> modelMapper.map(o, ResponseOrderDTO.class));
+    }
+
+    @Transactional(readOnly = true)
     public Page<ResponseOrderDTO> findByBuyerAndStatus(
             String buyerEmail, OrderStatus status, Pageable pageable) {
         User buyer = userRepository.findByEmail(buyerEmail)
