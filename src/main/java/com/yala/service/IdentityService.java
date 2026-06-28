@@ -36,7 +36,7 @@ public class IdentityService {
     private final UserRepository userRepository;
     private final SimpMessagingTemplate messagingTemplate;
     private final RestClient restClient;
-    private final ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Value("${didit.api-key:}")
     private String diditApiKey;
@@ -52,12 +52,10 @@ public class IdentityService {
 
     public IdentityService(UserRepository userRepository,
                            SimpMessagingTemplate messagingTemplate,
-                           RestClient.Builder restClientBuilder,
-                           ObjectMapper objectMapper) {
+                           RestClient.Builder restClientBuilder) {
         this.userRepository = userRepository;
         this.messagingTemplate = messagingTemplate;
         this.restClient = restClientBuilder.build();
-        this.objectMapper = objectMapper;
     }
 
     // -------------------------------------------------------------------------
