@@ -46,6 +46,15 @@ public class User {
     @Column(nullable = false, length = 100)
     private String name;
 
+    /** DNI (8 dígitos) validado contra RENIEC vía JSON.pe en el registro. Único por cuenta. */
+    @Column(unique = true, length = 8)
+    private String dni;
+
+    /** Nombres y apellidos oficiales (de RENIEC), capturados en el registro de comprador. */
+    private String nombres;
+    private String apellidoPaterno;
+    private String apellidoMaterno;
+
     @NotNull
     @Email
     @Column(nullable = false, unique = true)

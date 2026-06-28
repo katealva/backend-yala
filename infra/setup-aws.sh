@@ -130,6 +130,9 @@ prompt_secret /yala/prod/mp-public-key    "MercadoPago public key"
 prompt_secret /yala/prod/livekit-url        "LiveKit URL (wss://...)"
 prompt_secret /yala/prod/livekit-api-key    "LiveKit API key"
 prompt_secret /yala/prod/livekit-api-secret "LiveKit API secret"
+prompt_secret /yala/prod/jsonpe-api-key      "JSON.pe API key (validación DNI)"
+prompt_secret /yala/prod/didit-api-key       "Didit API key (KYC vendedores)"
+prompt_secret /yala/prod/didit-webhook-secret "Didit webhook secret"
 
 # -----------------------------------------------------------------------------
 # 5) CloudWatch log group
