@@ -53,3 +53,26 @@ public class IdentityController {
         return ResponseEntity.ok().build();
     }
 }
+
+// Separate controller for the /api/webhooks destination registered in Didit Business Console.
+// Didit sends all webhooks to https://yala.dpdns.org/api/webhooks; this delegates to IdentityService.
+@org.springframework.web.bind.annotation.RestController
+@org.springframework.web.bind.annotation.RequestMapping("/api/webhooks")
+class DiditWebhookAlias {
+
+    private final IdentityService identityService;
+
+    DiditWebhookAlias(IdentityService identityService) {
+        this.identityService = identityService;
+    }
+
+    @PostMapping
+    public ResponseEntity<Void> didit(
+            @RequestBody String rawBody,
+            @RequestHeader(value = "X-Signature-V2", required = false) String signatureV2,
+            @RequestHeader(value = "X-Signature",    required = false) String signatureRaw,
+            @RequestHeader(value = "X-Timestamp",    required = false) String timestamp) {
+        identityService.handleWebhook(rawBody, signatureV2, signatureRaw, timestamp);
+        return ResponseEntity.ok().build();
+    }
+}
