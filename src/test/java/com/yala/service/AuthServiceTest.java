@@ -14,6 +14,7 @@ import com.yala.dto.auth.RequestLoginDTO;
 import com.yala.dto.auth.RequestRefreshTokenDTO;
 import com.yala.dto.auth.RequestRegisterDTO;
 import com.yala.exceptions.EmailAlreadyExistsException;
+import com.yala.exceptions.IdentityValidationException;
 import com.yala.exceptions.UnauthorizedException;
 import com.yala.security.JwtService;
 import com.yala.model.Role;
@@ -39,13 +40,21 @@ class AuthServiceTest {
     @Mock
     private JwtService jwtService;
 
+    @Mock
+    private JsonPeService jsonPeService;
+
     @InjectMocks
     private AuthService authService;
 
+    private static RequestRegisterDTO sampleRegister() {
+        return new RequestRegisterDTO(
+                "12345678", "ada@yala.pe", "password123", "Ada", "Lovelace", "Byron");
+    }
+
     @Test
     void shouldRegisterUserWhenEmailIsUnique() {
-        RequestRegisterDTO request = new RequestRegisterDTO(
-                "Ada Lovelace", "ada@yala.pe", "password123", Role.USER);
+        // jsonPeService.isConfigured() defaults to false → demo mode (no external check).
+        RequestRegisterDTO request = sampleRegister();
         when(userRepository.existsByEmail("ada@yala.pe")).thenReturn(false);
         when(passwordEncoder.encode("password123")).thenReturn("hashed-password");
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> {
@@ -67,13 +76,61 @@ class AuthServiceTest {
 
     @Test
     void shouldThrowEmailAlreadyExistsExceptionWhenEmailIsDuplicated() {
-        RequestRegisterDTO request = new RequestRegisterDTO(
-                "Ada Lovelace", "ada@yala.pe", "password123", Role.USER);
+        RequestRegisterDTO request = sampleRegister();
         when(userRepository.existsByEmail("ada@yala.pe")).thenReturn(true);
 
         assertThatThrownBy(() -> authService.register(request))
                 .isInstanceOf(EmailAlreadyExistsException.class);
         verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    void shouldRejectRegistrationWhenDniNotFoundInJsonPe() {
+        RequestRegisterDTO request = sampleRegister();
+        when(userRepository.existsByEmail("ada@yala.pe")).thenReturn(false);
+        when(jsonPeService.isConfigured()).thenReturn(true);
+        when(jsonPeService.lookup("12345678")).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> authService.register(request))
+                .isInstanceOf(IdentityValidationException.class)
+                .hasMessageContaining("No se encontró un DNI válido");
+        verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    void shouldRejectRegistrationWhenNamesDoNotMatch() {
+        RequestRegisterDTO request = sampleRegister();
+        when(userRepository.existsByEmail("ada@yala.pe")).thenReturn(false);
+        when(jsonPeService.isConfigured()).thenReturn(true);
+        when(jsonPeService.lookup("12345678")).thenReturn(Optional.of(
+                new JsonPeService.DniRecord("OTRO", "NOMBRE", "DISTINTO", "NOMBRE DISTINTO, OTRO")));
+
+        assertThatThrownBy(() -> authService.register(request))
+                .isInstanceOf(IdentityValidationException.class);
+        verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    void shouldRegisterWhenJsonPeNamesMatchIgnoringCaseAndAccents() {
+        RequestRegisterDTO request = sampleRegister();
+        when(userRepository.existsByEmail("ada@yala.pe")).thenReturn(false);
+        when(jsonPeService.isConfigured()).thenReturn(true);
+        // RENIEC returns uppercase/accented variants; comparison must be tolerant.
+        when(jsonPeService.lookup("12345678")).thenReturn(Optional.of(
+                new JsonPeService.DniRecord("ADA", "LÓVELACE", "BYRON", "LOVELACE BYRON, ADA")));
+        when(passwordEncoder.encode("password123")).thenReturn("hashed-password");
+        when(userRepository.save(any(User.class))).thenAnswer(inv -> {
+            User saved = inv.getArgument(0);
+            saved.setId(1L);
+            return saved;
+        });
+        when(jwtService.generateAccessToken(any(User.class))).thenReturn("access-token");
+        when(jwtService.generateRefreshToken(any(User.class))).thenReturn("refresh-token");
+
+        ResponseAuthDTO response = authService.register(request);
+
+        assertThat(response.role()).isEqualTo(Role.USER);
+        verify(userRepository).save(any(User.class));
     }
 
     @Test
