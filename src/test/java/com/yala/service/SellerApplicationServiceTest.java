@@ -14,6 +14,8 @@ import com.yala.dto.seller.RequestSellerApplicationDTO;
 import com.yala.dto.seller.ResponseSellerApplicationDTO;
 import com.yala.exceptions.DuplicateResourceException;
 import java.util.Optional;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -50,6 +52,7 @@ class SellerApplicationServiceTest {
             a.setId(5L);
             return a;
         });
+        when(identityService.isConfigured()).thenReturn(true);
         when(identityService.createSession("ada@yala.pe"))
                 .thenReturn(new ResponseSessionDTO("https://verify.didit.me/s/abc", "sess-1"));
 
@@ -59,6 +62,25 @@ class SellerApplicationServiceTest {
         assertThat(dto.storeName()).isEqualTo("CardVault PE");
         assertThat(dto.diditUrl()).isEqualTo("https://verify.didit.me/s/abc");
         verify(identityService).createSession("ada@yala.pe");
+    }
+
+    @Test
+    void shouldPropagateWhenDiditSessionFailsWhileConfigured() {
+        when(userRepository.findByEmail("ada@yala.pe")).thenReturn(Optional.of(user(Role.USER)));
+        when(sellerApplicationRepository.findFirstByUserIdAndStatusOrderByCreatedAtDesc(
+                2L, SellerApplicationStatus.PENDING)).thenReturn(Optional.empty());
+        when(sellerApplicationRepository.save(any(SellerApplication.class))).thenAnswer(inv -> {
+            SellerApplication a = inv.getArgument(0);
+            a.setId(5L);
+            return a;
+        });
+        when(identityService.isConfigured()).thenReturn(true);
+        when(identityService.createSession("ada@yala.pe"))
+                .thenThrow(new ResponseStatusException(HttpStatus.BAD_GATEWAY, "Didit session creation failed"));
+
+        // No se traga el error: propaga para que el front muestre un fallo real (y la tx hace rollback).
+        assertThatThrownBy(() -> service.apply("ada@yala.pe", request()))
+                .isInstanceOf(ResponseStatusException.class);
     }
 
     @Test

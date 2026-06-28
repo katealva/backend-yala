@@ -85,6 +85,9 @@ public class IdentityService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found: " + email));
 
+        log.info("Creating Didit session for {} (workflow_id length={})",
+                email, diditWorkflowId.length());
+
         Map<String, Object> body = new HashMap<>();
         body.put("workflow_id", diditWorkflowId);
         body.put("vendor_data", String.valueOf(user.getId()));
@@ -411,6 +414,12 @@ public class IdentityService {
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,
                     "DIDIT_API_KEY not configured");
         }
+    }
+
+    /** True when Didit is fully configured (api-key + workflow-id) for the seller KYC flow. */
+    public boolean isConfigured() {
+        return diditApiKey != null && !diditApiKey.isBlank()
+                && diditWorkflowId != null && !diditWorkflowId.isBlank();
     }
 
     /**
