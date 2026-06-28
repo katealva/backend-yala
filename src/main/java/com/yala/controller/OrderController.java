@@ -50,6 +50,16 @@ public class OrderController {
         return ResponseEntity.ok(orderService.findByBuyer(auth.getName(), pageable));
     }
 
+    @GetMapping("/my-sales")
+    @PreAuthorize("hasAnyRole('SELLER','ADMIN')")
+    @Operation(summary = "Lista paginada de ventas del vendedor autenticado (ganadores de subastas en vivo y compras)")
+    public ResponseEntity<Page<ResponseOrderDTO>> findMySales(
+            Authentication auth,
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC)
+                    Pageable pageable) {
+        return ResponseEntity.ok(orderService.findBySeller(auth.getName(), pageable));
+    }
+
     @GetMapping("/pending-payment")
     @Operation(summary = "Órdenes PENDING del comprador autenticado (lista de pendientes de pago)")
     public ResponseEntity<Page<ResponseOrderDTO>> findPendingPayment(

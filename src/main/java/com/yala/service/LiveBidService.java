@@ -84,7 +84,7 @@ public class LiveBidService {
         liveAuctionRepository.save(auction);
 
         eventPublisher.publishEvent(new NewLiveBidEvent(
-                auction.getId(), request.amount(), previousBidderId, bidder.getId()));
+                auction.getId(), bid.getId(), request.amount(), previousBidderId, bidder.getId()));
 
         log.info("Live bid {} placed on flash auction {} by {} for {}",
                 bid.getId(), auction.getId(), bidder.getEmail(), request.amount());

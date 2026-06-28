@@ -2,6 +2,7 @@ package com.yala.event;
 
 import com.yala.dto.live.LiveUpdateMessage;
 import com.yala.dto.live.ResponseLiveAuctionDTO;
+import com.yala.dto.live.ResponseLiveCommentDTO;
 import com.yala.exceptions.ResourceNotFoundException;
 import com.yala.model.LiveAuction;
 import com.yala.model.LiveAuctionStatus;
@@ -83,6 +84,17 @@ public class LiveEventListeners {
                             webUrl + "/live/" + auction.getLiveStream().getId(),
                             auction.getId()));
         }
+        // Surface every bid in the live chat so all viewers see it (ephemeral, not persisted).
+        userRepository.findById(event.currentBidderId()).ifPresent(bidder -> {
+            ResponseLiveCommentDTO chatMsg = new ResponseLiveCommentDTO(
+                    -event.bidId(),
+                    "pujó S/. " + formatAmount(event.newBidAmount()),
+                    LocalDateTime.now(),
+                    bidder.getName(),
+                    bidder.getId());
+            messagingTemplate.convertAndSend(
+                    "/topic/live/" + auction.getLiveStream().getId() + "/chat", chatMsg);
+        });
         broadcastAuction(auction, "BID");
     }
 
@@ -113,11 +125,13 @@ public class LiveEventListeners {
             notificationService.createNotification(seller.getId(), NotificationType.SALE_CONFIRMED,
                     "Vendiste " + auction.getTitle() + " en tu live.");
 
-            String orderUrl = webUrl + "/orders/" + order.getId();
+            // Winner pays via Mercado Pago (the checkout route creates the preference and redirects).
+            String payUrl = webUrl + "/checkout?orderId=" + order.getId();
+            String sellerUrl = webUrl + "/seller";
             emailService.sendAuctionWon(winner.getEmail(), winner.getName(),
-                    auction.getTitle(), amount, orderUrl, order.getId());
+                    auction.getTitle(), amount, payUrl, order.getId());
             emailService.sendSaleConfirmed(seller.getEmail(), seller.getName(),
-                    auction.getTitle(), winner.getName(), amount, orderUrl, order.getId());
+                    auction.getTitle(), winner.getName(), amount, sellerUrl, order.getId());
 
             log.info("Flash auction {} sold; order {} created for winner {} (deadline {})",
                     auction.getId(), order.getId(), winner.getEmail(), order.getPaymentDeadline());
@@ -154,6 +168,12 @@ public class LiveEventListeners {
         messagingTemplate.convertAndSend(
                 "/topic/live/" + auction.getLiveStream().getId(),
                 new LiveUpdateMessage(type, dto));
+    }
+
+    /** Money for chat text: drop the trailing ".0" when the amount is a whole number. */
+    private String formatAmount(Float amount) {
+        if (amount == null) return "0";
+        return amount == Math.floor(amount) ? String.valueOf(amount.longValue()) : String.valueOf(amount);
     }
 
     private LiveAuction loadAuction(Long id) {
