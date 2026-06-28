@@ -35,11 +35,13 @@ public class IdentityController {
     }
 
     @PostMapping("/webhook")
-    @Operation(summary = "Webhook de Didit — verifica firma HMAC-SHA256 en x-signature antes de procesar")
+    @Operation(summary = "Webhook de Didit — verifica X-Signature-V2 (canonical JSON) y X-Timestamp")
     public ResponseEntity<Void> webhook(
             @RequestBody String rawBody,
-            @RequestHeader(value = "x-signature", required = false) String signature) {
-        identityService.handleWebhook(rawBody, signature);
+            @RequestHeader(value = "X-Signature-V2", required = false) String signatureV2,
+            @RequestHeader(value = "X-Signature",    required = false) String signatureRaw,
+            @RequestHeader(value = "X-Timestamp",    required = false) String timestamp) {
+        identityService.handleWebhook(rawBody, signatureV2, signatureRaw, timestamp);
         return ResponseEntity.ok().build();
     }
 }
