@@ -14,6 +14,7 @@ import com.yala.exceptions.UnauthorizedException;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.stream.Collectors;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 /** Centralizes exception-to-HTTP mapping, returning a consistent {@link ErrorResponse}. */
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionsHandler {
 
@@ -126,6 +128,9 @@ public class GlobalExceptionsHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleUnexpected(
             Exception ex, HttpServletRequest request) {
+        // Log the full stacktrace: unexpected 500s must be diagnosable from CloudWatch.
+        log.error("Unhandled exception on {} {}: {}",
+                request.getMethod(), request.getRequestURI(), ex.getMessage(), ex);
         return build(HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL_ERROR",
                 "An unexpected error occurred", request);
     }

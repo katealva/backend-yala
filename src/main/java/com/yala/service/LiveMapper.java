@@ -10,16 +10,27 @@ import com.yala.model.LiveAuction;
 import com.yala.model.LiveBid;
 import com.yala.model.LiveComment;
 import com.yala.model.LiveStream;
-import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
+import com.yala.model.User;
 import org.springframework.stereotype.Component;
 
-/** Builds the Live* response DTOs, reusing the shared {@link ModelMapper} for nested users. */
+/** Builds the Live* response DTOs. Nested users are mapped by hand to avoid ModelMapper choking on
+ *  Hibernate lazy proxies when targeting the immutable {@link ResponseUserDTO} record. */
 @Component
-@RequiredArgsConstructor
 public class LiveMapper {
 
-    private final ModelMapper modelMapper;
+    /** Null-safe User -> ResponseUserDTO. Getters initialize the lazy proxy inside the caller's tx. */
+    private ResponseUserDTO toUser(User u) {
+        if (u == null) return null;
+        return new ResponseUserDTO(
+                u.getId(),
+                u.getName(),
+                u.getEmail(),
+                u.getAvatarUrl(),
+                u.getReputation(),
+                u.getIsVerifiedSeller(),
+                u.getIsIdentityVerified(),
+                u.getRole());
+    }
 
     public ResponseLiveSummaryDTO toSummary(LiveStream s) {
         if (s == null) return null;
@@ -43,7 +54,7 @@ public class LiveMapper {
                 s.getCoverImageUrl(),
                 s.getStartedAt(),
                 s.getEndedAt(),
-                modelMapper.map(s.getSeller(), ResponseUserDTO.class),
+                toUser(s.getSeller()),
                 activeAuction);
     }
 
@@ -68,7 +79,7 @@ public class LiveMapper {
                 b.getId(),
                 b.getAmount(),
                 b.getPlacedAt(),
-                modelMapper.map(b.getBidder(), ResponseUserDTO.class));
+                toUser(b.getBidder()));
     }
 
     public ResponseLiveCommentDTO toCommentDto(LiveComment c) {
