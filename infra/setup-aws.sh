@@ -112,6 +112,7 @@ put_param /yala/prod/db-user        String       "$DB_USER"
 put_param /yala/prod/aws-s3-bucket  String       "yala-bucket-prod"
 put_param /yala/prod/app-base-url   String       "http://localhost:8081"
 put_param /yala/prod/app-web-url    String       "https://main.d3lg9y66c0qtho.amplifyapp.com"
+put_param /yala/prod/didit-workflow-id String   "458fe249-28d7-4aac-8dbf-c6c302dac434"
 
 prompt_secret () {
   local key="$1" label="$2" existing
