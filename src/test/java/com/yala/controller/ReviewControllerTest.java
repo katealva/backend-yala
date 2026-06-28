@@ -54,7 +54,7 @@ class ReviewControllerTest {
 
     private ResponseUserDTO sampleAuthor() {
         return new ResponseUserDTO(1L, "Ada Lovelace", "ada@yala.pe",
-                null, 4.5f, false, Role.USER);
+                null, 4.5f, false, false, Role.USER);
     }
 
     private ResponseReviewDTO sampleReview() {

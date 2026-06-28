@@ -142,7 +142,7 @@ public class IdentityService {
             userRepository.save(user);
             messagingTemplate.convertAndSend(
                     "/topic/identity/" + user.getId(),
-                    Map.of("verified", true, "userId", user.getId()));
+                    (Object) Map.of("verified", true, "userId", user.getId()));
             log.info("Identity verified for user {} via Didit Database Validation", email);
         }
 
@@ -235,14 +235,14 @@ public class IdentityService {
                         userRepository.save(user);
                         messagingTemplate.convertAndSend(
                                 "/topic/identity/" + userId,
-                                Map.of("verified", true, "userId", userId));
+                                (Object) Map.of("verified", true, "userId", userId));
                         log.info("Identity approved for user {} via Didit webhook", userId);
                     }
                 }
                 case "Declined" -> {
                     messagingTemplate.convertAndSend(
                             "/topic/identity/" + userId,
-                            Map.of("verified", false, "status", "declined", "userId", userId));
+                            (Object) Map.of("verified", false, "status", "declined", "userId", userId));
                     log.info("Identity declined for user {} via Didit webhook", userId);
                 }
                 case "In Review"      -> log.info("Identity in review for user {}", userId);
@@ -257,7 +257,7 @@ public class IdentityService {
                     userRepository.save(user);
                     messagingTemplate.convertAndSend(
                             "/topic/identity/" + userId,
-                            Map.of("verified", false, "status", "kyc-expired", "userId", userId));
+                            (Object) Map.of("verified", false, "status", "kyc-expired", "userId", userId));
                     log.info("KYC expired for user {} — isIdentityVerified reset to false", userId);
                 }
                 case "Not Started"    -> log.debug("Identity not started for user {}", userId);

@@ -113,6 +113,7 @@ public class ModelMapperConfig {
                 source.getAvatarUrl(),
                 source.getReputation(),
                 source.getIsVerifiedSeller(),
+                source.getIsIdentityVerified(),
                 source.getRole());
     }
 
