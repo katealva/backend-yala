@@ -97,11 +97,14 @@ public class IdentityService {
 
         try {
             @SuppressWarnings("unchecked")
+            // Send a pre-serialized JSON String. Passing the Map directly makes the (JDK HttpClient)
+            // transport drop the body, so Didit receives no workflow_id → 400 "This field is required".
+            String payload = objectMapper.writeValueAsString(body);
             Map<String, Object> response = restClient.post()
                     .uri("https://verification.didit.me/v3/session/")
                     .header("x-api-key", diditApiKey)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .body(body)
+                    .body(payload)
                     .retrieve()
                     .body(Map.class);
 
@@ -386,11 +389,13 @@ public class IdentityService {
             }
             body.put("save_api_request", Boolean.FALSE);
 
+            // Pre-serialized JSON String (see createSession): a Map body is dropped by the transport.
+            String payload = objectMapper.writeValueAsString(body);
             Map<?, ?> response = restClient.post()
                     .uri("https://verification.didit.me/v3/database-validation/")
                     .header("x-api-key", diditApiKey)
                     .contentType(MediaType.APPLICATION_JSON)
-                    .body(body)
+                    .body(payload)
                     .retrieve()
                     .body(Map.class);
 
