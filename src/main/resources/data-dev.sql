@@ -6,9 +6,9 @@
 
 -- 3 categorías
 INSERT INTO categories (id, name, description) VALUES
-    (1, 'Pokémon TCG',  'Cartas coleccionables del Pokémon Trading Card Game.'),
-    (2, 'Funko Pop',    'Figuras coleccionables Funko Pop de cultura geek.'),
-    (3, 'Comics',       'Cómics Marvel, DC, manga y novelas gráficas.')
+    (1, 'Cartas TCG', 'Cartas coleccionables: Pokémon, Magic, Yu-Gi-Oh y más.'),
+    (2, 'Figuras',    'Figuras coleccionables: Funko Pop, estatuas, modelos y más.'),
+    (3, 'Comics',     'Cómics Marvel, DC, manga y novelas gráficas.')
 ON CONFLICT (name) DO NOTHING;
 
 -- 2 usuarios (1 USER + 1 SELLER verified)
