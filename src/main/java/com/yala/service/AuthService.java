@@ -9,10 +9,14 @@ import com.yala.exceptions.EmailAlreadyExistsException;
 import com.yala.exceptions.IdentityValidationException;
 import com.yala.exceptions.UnauthorizedException;
 import com.yala.security.JwtService;
+import com.yala.model.PasswordResetCode;
 import com.yala.model.Role;
 import com.yala.model.User;
+import com.yala.repository.PasswordResetCodeRepository;
 import com.yala.repository.UserRepository;
 import com.yala.util.TextNormalizer;
+import java.security.SecureRandom;
+import java.time.LocalDateTime;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -23,17 +27,24 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class AuthService {
 
+    private static final SecureRandom RANDOM = new SecureRandom();
+
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final JsonPeService jsonPeService;
+    private final PasswordResetCodeRepository passwordResetCodeRepository;
+    private final EmailService emailService;
 
     public AuthService(UserRepository userRepository, PasswordEncoder passwordEncoder,
-            JwtService jwtService, JsonPeService jsonPeService) {
+            JwtService jwtService, JsonPeService jsonPeService,
+            PasswordResetCodeRepository passwordResetCodeRepository, EmailService emailService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.jsonPeService = jsonPeService;
+        this.passwordResetCodeRepository = passwordResetCodeRepository;
+        this.emailService = emailService;
     }
 
     /**
@@ -119,6 +130,43 @@ public class AuthService {
                         new UnauthorizedException("Invalid or expired refresh token"));
         String accessToken = jwtService.generateAccessToken(user);
         return ResponseAuthDTO.of(user, accessToken, token);
+    }
+
+    /**
+     * Generates a 6-digit code (valid 15 min) and emails it to the user. Responds the same whether or
+     * not the email exists, to avoid leaking which addresses are registered.
+     */
+    @Transactional
+    public void forgotPassword(String email) {
+        userRepository.findByEmail(email).ifPresent(user -> {
+            String code = String.format("%06d", RANDOM.nextInt(1_000_000));
+            passwordResetCodeRepository.save(PasswordResetCode.builder()
+                    .user(user)
+                    .code(code)
+                    .expiresAt(LocalDateTime.now().plusMinutes(15))
+                    .used(false)
+                    .build());
+            emailService.sendPasswordReset(user.getEmail(), user.getName(), code);
+            log.info("Password reset code generated for {}", user.getEmail());
+        });
+    }
+
+    /** Validates the code (match, unused, not expired) and sets the new password. */
+    @Transactional
+    public void resetPassword(String email, String code, String newPassword) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UnauthorizedException("Código inválido o expirado."));
+        PasswordResetCode resetCode = passwordResetCodeRepository
+                .findFirstByUserIdAndCodeAndUsedFalseOrderByCreatedAtDesc(user.getId(), code)
+                .orElseThrow(() -> new UnauthorizedException("Código inválido o expirado."));
+        if (resetCode.getExpiresAt().isBefore(LocalDateTime.now())) {
+            throw new UnauthorizedException("Código inválido o expirado.");
+        }
+        user.setPasswordHash(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+        resetCode.setUsed(true);
+        passwordResetCodeRepository.save(resetCode);
+        log.info("Password reset completed for {}", user.getEmail());
     }
 
     private ResponseAuthDTO buildAuthResponse(User user) {

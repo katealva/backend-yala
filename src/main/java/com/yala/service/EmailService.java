@@ -92,6 +92,15 @@ public class EmailService {
                 "order-confirmed/" + orderId);
     }
 
+    @Async
+    public void sendPasswordReset(String to, String recipientName, String code) {
+        send(to, "Tu código para restablecer la contraseña — Yala", "email/password-reset",
+                Map.of(
+                        "recipientName", recipientName,
+                        "code", code),
+                "password-reset/" + to + "/" + code);
+    }
+
     private void send(String to, String subject, String templateName,
             Map<String, Object> variables, String idempotencyKey) {
         if (apiKey == null || apiKey.isBlank()) {
