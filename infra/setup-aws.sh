@@ -134,6 +134,7 @@ prompt_secret /yala/prod/livekit-api-secret "LiveKit API secret"
 prompt_secret /yala/prod/jsonpe-api-key      "JSON.pe API key (validación DNI)"
 prompt_secret /yala/prod/didit-api-key       "Didit API key (KYC vendedores)"
 prompt_secret /yala/prod/didit-webhook-secret "Didit webhook secret"
+prompt_secret /yala/prod/openai-api-key        "OpenAI API key (resumen IA de comentarios)"
 
 # -----------------------------------------------------------------------------
 # 5) CloudWatch log group
