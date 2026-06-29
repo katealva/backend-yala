@@ -119,7 +119,7 @@ class UserServiceTest {
                 .build();
         Pageable pageable = PageRequest.of(0, 20);
         when(userRepository.existsById(1L)).thenReturn(true);
-        when(listingRepository.findBySellerId(1L, pageable))
+        when(listingRepository.findBySellerIdAndStatusNot(1L, ListingStatus.CANCELLED, pageable))
                 .thenReturn(new PageImpl<>(List.of(listing)));
 
         Page<ResponseListingDTO> result = userService.getListingsByUser(1L, pageable);
@@ -134,6 +134,6 @@ class UserServiceTest {
 
         assertThatThrownBy(() -> userService.getListingsByUser(99L, PageRequest.of(0, 20)))
                 .isInstanceOf(ResourceNotFoundException.class);
-        verify(listingRepository, never()).findBySellerId(any(), any());
+        verify(listingRepository, never()).findBySellerIdAndStatusNot(any(), any(), any());
     }
 }

@@ -5,9 +5,12 @@ import com.yala.model.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import java.time.LocalDateTime;
 
 import com.yala.dto.auth.ResponseAuthDTO;
 import com.yala.dto.auth.RequestLoginDTO;
@@ -42,6 +45,12 @@ class AuthServiceTest {
 
     @Mock
     private JsonPeService jsonPeService;
+
+    @Mock
+    private PasswordResetCodeRepository passwordResetCodeRepository;
+
+    @Mock
+    private EmailService emailService;
 
     @InjectMocks
     private AuthService authService;
@@ -228,5 +237,61 @@ class AuthServiceTest {
 
         assertThatThrownBy(() -> authService.refreshToken(request))
                 .isInstanceOf(UnauthorizedException.class);
+    }
+
+    @Test
+    void forgotPasswordGeneratesCodeAndEmailsWhenUserExists() {
+        User user = User.builder().id(1L).name("Ada").email("ada@yala.pe").build();
+        when(userRepository.findByEmail("ada@yala.pe")).thenReturn(Optional.of(user));
+
+        authService.forgotPassword("ada@yala.pe");
+
+        verify(passwordResetCodeRepository).save(any(PasswordResetCode.class));
+        verify(emailService).sendPasswordReset(eq("ada@yala.pe"), eq("Ada"), any(String.class));
+    }
+
+    @Test
+    void forgotPasswordIsSilentWhenUserDoesNotExist() {
+        when(userRepository.findByEmail("ghost@yala.pe")).thenReturn(Optional.empty());
+
+        authService.forgotPassword("ghost@yala.pe");
+
+        verify(passwordResetCodeRepository, never()).save(any());
+        verify(emailService, never()).sendPasswordReset(any(), any(), any());
+    }
+
+    @Test
+    void resetPasswordChangesHashWhenCodeIsValid() {
+        User user = User.builder().id(1L).email("ada@yala.pe").passwordHash("old").build();
+        PasswordResetCode code = PasswordResetCode.builder()
+                .id(5L).user(user).code("123456")
+                .expiresAt(LocalDateTime.now().plusMinutes(10)).used(false).build();
+        when(userRepository.findByEmail("ada@yala.pe")).thenReturn(Optional.of(user));
+        when(passwordResetCodeRepository
+                .findFirstByUserIdAndCodeAndUsedFalseOrderByCreatedAtDesc(1L, "123456"))
+                .thenReturn(Optional.of(code));
+        when(passwordEncoder.encode("newpass123")).thenReturn("new-hash");
+
+        authService.resetPassword("ada@yala.pe", "123456", "newpass123");
+
+        assertThat(user.getPasswordHash()).isEqualTo("new-hash");
+        assertThat(code.isUsed()).isTrue();
+        verify(userRepository).save(user);
+    }
+
+    @Test
+    void resetPasswordThrowsWhenCodeExpired() {
+        User user = User.builder().id(1L).email("ada@yala.pe").passwordHash("old").build();
+        PasswordResetCode code = PasswordResetCode.builder()
+                .id(5L).user(user).code("123456")
+                .expiresAt(LocalDateTime.now().minusMinutes(1)).used(false).build();
+        when(userRepository.findByEmail("ada@yala.pe")).thenReturn(Optional.of(user));
+        when(passwordResetCodeRepository
+                .findFirstByUserIdAndCodeAndUsedFalseOrderByCreatedAtDesc(1L, "123456"))
+                .thenReturn(Optional.of(code));
+
+        assertThatThrownBy(() -> authService.resetPassword("ada@yala.pe", "123456", "newpass123"))
+                .isInstanceOf(UnauthorizedException.class);
+        verify(userRepository, never()).save(any());
     }
 }

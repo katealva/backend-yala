@@ -2,9 +2,11 @@ package com.yala.controller;
 import com.yala.service.*;
 
 import com.yala.dto.auth.ResponseAuthDTO;
+import com.yala.dto.auth.RequestForgotPasswordDTO;
 import com.yala.dto.auth.RequestLoginDTO;
 import com.yala.dto.auth.RequestRefreshTokenDTO;
 import com.yala.dto.auth.RequestRegisterDTO;
+import com.yala.dto.auth.RequestResetPasswordDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -43,5 +45,19 @@ public class AuthController {
     public ResponseEntity<ResponseAuthDTO> refreshToken(
             @Valid @RequestBody RequestRefreshTokenDTO request) {
         return ResponseEntity.ok(authService.refreshToken(request));
+    }
+
+    @PostMapping("/forgot-password")
+    @Operation(summary = "Envía un código de verificación al correo para restablecer la contraseña")
+    public ResponseEntity<Void> forgotPassword(@Valid @RequestBody RequestForgotPasswordDTO request) {
+        authService.forgotPassword(request.email());
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/reset-password")
+    @Operation(summary = "Valida el código y establece la nueva contraseña")
+    public ResponseEntity<Void> resetPassword(@Valid @RequestBody RequestResetPasswordDTO request) {
+        authService.resetPassword(request.email(), request.code(), request.newPassword());
+        return ResponseEntity.ok().build();
     }
 }

@@ -274,6 +274,23 @@ class ListingServiceTest {
     }
 
     @Test
+    void shouldCancelLinkedAuctionWhenCancellingListing() {
+        User seller = verifiedSeller();
+        Auction auction = Auction.builder().id(3L).status(AuctionStatus.ACTIVE).build();
+        Listing existing = Listing.builder()
+                .id(8L).title("To cancel").mode(ListingMode.AUCTION)
+                .condition("USED").status(ListingStatus.ACTIVE).auction(auction)
+                .seller(seller).category(sampleCategory()).build();
+        when(listingRepository.findById(8L)).thenReturn(Optional.of(existing));
+        when(listingRepository.save(any(Listing.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        listingService.cancel(8L, "ada@yala.pe");
+
+        assertThat(existing.getStatus()).isEqualTo(ListingStatus.CANCELLED);
+        assertThat(auction.getStatus()).isEqualTo(AuctionStatus.CANCELLED);
+    }
+
+    @Test
     void shouldThrowUnauthorizedExceptionWhenCancelerIsNotOwner() {
         Listing existing = Listing.builder()
                 .id(8L).title("To cancel").mode(ListingMode.FIXED).fixedPrice(100f)
