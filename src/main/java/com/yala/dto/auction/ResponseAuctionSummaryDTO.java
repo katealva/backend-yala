@@ -1,5 +1,6 @@
 package com.yala.dto.auction;
 
+import com.yala.dto.listing.ResponseListingSummaryDTO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
 
@@ -15,5 +16,8 @@ public record ResponseAuctionSummaryDTO(
 
         @Schema(description = "Estado actual de la subasta", example = "ACTIVE",
                 allowableValues = {"ACTIVE", "FINISHED", "CANCELLED"})
-        String status) {
+        String status,
+
+        @Schema(description = "Resumen del listing (imágenes, título, condición, categoría, vendedor)")
+        ResponseListingSummaryDTO listing) {
 }

@@ -11,6 +11,7 @@ import com.yala.model.Image;
 import com.yala.dto.image.ResponseImageDTO;
 import com.yala.model.Listing;
 import com.yala.dto.listing.ResponseListingDTO;
+import com.yala.dto.listing.ResponseListingSummaryDTO;
 import com.yala.model.Notification;
 import com.yala.dto.notification.ResponseNotificationDTO;
 import com.yala.model.Order;
@@ -123,12 +124,19 @@ public class ModelMapperConfig {
     }
 
     private static ResponseAuctionSummaryDTO toAuctionSummaryResponse(Auction source) {
+        return toAuctionSummaryResponse(source, true);
+    }
+
+    // withListing=false is used when the summary is embedded inside a ResponseListingDTO, to avoid
+    // carrying the listing twice (the full listing fields are already at the top level there).
+    private static ResponseAuctionSummaryDTO toAuctionSummaryResponse(Auction source, boolean withListing) {
         if (source == null) return null;
         return new ResponseAuctionSummaryDTO(
                 source.getId(),
                 source.getCurrentPrice(),
                 source.getEndsAt(),
-                source.getStatus() != null ? source.getStatus().name() : null);
+                source.getStatus() != null ? source.getStatus().name() : null,
+                withListing ? toListingSummaryResponse(source.getListing()) : null);
     }
 
     private static ResponseAuctionDTO toAuctionResponse(Auction source) {
@@ -141,7 +149,23 @@ public class ModelMapperConfig {
                 source.getEndsAt(),
                 source.getStatus() != null ? source.getStatus().name() : null,
                 toUserResponse(source.getWinner()),
-                source.getBids() != null ? source.getBids().size() : 0);
+                source.getBids() != null ? source.getBids().size() : 0,
+                toListingSummaryResponse(source.getListing()));
+    }
+
+    private static ResponseListingSummaryDTO toListingSummaryResponse(Listing source) {
+        if (source == null) return null;
+        List<String> imageUrls = source.getImages() != null
+                ? source.getImages().stream().map(Image::getUrl).toList()
+                : List.of();
+        return new ResponseListingSummaryDTO(
+                source.getId(),
+                source.getTitle(),
+                source.getDescription(),
+                imageUrls,
+                source.getCondition(),
+                source.getCategory() != null ? source.getCategory().getName() : null,
+                toUserResponse(source.getSeller()));
     }
 
     private static ResponseBidDTO toBidResponse(Bid source) {
@@ -170,7 +194,7 @@ public class ModelMapperConfig {
                 toUserResponse(source.getSeller()),
                 toCategoryResponse(source.getCategory()),
                 imageUrls,
-                toAuctionSummaryResponse(source.getAuction()));
+                toAuctionSummaryResponse(source.getAuction(), false));
     }
 
     private static ResponseOrderDTO toOrderResponse(Order source) {

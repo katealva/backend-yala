@@ -54,12 +54,12 @@ class AuctionControllerTest {
     }
 
     private ResponseAuctionSummaryDTO summaryResponse() {
-        return new ResponseAuctionSummaryDTO(100L, 100f, LocalDateTime.now().plusDays(1), "ACTIVE");
+        return new ResponseAuctionSummaryDTO(100L, 100f, LocalDateTime.now().plusDays(1), "ACTIVE", null);
     }
 
     private ResponseAuctionDTO fullResponse() {
         return new ResponseAuctionDTO(100L, 100f, 100f, LocalDateTime.now(),
-                LocalDateTime.now().plusDays(1), "ACTIVE", null, 0);
+                LocalDateTime.now().plusDays(1), "ACTIVE", null, 0, null);
     }
 
     @Test
