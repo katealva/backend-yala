@@ -5,6 +5,7 @@ import com.yala.model.*;
 import com.yala.dto.auction.ResponseAuctionDTO;
 import com.yala.dto.auction.ResponseAuctionSummaryDTO;
 import com.yala.dto.auction.RequestAuctionDTO;
+import com.yala.dto.auction.RequestAuctionUpdateDTO;
 import com.yala.repository.BidRepository;
 import com.yala.event.AuctionFinishedEvent;
 import com.yala.exceptions.DuplicateResourceException;
@@ -69,6 +70,25 @@ public class AuctionService {
                 .build());
 
         return modelMapper.map(saved, ResponseAuctionDTO.class);
+    }
+
+    /** Edits an auction's starting price and end date. Owner-only, and only while it has no bids. */
+    @Transactional
+    public ResponseAuctionDTO update(Long id, RequestAuctionUpdateDTO request, String sellerEmail) {
+        Auction auction = findOrThrow(id);
+        if (!auction.getListing().getSeller().getEmail().equals(sellerEmail)) {
+            throw new UnauthorizedException("Only the listing owner can update this auction");
+        }
+        if (bidRepository.findFirstByAuctionIdOrderByAmountDesc(id).isPresent()) {
+            throw new InvalidBidException("No puedes editar una subasta que ya tiene pujas");
+        }
+        if (request.endsAt().isBefore(LocalDateTime.now())) {
+            throw new InvalidBidException("Auction end date must be in the future");
+        }
+        auction.setStartingPrice(request.startingPrice());
+        auction.setCurrentPrice(request.startingPrice());
+        auction.setEndsAt(request.endsAt());
+        return modelMapper.map(auctionRepository.save(auction), ResponseAuctionDTO.class);
     }
 
     @Transactional(readOnly = true)
