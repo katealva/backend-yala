@@ -18,6 +18,8 @@ public interface ListingRepository
 
     Page<Listing> findBySellerId(Long sellerId, Pageable pageable);
 
+    Page<Listing> findBySellerIdAndStatusNot(Long sellerId, ListingStatus status, Pageable pageable);
+
     Page<Listing> findByCategoryName(String categoryName, Pageable pageable);
 
     Page<Listing> findByMode(ListingMode mode, Pageable pageable);

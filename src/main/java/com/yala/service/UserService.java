@@ -58,7 +58,8 @@ public class UserService {
         if (!userRepository.existsById(userId)) {
             throw new ResourceNotFoundException("User not found with id: " + userId);
         }
-        return listingRepository.findBySellerId(userId, pageable)
+        // Hide cancelled (soft-deleted) listings from the seller's publications and public profile.
+        return listingRepository.findBySellerIdAndStatusNot(userId, ListingStatus.CANCELLED, pageable)
                 .map(listing -> modelMapper.map(listing, ResponseListingDTO.class));
     }
 

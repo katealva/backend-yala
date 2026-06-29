@@ -128,6 +128,10 @@ public class ListingService {
         Listing listing = findOrThrow(id);
         ensureOwner(listing, requesterEmail);
         listing.setStatus(ListingStatus.CANCELLED);
+        // Cancel the linked auction too so it disappears from /auctions and its detail (cascade=ALL persists it).
+        if (listing.getAuction() != null) {
+            listing.getAuction().setStatus(AuctionStatus.CANCELLED);
+        }
         listingRepository.save(listing);
         log.info("Listing {} cancelled by {}", listing.getId(), requesterEmail);
     }
