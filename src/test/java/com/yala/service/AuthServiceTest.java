@@ -134,6 +134,29 @@ class AuthServiceTest {
     }
 
     @Test
+    void shouldRegisterWhenReniecReturnsReplacementCharForSpecialLetter() {
+        RequestRegisterDTO request = sampleRegister(); // apellidoMaterno "Byron"
+        when(userRepository.existsByEmail("ada@yala.pe")).thenReturn(false);
+        when(jsonPeService.isConfigured()).thenReturn(true);
+        // JSON.pe corrompe Ñ/letras especiales en su origen → '�'; debe matchear igual (comodín).
+        when(jsonPeService.lookup("12345678")).thenReturn(Optional.of(
+                new JsonPeService.DniRecord("ADA", "LOVELACE", "BYR�N", "BYR�N, ADA")));
+        when(passwordEncoder.encode("password123")).thenReturn("hashed-password");
+        when(userRepository.save(any(User.class))).thenAnswer(inv -> {
+            User saved = inv.getArgument(0);
+            saved.setId(1L);
+            return saved;
+        });
+        when(jwtService.generateAccessToken(any(User.class))).thenReturn("access-token");
+        when(jwtService.generateRefreshToken(any(User.class))).thenReturn("refresh-token");
+
+        ResponseAuthDTO response = authService.register(request);
+
+        assertThat(response.role()).isEqualTo(Role.USER);
+        verify(userRepository).save(any(User.class));
+    }
+
+    @Test
     void shouldReturnTokenWhenCredentialsAreValid() {
         RequestLoginDTO request = new RequestLoginDTO("ada@yala.pe", "password123");
         User user = User.builder()

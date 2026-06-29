@@ -86,9 +86,11 @@ public class AuthService {
         var record = jsonPeService.lookup(request.dni())
                 .orElseThrow(() -> new IdentityValidationException("No se encontró un DNI válido."));
 
-        boolean matches = TextNormalizer.equalsNormalized(record.nombres(), request.nombres())
-                && TextNormalizer.equalsNormalized(record.apellidoPaterno(), request.apellidoPaterno())
-                && TextNormalizer.equalsNormalized(record.apellidoMaterno(), request.apellidoMaterno());
+        // JSON.pe corrompe Ñ/acentos en su origen y los devuelve como '�'; matchesReniec trata ese
+        // carácter como comodín para no bloquear a usuarios con apellidos como ZUÑIGA, PEÑA, NUÑEZ.
+        boolean matches = TextNormalizer.matchesReniec(record.nombres(), request.nombres())
+                && TextNormalizer.matchesReniec(record.apellidoPaterno(), request.apellidoPaterno())
+                && TextNormalizer.matchesReniec(record.apellidoMaterno(), request.apellidoMaterno());
         if (!matches) {
             throw new IdentityValidationException(
                     "Los nombres o apellidos no coinciden con el DNI.");
