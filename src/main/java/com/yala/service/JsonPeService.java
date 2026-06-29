@@ -1,5 +1,10 @@
 package com.yala.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.nio.ByteBuffer;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.CodingErrorAction;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +23,7 @@ import org.springframework.web.client.RestClient;
 public class JsonPeService {
 
     private final RestClient restClient;
+    private final ObjectMapper objectMapper = new ObjectMapper();
     private final String baseUrl;
     private final String apiKey;
 
@@ -44,13 +50,19 @@ public class JsonPeService {
             return Optional.empty();
         }
         try {
-            Map<?, ?> response = restClient.post()
+            // Read raw bytes: JSON.pe sends `application/json` without charset and emits Ñ/accents as
+            // single Latin-1 bytes (e.g. Ñ = 0xD1), which are invalid UTF-8 and would become "�".
+            byte[] raw = restClient.post()
                     .uri(baseUrl + "/api/dni")
                     .header("Authorization", "Bearer " + apiKey)
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(Map.of("dni", dni))
                     .retrieve()
-                    .body(Map.class);
+                    .body(byte[].class);
+            if (raw == null) {
+                return Optional.empty();
+            }
+            Map<?, ?> response = objectMapper.readValue(decode(raw), Map.class);
 
             if (response == null || !Boolean.TRUE.equals(response.get("success"))) {
                 return Optional.empty();
@@ -67,6 +79,22 @@ public class JsonPeService {
         } catch (Exception e) {
             log.warn("JSON.pe DNI lookup failed for {}: {}", dni, e.getMessage());
             return Optional.empty();
+        }
+    }
+
+    /**
+     * Decodes the response body trying strict UTF-8 first; if the bytes aren't valid UTF-8
+     * (JSON.pe sends Latin-1 for Ñ/accents), falls back to ISO-8859-1. Encoding-agnostic.
+     */
+    private static String decode(byte[] bytes) {
+        try {
+            return StandardCharsets.UTF_8.newDecoder()
+                    .onMalformedInput(CodingErrorAction.REPORT)
+                    .onUnmappableCharacter(CodingErrorAction.REPORT)
+                    .decode(ByteBuffer.wrap(bytes))
+                    .toString();
+        } catch (CharacterCodingException e) {
+            return new String(bytes, StandardCharsets.ISO_8859_1);
         }
     }
 
