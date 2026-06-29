@@ -22,4 +22,19 @@ class TextNormalizerTest {
     void nullIsNormalizedToEmpty() {
         assertThat(TextNormalizer.normalize(null)).isEmpty();
     }
+
+    @Test
+    void matchesReniecTreatsReplacementCharAsWildcard() {
+        // JSON.pe devuelve '�' (U+FFFD) donde había Ñ/acentos; debe matchear cualquier letra.
+        assertThat(TextNormalizer.matchesReniec("ZU�IGA", "ZUÑIGA")).isTrue();
+        assertThat(TextNormalizer.matchesReniec("ZU�IGA", "Zuniga")).isTrue();
+        assertThat(TextNormalizer.matchesReniec("PE�A", "Peña")).isTrue();
+        assertThat(TextNormalizer.matchesReniec("ZU�IGA", "Torres")).isFalse();
+    }
+
+    @Test
+    void matchesReniecRequiresExactMatchWithoutReplacementChar() {
+        assertThat(TextNormalizer.matchesReniec("CASTILLO", "castillo")).isTrue();
+        assertThat(TextNormalizer.matchesReniec("CASTILLO", "Pereira")).isFalse();
+    }
 }
