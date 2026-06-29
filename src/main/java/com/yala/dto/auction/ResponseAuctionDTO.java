@@ -1,5 +1,6 @@
 package com.yala.dto.auction;
 
+import com.yala.dto.listing.ResponseListingSummaryDTO;
 import com.yala.dto.user.ResponseUserDTO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
@@ -27,5 +28,8 @@ public record ResponseAuctionDTO(
         @Schema(description = "Usuario ganador (presente sólo si status = FINISHED y hubo pujas)")
         ResponseUserDTO winner,
 
-        @Schema(description = "Número total de pujas registradas", example = "12") int totalBids) {
+        @Schema(description = "Número total de pujas registradas", example = "12") int totalBids,
+
+        @Schema(description = "Resumen del listing (imágenes, título, condición, categoría, vendedor)")
+        ResponseListingSummaryDTO listing) {
 }
