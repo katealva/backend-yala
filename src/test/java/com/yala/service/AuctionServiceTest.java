@@ -13,6 +13,7 @@ import static org.mockito.Mockito.when;
 import com.yala.dto.auction.ResponseAuctionDTO;
 import com.yala.dto.auction.ResponseAuctionSummaryDTO;
 import com.yala.dto.auction.RequestAuctionDTO;
+import com.yala.dto.auction.RequestAuctionUpdateDTO;
 import com.yala.model.Bid;
 import com.yala.repository.BidRepository;
 import com.yala.config.ModelMapperConfig;
@@ -145,6 +146,47 @@ class AuctionServiceTest {
                 new RequestAuctionDTO(10L, 100f, LocalDateTime.now().minusHours(1)), "bob@yala.pe"))
                 .isInstanceOf(InvalidBidException.class)
                 .hasMessageContaining("future");
+        verify(auctionRepository, never()).save(any());
+    }
+
+    @Test
+    void shouldUpdateAuctionWhenOwnerAndNoBids() {
+        Auction auction = activeAuction(listing(seller()));
+        when(auctionRepository.findById(100L)).thenReturn(Optional.of(auction));
+        when(bidRepository.findFirstByAuctionIdOrderByAmountDesc(100L)).thenReturn(Optional.empty());
+        when(auctionRepository.save(any(Auction.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        ResponseAuctionDTO r = auctionService.update(100L,
+                new RequestAuctionUpdateDTO(250f, LocalDateTime.now().plusDays(3)), "bob@yala.pe");
+
+        assertThat(r.currentPrice()).isEqualTo(250f);
+        assertThat(auction.getStartingPrice()).isEqualTo(250f);
+        assertThat(auction.getCurrentPrice()).isEqualTo(250f);
+        verify(auctionRepository).save(auction);
+    }
+
+    @Test
+    void shouldRejectUpdateWhenAuctionHasBids() {
+        Auction auction = activeAuction(listing(seller()));
+        when(auctionRepository.findById(100L)).thenReturn(Optional.of(auction));
+        when(bidRepository.findFirstByAuctionIdOrderByAmountDesc(100L))
+                .thenReturn(Optional.of(Bid.builder().id(1L).amount(150f).build()));
+
+        assertThatThrownBy(() -> auctionService.update(100L,
+                new RequestAuctionUpdateDTO(250f, LocalDateTime.now().plusDays(3)), "bob@yala.pe"))
+                .isInstanceOf(InvalidBidException.class)
+                .hasMessageContaining("pujas");
+        verify(auctionRepository, never()).save(any());
+    }
+
+    @Test
+    void shouldRejectUpdateWhenRequesterIsNotOwner() {
+        Auction auction = activeAuction(listing(seller()));
+        when(auctionRepository.findById(100L)).thenReturn(Optional.of(auction));
+
+        assertThatThrownBy(() -> auctionService.update(100L,
+                new RequestAuctionUpdateDTO(250f, LocalDateTime.now().plusDays(3)), "eve@yala.pe"))
+                .isInstanceOf(UnauthorizedException.class);
         verify(auctionRepository, never()).save(any());
     }
 
