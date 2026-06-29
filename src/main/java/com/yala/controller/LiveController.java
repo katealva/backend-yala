@@ -10,6 +10,7 @@ import com.yala.dto.live.RequestStartLiveDTO;
 import com.yala.dto.live.ResponseLiveAuctionDTO;
 import com.yala.dto.live.ResponseLiveBidDTO;
 import com.yala.dto.live.ResponseLiveCommentDTO;
+import com.yala.dto.live.ResponseLiveCommentSummaryDTO;
 import com.yala.dto.live.ResponseLiveStreamDTO;
 import com.yala.dto.live.ResponseLiveSummaryDTO;
 import com.yala.dto.live.ResponseLiveTokenDTO;
@@ -30,6 +31,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -43,6 +45,7 @@ public class LiveController {
     private final LiveAuctionService liveAuctionService;
     private final LiveBidService liveBidService;
     private final LiveCommentService liveCommentService;
+    private final LiveCommentSummaryService liveCommentSummaryService;
 
     // ----- Streams -----
 
@@ -143,6 +146,15 @@ public class LiveController {
             Authentication auth) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(liveCommentService.post(id, request, auth.getName()));
+    }
+
+    @PostMapping("/{id}/comments/summary")
+    @Operation(summary = "Resumen con IA de los comentarios del live (solo el host). No se transmite a los espectadores.")
+    public ResponseEntity<ResponseLiveCommentSummaryDTO> summarizeComments(
+            @PathVariable Long id,
+            @RequestParam(defaultValue = "50") Integer limit,
+            Authentication auth) {
+        return ResponseEntity.ok(liveCommentSummaryService.summarize(id, auth.getName(), limit));
     }
 
     // ----- Webhook -----
