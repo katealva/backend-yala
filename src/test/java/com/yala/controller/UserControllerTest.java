@@ -39,6 +39,9 @@ class UserControllerTest {
     @MockitoBean
     private UserService userService;
 
+    @MockitoBean
+    private SellerApplicationService sellerApplicationService;
+
     /** Satisfies the JwtAuthorizationFilter bean pulled into the @WebMvcTest slice. */
     @MockitoBean
     private JwtService jwtService;

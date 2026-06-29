@@ -4,6 +4,7 @@ import com.yala.repository.*;
 import com.yala.model.*;
 
 import com.yala.dto.listing.ResponseListingDTO;
+import com.yala.dto.seller.ResponseSellerStoreDTO;
 import com.yala.dto.user.RequestUpdateUserDTO;
 import com.yala.dto.user.ResponseUserDTO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -26,9 +27,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
 
     private final UserService userService;
+    private final SellerApplicationService sellerApplicationService;
 
-    public UserController(UserService userService) {
+    public UserController(UserService userService,
+            SellerApplicationService sellerApplicationService) {
         this.userService = userService;
+        this.sellerApplicationService = sellerApplicationService;
     }
 
     @GetMapping("/me")
@@ -57,5 +61,11 @@ public class UserController {
     public ResponseEntity<Page<ResponseListingDTO>> getListingsByUser(
             @PathVariable Long id, Pageable pageable) {
         return ResponseEntity.ok(userService.getListingsByUser(id, pageable));
+    }
+
+    @GetMapping("/{id}/store")
+    @Operation(summary = "Datos públicos de la tienda de un vendedor (nombre y dirección; sin celular ni CCI)")
+    public ResponseEntity<ResponseSellerStoreDTO> getSellerStore(@PathVariable Long id) {
+        return ResponseEntity.ok(sellerApplicationService.getPublicStore(id));
     }
 }
