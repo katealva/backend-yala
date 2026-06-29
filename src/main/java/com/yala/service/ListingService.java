@@ -14,6 +14,9 @@ import com.yala.repository.TagRepository;
 import com.yala.model.Role;
 import com.yala.model.User;
 import com.yala.repository.UserRepository;
+import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -212,12 +215,22 @@ public class ListingService {
                 cb.equal(cb.lower(root.get("condition")), condition.toLowerCase());
     }
 
+    // The effective price is the auction's current price (auctions leave fixedPrice null);
+    // coalesce keeps fixed-price listings covered too.
     private static Specification<Listing> priceGreaterThanOrEqualTo(Float min) {
-        return (root, query, cb) -> cb.greaterThanOrEqualTo(root.get("fixedPrice"), min);
+        return (root, query, cb) -> {
+            Join<Listing, Auction> auction = root.join("auction", JoinType.LEFT);
+            Expression<Float> price = cb.coalesce(auction.<Float>get("currentPrice"), root.<Float>get("fixedPrice"));
+            return cb.greaterThanOrEqualTo(price, min);
+        };
     }
 
     private static Specification<Listing> priceLessThanOrEqualTo(Float max) {
-        return (root, query, cb) -> cb.lessThanOrEqualTo(root.get("fixedPrice"), max);
+        return (root, query, cb) -> {
+            Join<Listing, Auction> auction = root.join("auction", JoinType.LEFT);
+            Expression<Float> price = cb.coalesce(auction.<Float>get("currentPrice"), root.<Float>get("fixedPrice"));
+            return cb.lessThanOrEqualTo(price, max);
+        };
     }
 
     private static Specification<Listing> titleContains(String q) {
