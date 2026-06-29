@@ -3,6 +3,7 @@ package com.yala.service;
 import com.yala.dto.identity.ResponseSessionDTO;
 import com.yala.dto.seller.RequestSellerApplicationDTO;
 import com.yala.dto.seller.ResponseSellerApplicationDTO;
+import com.yala.dto.seller.ResponseSellerStoreDTO;
 import com.yala.exceptions.DuplicateResourceException;
 import com.yala.exceptions.ResourceNotFoundException;
 import com.yala.model.Role;
@@ -81,6 +82,16 @@ public class SellerApplicationService {
         return sellerApplicationRepository.findFirstByUserIdOrderByCreatedAtDesc(user.getId())
                 .map(app -> toDto(app, null))
                 .orElse(null);
+    }
+
+    /** Public store data of a seller (latest APPROVED application). Never exposes phone/cci. */
+    @Transactional(readOnly = true)
+    public ResponseSellerStoreDTO getPublicStore(Long userId) {
+        SellerApplication app = sellerApplicationRepository
+                .findFirstByUserIdAndStatusOrderByCreatedAtDesc(userId, SellerApplicationStatus.APPROVED)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "El vendedor no tiene una tienda registrada"));
+        return new ResponseSellerStoreDTO(app.getStoreName(), app.getAddress());
     }
 
     private ResponseSellerApplicationDTO toDto(SellerApplication a, String diditUrl) {

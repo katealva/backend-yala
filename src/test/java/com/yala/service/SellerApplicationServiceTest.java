@@ -12,7 +12,9 @@ import static org.mockito.Mockito.when;
 import com.yala.dto.identity.ResponseSessionDTO;
 import com.yala.dto.seller.RequestSellerApplicationDTO;
 import com.yala.dto.seller.ResponseSellerApplicationDTO;
+import com.yala.dto.seller.ResponseSellerStoreDTO;
 import com.yala.exceptions.DuplicateResourceException;
+import com.yala.exceptions.ResourceNotFoundException;
 import java.util.Optional;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
@@ -81,6 +83,31 @@ class SellerApplicationServiceTest {
         // No se traga el error: propaga para que el front muestre un fallo real (y la tx hace rollback).
         assertThatThrownBy(() -> service.apply("ada@yala.pe", request()))
                 .isInstanceOf(ResponseStatusException.class);
+    }
+
+    @Test
+    void getPublicStoreReturnsOnlyStoreNameAndAddress() {
+        SellerApplication app = SellerApplication.builder()
+                .id(5L).storeName("CardVault PE").address("Av. Ejemplo 123, Lima")
+                .phone("+51 999 999 999").cci("00219300012345678901")
+                .status(SellerApplicationStatus.APPROVED).user(user(Role.SELLER)).build();
+        when(sellerApplicationRepository.findFirstByUserIdAndStatusOrderByCreatedAtDesc(
+                2L, SellerApplicationStatus.APPROVED)).thenReturn(Optional.of(app));
+
+        ResponseSellerStoreDTO dto = service.getPublicStore(2L);
+
+        assertThat(dto.storeName()).isEqualTo("CardVault PE");
+        assertThat(dto.address()).isEqualTo("Av. Ejemplo 123, Lima");
+        // El record solo tiene storeName + address: phone y cci no se exponen por construcción.
+    }
+
+    @Test
+    void getPublicStoreThrowsWhenNoApprovedApplication() {
+        when(sellerApplicationRepository.findFirstByUserIdAndStatusOrderByCreatedAtDesc(
+                2L, SellerApplicationStatus.APPROVED)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.getPublicStore(2L))
+                .isInstanceOf(ResourceNotFoundException.class);
     }
 
     @Test
