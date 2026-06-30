@@ -1,6 +1,8 @@
 package com.yala.dto.bid;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Digits;
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 
@@ -10,7 +12,7 @@ public record RequestBidDTO(
                 example = "501", requiredMode = Schema.RequiredMode.REQUIRED)
         @NotNull Long auctionId,
 
-        @Schema(description = "Monto de la puja en soles. Debe ser estrictamente mayor que currentPrice",
+        @Schema(description = "Monto de la puja en soles. Mayor que currentPrice, máx 9999, hasta 2 decimales",
                 example = "1400.00", requiredMode = Schema.RequiredMode.REQUIRED)
-        @NotNull @Min(0) Float amount) {
+        @NotNull @Min(0) @Max(9999) @Digits(integer = 4, fraction = 2) Float amount) {
 }
