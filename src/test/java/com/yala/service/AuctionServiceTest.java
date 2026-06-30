@@ -213,7 +213,8 @@ class AuctionServiceTest {
     void shouldReturnPagedAuctionsWhenActiveAuctionsExist() {
         Auction auction = activeAuction(listing(seller()));
         Page<Auction> page = new PageImpl<>(List.of(auction));
-        when(auctionRepository.findByStatus(AuctionStatus.ACTIVE, PageRequest.of(0, 20)))
+        when(auctionRepository.findByStatusAndListingStatus(
+                AuctionStatus.ACTIVE, ListingStatus.ACTIVE, PageRequest.of(0, 20)))
                 .thenReturn(page);
 
         Page<ResponseAuctionSummaryDTO> result = auctionService.findAllActive(PageRequest.of(0, 20));

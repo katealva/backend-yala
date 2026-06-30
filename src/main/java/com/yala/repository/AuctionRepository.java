@@ -16,6 +16,10 @@ public interface AuctionRepository extends JpaRepository<Auction, Long> {
 
     Page<Auction> findByStatus(AuctionStatus status, Pageable pageable);
 
+    /** Active auctions whose listing is also ACTIVE — hides auctions of soft-deleted (CANCELLED) listings. */
+    Page<Auction> findByStatusAndListingStatus(
+            AuctionStatus auctionStatus, ListingStatus listingStatus, Pageable pageable);
+
     /** Used by the scheduler to find auctions that must be auto-closed. */
     List<Auction> findByStatusAndEndsAtBefore(AuctionStatus status, LocalDateTime time);
 

@@ -98,7 +98,9 @@ public class AuctionService {
 
     @Transactional(readOnly = true)
     public Page<ResponseAuctionSummaryDTO> findAllActive(Pageable pageable) {
-        return auctionRepository.findByStatus(AuctionStatus.ACTIVE, pageable)
+        // Only auctions whose listing is still ACTIVE — excludes orphans of soft-deleted listings.
+        return auctionRepository
+                .findByStatusAndListingStatus(AuctionStatus.ACTIVE, ListingStatus.ACTIVE, pageable)
                 .map(a -> modelMapper.map(a, ResponseAuctionSummaryDTO.class));
     }
 
