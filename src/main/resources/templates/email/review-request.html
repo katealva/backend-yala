@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head><meta charset="UTF-8" /></head>
+<body style="margin:0;background:#F4F5F8;font-family:Arial,Helvetica,sans-serif;color:#1A1B22;">
+  <div style="max-width:480px;margin:0 auto;padding:32px 20px;">
+    <div style="background:#fff;border-radius:16px;padding:28px;border:1px solid #E7E8EE;">
+      <div style="font-size:20px;font-weight:800;color:#4338CA;margin-bottom:4px;">Yala</div>
+      <h1 style="font-size:18px;margin:14px 0 6px;">¿Cómo fue tu compra?</h1>
+      <p style="font-size:14px;line-height:1.6;color:#5A5F6A;margin:0 0 18px;">
+        Hola <span th:text="${recipientName}">usuario</span>, tu compra de
+        <b th:text="${listingTitle}">producto</b> se completó. Cuéntale a la comunidad cómo fue tu experiencia
+        con el vendedor: califícalo con estrellas y déjale un comentario.
+      </p>
+      <div style="text-align:center;margin:8px 0 18px;">
+        <a th:href="${reviewUrl}" href="#"
+           style="display:inline-block;background:#4338CA;color:#fff;text-decoration:none;font-weight:700;font-size:15px;border-radius:12px;padding:12px 26px;">
+          Dejar mi reseña
+        </a>
+      </div>
+      <p style="font-size:12px;line-height:1.6;color:#8A8F98;margin:0;">
+        Tu opinión ayuda a otros coleccionistas a comprar con confianza en Yala.
+      </p>
+    </div>
+    <p style="text-align:center;font-size:11px;color:#9499A3;margin-top:16px;">© Yala · Precios en S/.</p>
+  </div>
+</body>
+</html>

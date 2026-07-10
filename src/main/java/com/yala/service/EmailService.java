@@ -93,6 +93,16 @@ public class EmailService {
     }
 
     @Async
+    public void sendReviewRequest(String to, String recipientName, String listingTitle, String reviewUrl) {
+        send(to, "¿Cómo fue tu compra? Deja tu reseña — Yala", "email/review-request",
+                Map.of(
+                        "recipientName", recipientName,
+                        "listingTitle", listingTitle,
+                        "reviewUrl", reviewUrl),
+                "review-request/" + reviewUrl);
+    }
+
+    @Async
     public void sendPasswordReset(String to, String recipientName, String code) {
         send(to, "Tu código para restablecer la contraseña — Yala", "email/password-reset",
                 Map.of(
