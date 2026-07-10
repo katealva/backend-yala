@@ -141,7 +141,7 @@ public class EventListeners {
         notificationService.createNotification(
                 auction.getWinner().getId(),
                 NotificationType.AUCTION_WON,
-                "Congrats! You won " + listing.getTitle());
+                "¡Ganaste \"" + listing.getTitle() + "\"! Tienes 48h para pagar tu subasta.");
         notificationService.createNotification(
                 listing.getSeller().getId(),
                 NotificationType.SALE_CONFIRMED,
@@ -207,6 +207,15 @@ public class EventListeners {
                             seller.getEmail(), seller.getName(), title,
                             order.getBuyer() != null ? order.getBuyer().getName() : "",
                             order.getAmount(), orderUrl, order.getId()));
+            // Ask the buyer to review the seller now that the purchase is complete.
+            notificationService.createNotification(
+                    event.buyerId(),
+                    NotificationType.REVIEW_REQUEST,
+                    "Califica tu compra de \"" + title + "\" con el vendedor.");
+            userRepository.findById(event.buyerId()).ifPresent(buyer ->
+                    emailService.sendReviewRequest(
+                            buyer.getEmail(), buyer.getName(), title,
+                            webUrl + "/review/" + order.getId()));
         });
     }
 }
