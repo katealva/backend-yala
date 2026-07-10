@@ -86,6 +86,7 @@ public class ListingService {
 
         List<Specification<Listing>> specs = new ArrayList<>();
         specs.add(isActive());
+        specs.add(auctionActiveOrNone());
         if (isPresent(category)) specs.add(hasCategory(category));
         if (isPresent(mode)) specs.add(hasMode(mode));
         if (isPresent(condition)) specs.add(hasCondition(condition));
@@ -197,6 +198,18 @@ public class ListingService {
 
     private static Specification<Listing> isActive() {
         return (root, query, cb) -> cb.equal(root.get("status"), ListingStatus.ACTIVE);
+    }
+
+    /**
+     * Excludes auction listings whose auction is no longer ACTIVE (finished/cancelled) so the home feed
+     * doesn't show closed auctions — the listing stays ACTIVE and still appears in the seller's profile.
+     */
+    private static Specification<Listing> auctionActiveOrNone() {
+        return (root, query, cb) -> {
+            var auction = root.join("auction", jakarta.persistence.criteria.JoinType.LEFT);
+            return cb.or(cb.isNull(auction.get("id")),
+                    cb.equal(auction.get("status"), AuctionStatus.ACTIVE));
+        };
     }
 
     private static Specification<Listing> hasCategory(String category) {
