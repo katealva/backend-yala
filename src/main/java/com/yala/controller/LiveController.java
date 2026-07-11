@@ -48,6 +48,7 @@ public class LiveController {
     private final LiveCommentSummaryService liveCommentSummaryService;
     private final HighlightService highlightService;
     private final ProductVoiceService productVoiceService;
+    private final LiveTranscriptionService liveTranscriptionService;
 
     // ----- Streams -----
 
@@ -184,6 +185,18 @@ public class LiveController {
             Authentication auth) {
         return ResponseEntity.ok(productVoiceService.detect(id, auth.getName(),
                 body != null ? body.transcript() : null));
+    }
+
+    @PostMapping(value = "/{id}/transcribe", consumes = org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasAnyRole('SELLER','ADMIN')")
+    @Operation(summary = "Transcribe un chunk de audio del mic del host con gpt-4o-mini-transcribe "
+            + "(cross-browser, reemplaza Web Speech API). Solo el host.")
+    public ResponseEntity<com.yala.dto.live.ResponseTranscriptDTO> transcribe(
+            @PathVariable Long id,
+            @org.springframework.web.bind.annotation.RequestParam("audio")
+                    org.springframework.web.multipart.MultipartFile audio,
+            Authentication auth) {
+        return ResponseEntity.ok(liveTranscriptionService.transcribe(id, auth.getName(), audio));
     }
 
     // ----- Webhook -----
