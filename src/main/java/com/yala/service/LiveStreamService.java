@@ -2,23 +2,28 @@ package com.yala.service;
 
 import com.yala.dto.live.RequestStartLiveDTO;
 import com.yala.dto.live.ResponseLiveAuctionDTO;
+import com.yala.dto.live.ResponseLiveClipDTO;
 import com.yala.dto.live.ResponseLiveStreamDTO;
 import com.yala.dto.live.ResponseLiveSummaryDTO;
 import com.yala.dto.live.ResponseLiveTokenDTO;
+import com.yala.dto.live.ResponseMyLiveDTO;
 import com.yala.event.LiveEndedEvent;
 import com.yala.exceptions.ResourceNotFoundException;
 import com.yala.exceptions.UnauthorizedException;
 import com.yala.model.LiveAuction;
 import com.yala.model.LiveAuctionStatus;
+import com.yala.model.LiveClipStatus;
 import com.yala.model.LiveStatus;
 import com.yala.model.LiveStream;
 import com.yala.model.Role;
 import com.yala.model.User;
 import com.yala.repository.LiveAuctionRepository;
 import com.yala.repository.LiveBidRepository;
+import com.yala.repository.LiveClipRepository;
 import com.yala.repository.LiveStreamRepository;
 import com.yala.repository.UserRepository;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,11 +46,13 @@ public class LiveStreamService {
     private final LiveStreamRepository liveStreamRepository;
     private final LiveAuctionRepository liveAuctionRepository;
     private final LiveBidRepository liveBidRepository;
+    private final LiveClipRepository liveClipRepository;
     private final UserRepository userRepository;
     private final LiveKitService liveKitService;
     private final LiveAuctionService liveAuctionService;
     private final LiveMapper liveMapper;
     private final ApplicationEventPublisher eventPublisher;
+    private final HighlightService highlightService;
 
     @Transactional
     public ResponseLiveTokenDTO start(RequestStartLiveDTO request, String sellerEmail) {
@@ -70,6 +77,18 @@ public class LiveStreamService {
 
         String token = liveKitService.publisherToken(
                 roomName, "seller-" + seller.getId(), seller.getName());
+
+        // Fase 0 (ADR-001): record the room to S3 so highlight clips can be cut when it ends.
+        // Degrades gracefully — if egress isn't configured, the live runs without a recording.
+        if (liveKitService.recordingAvailable()) {
+            String recordingKey = "recordings/" + stream.getId() + "/live.mp4";
+            liveKitService.startRecordingEgress(roomName, recordingKey).ifPresent(egressId -> {
+                stream.setEgressId(egressId);
+                stream.setRecordingKey(recordingKey);
+                stream.setRecordingStatus(LiveClipStatus.PENDING);
+                liveStreamRepository.save(stream);
+            });
+        }
 
         log.info("Live {} started by seller {} (room {})",
                 stream.getId(), seller.getEmail(), roomName);
@@ -101,6 +120,13 @@ public class LiveStreamService {
                         log.info("Live {} ended via LiveKit webhook (room_finished)", stream.getId());
                     }
                 });
+            } else if ("egress_ended".equals(info.event()) && info.egressId() != null) {
+                // The recording MP4 is now in S3 — kick off highlight-clip generation (async).
+                liveStreamRepository.findByEgressId(info.egressId()).ifPresent(stream -> {
+                    log.info("Recording ready for live {} (egress {}) -> generating clips",
+                            stream.getId(), info.egressId());
+                    highlightService.generateForLive(stream.getId());
+                });
             }
         });
     }
@@ -121,6 +147,12 @@ public class LiveStreamService {
         stream.setEndedAt(LocalDateTime.now());
         liveStreamRepository.save(stream);
 
+        // Stop recording; egress finalizes the MP4 to S3 and fires an egress_ended webhook,
+        // which triggers highlight generation in handleWebhook().
+        if (stream.getEgressId() != null) {
+            liveKitService.stopEgress(stream.getEgressId());
+        }
+
         liveKitService.deleteRoom(stream.getRoomName());
         eventPublisher.publishEvent(new LiveEndedEvent(stream.getId()));
     }
@@ -129,6 +161,24 @@ public class LiveStreamService {
     public Page<ResponseLiveSummaryDTO> listActive(Pageable pageable) {
         return liveStreamRepository.findByStatus(LiveStatus.LIVE, pageable)
                 .map(liveMapper::toSummary);
+    }
+
+    /** The seller's own lives (incl. finished) with their highlight clips, for the dashboard. */
+    @Transactional(readOnly = true)
+    public List<ResponseMyLiveDTO> listMine(String sellerEmail) {
+        User seller = userRepository.findByEmail(sellerEmail)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        return liveStreamRepository.findBySellerIdOrderByStartedAtDesc(seller.getId()).stream()
+                .map(s -> new ResponseMyLiveDTO(
+                        s.getId(),
+                        s.getTitle(),
+                        s.getStatus().name(),
+                        s.getStartedAt(),
+                        s.getEndedAt(),
+                        s.getRecordingStatus() != null ? s.getRecordingStatus().name() : null,
+                        liveClipRepository.findByLiveStreamIdOrderByScoreDesc(s.getId()).stream()
+                                .map(ResponseLiveClipDTO::from).toList()))
+                .toList();
     }
 
     @Transactional(readOnly = true)

@@ -65,6 +65,16 @@ public class LiveStream {
 
     private LocalDateTime endedAt;
 
+    /** LiveKit egress (recording) id while the room is being recorded; null otherwise. */
+    private String egressId;
+
+    /** S3 key of the finished recording MP4 (set when egress completes). */
+    private String recordingKey;
+
+    /** Highlight pipeline state: null (no recording), PENDING, READY, FAILED. */
+    @Enumerated(EnumType.STRING)
+    private LiveClipStatus recordingStatus;
+
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "seller_id", nullable = false)
