@@ -2,6 +2,7 @@ package com.yala.service;
 
 import com.yala.dto.live.RequestFlashAuctionDTO;
 import com.yala.dto.live.ResponseLiveAuctionDTO;
+import com.yala.event.LiveAuctionCloseReason;
 import com.yala.event.LiveAuctionClosedEvent;
 import com.yala.event.LiveAuctionStartedEvent;
 import com.yala.exceptions.AuctionNotActiveException;
@@ -104,7 +105,8 @@ public class LiveAuctionService {
         }
         liveAuctionRepository.save(auction);
 
-        eventPublisher.publishEvent(new LiveAuctionClosedEvent(auction.getId()));
+        eventPublisher.publishEvent(
+                new LiveAuctionClosedEvent(auction.getId(), LiveAuctionCloseReason.MANUAL));
         log.info("Flash auction {} closed as {} (winner: {})", auction.getId(), auction.getStatus(),
                 auction.getWinner() != null ? auction.getWinner().getEmail() : "none");
         return liveMapper.toAuctionDto(auction, liveBidRepository.countByLiveAuctionId(auctionId));

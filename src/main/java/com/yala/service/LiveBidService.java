@@ -2,6 +2,8 @@ package com.yala.service;
 
 import com.yala.dto.live.RequestLiveBidDTO;
 import com.yala.dto.live.ResponseLiveBidDTO;
+import com.yala.event.LiveAuctionCloseReason;
+import com.yala.event.LiveAuctionClosedEvent;
 import com.yala.event.NewLiveBidEvent;
 import com.yala.exceptions.AuctionNotActiveException;
 import com.yala.exceptions.InvalidBidException;
@@ -11,6 +13,7 @@ import com.yala.model.LiveAuctionStatus;
 import com.yala.model.LiveBid;
 import com.yala.model.LiveStatus;
 import com.yala.model.User;
+import java.time.LocalDateTime;
 import com.yala.repository.LiveAuctionRepository;
 import com.yala.repository.LiveBidRepository;
 import com.yala.repository.UserRepository;
@@ -32,6 +35,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class LiveBidService {
+
+    /** Monto máximo permitido en una subasta en vivo; al alcanzarlo la subasta se cierra sola. */
+    private static final float MAX_BID = 9999f;
 
     private final LiveBidRepository liveBidRepository;
     private final LiveAuctionRepository liveAuctionRepository;
@@ -59,11 +65,15 @@ public class LiveBidService {
             throw new InvalidBidException("The host cannot bid on their own flash auction");
         }
 
-        float minNext = auction.getCurrentPrice() == null
+        // La primera puja válida es basePrice + incremento (pujar exactamente el precio base se rechaza);
+        // las siguientes, la puja actual + incremento.
+        float floor = auction.getCurrentPrice() == null
                 ? auction.getBasePrice()
-                : auction.getCurrentPrice() + auction.getBidIncrement();
+                : auction.getCurrentPrice();
+        float minNext = floor + auction.getBidIncrement();
         if (request.amount() < minNext) {
-            throw new InvalidBidException("Bid must be at least " + minNext);
+            throw new InvalidBidException(
+                    "El monto debe ser mayor. Monto mínimo permitido: S/. " + minNext);
         }
 
         Long previousBidderId = liveBidRepository
@@ -81,10 +91,27 @@ public class LiveBidService {
 
         // Optimistic-lock check on LiveAuction.currentPrice (409 on conflict).
         auction.setCurrentPrice(request.amount());
+
+        // Al alcanzar (o igualar) el monto máximo, la SUBASTA se cierra sola (el live sigue transmitiendo):
+        // gana quien hizo esta puja. El estado queda SOLD, así que el flujo post-cierre (orden + correos)
+        // lo dispara LiveEventListeners igual que en cualquier cierre.
+        boolean maxReached = request.amount() >= MAX_BID;
+        if (maxReached) {
+            auction.setStatus(LiveAuctionStatus.SOLD);
+            auction.setWinner(bidder);
+            auction.setWinningAmount(request.amount());
+            auction.setEndedAt(LocalDateTime.now());
+        }
         liveAuctionRepository.save(auction);
 
         eventPublisher.publishEvent(new NewLiveBidEvent(
                 auction.getId(), bid.getId(), request.amount(), previousBidderId, bidder.getId()));
+        if (maxReached) {
+            eventPublisher.publishEvent(
+                    new LiveAuctionClosedEvent(auction.getId(), LiveAuctionCloseReason.MAX_REACHED));
+            log.info("Flash auction {} auto-closed: max bid {} reached (winner {})",
+                    auction.getId(), request.amount(), bidder.getEmail());
+        }
 
         log.info("Live bid {} placed on flash auction {} by {} for {}",
                 bid.getId(), auction.getId(), bidder.getEmail(), request.amount());
