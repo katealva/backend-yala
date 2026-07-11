@@ -296,6 +296,10 @@ public class HighlightService {
 
     private Path downloadRecording(LiveStream stream) throws Exception {
         Path tmp = Files.createTempFile("live-" + stream.getId() + "-", ".mp4");
+        // El AWS SDK v2 (ResponseTransformer.toFile) NO sobrescribe un archivo existente y falla con
+        // "Failed to read response into file". createTempFile ya creó el archivo vacío, así que lo
+        // borramos para que getObject pueda crearlo y escribir la grabación.
+        Files.deleteIfExists(tmp);
         s3Client.getObject(
                 GetObjectRequest.builder().bucket(bucket).key(stream.getRecordingKey()).build(),
                 tmp);
