@@ -46,6 +46,7 @@ public class LiveController {
     private final LiveBidService liveBidService;
     private final LiveCommentService liveCommentService;
     private final LiveCommentSummaryService liveCommentSummaryService;
+    private final HighlightService highlightService;
 
     // ----- Streams -----
 
@@ -155,6 +156,21 @@ public class LiveController {
             @RequestParam(defaultValue = "50") Integer limit,
             Authentication auth) {
         return ResponseEntity.ok(liveCommentSummaryService.summarize(id, auth.getName(), limit));
+    }
+
+    @GetMapping("/mine")
+    @PreAuthorize("hasAnyRole('SELLER','ADMIN')")
+    @Operation(summary = "Mis transmisiones (incluye finalizadas) con sus clips de highlights. Solo el propio seller.")
+    public ResponseEntity<java.util.List<com.yala.dto.live.ResponseMyLiveDTO>> myLives(Authentication auth) {
+        return ResponseEntity.ok(liveStreamService.listMine(auth.getName()));
+    }
+
+    @GetMapping("/{id}/clips")
+    @PreAuthorize("hasAnyRole('SELLER','ADMIN')")
+    @Operation(summary = "Clips de highlights auto-generados del live, para descargar (solo el host).")
+    public ResponseEntity<java.util.List<com.yala.dto.live.ResponseLiveClipDTO>> clips(
+            @PathVariable Long id, Authentication auth) {
+        return ResponseEntity.ok(highlightService.listClips(id, auth.getName()));
     }
 
     // ----- Webhook -----
