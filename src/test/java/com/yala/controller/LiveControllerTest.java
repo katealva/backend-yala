@@ -63,6 +63,7 @@ class LiveControllerTest {
     @MockitoBean private LiveCommentSummaryService liveCommentSummaryService;
     @MockitoBean private HighlightService highlightService;
     @MockitoBean private ProductVoiceService productVoiceService;
+    @MockitoBean private LiveTranscriptionService liveTranscriptionService;
     @MockitoBean private JwtService jwtService;
 
     private static Principal principal(String email, String role) {
