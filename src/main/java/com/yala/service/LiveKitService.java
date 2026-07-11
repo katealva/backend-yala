@@ -120,6 +120,10 @@ public class LiveKitService {
                     .setFilepath(filepath)
                     .setS3(s3)
                     .build();
+            // RoomCompositeEgress exige que la sala EXISTA. El egress se lanza al crear el live,
+            // antes de que el vendedor se conecte, así que la creamos primero (idempotente) para
+            // evitar el 404 "room not found".
+            ensureRoom(roomName);
             EgressServiceClient client = EgressServiceClient.createClient(httpUrl(), apiKey, apiSecret);
             var response = client.startRoomCompositeEgress(roomName, output).execute();
             if (response.isSuccessful() && response.body() != null) {
@@ -132,6 +136,16 @@ public class LiveKitService {
         } catch (Exception ex) {
             log.warn("Could not start egress for room {}: {}", roomName, ex.getMessage());
             return Optional.empty();
+        }
+    }
+
+    // Crea la sala si no existe (idempotente). Necesario porque el RoomCompositeEgress se inicia
+    // antes de que el primer participante se conecte, y LiveKit exige que la sala ya exista.
+    private void ensureRoom(String roomName) {
+        try {
+            RoomServiceClient.createClient(httpUrl(), apiKey, apiSecret).createRoom(roomName).execute();
+        } catch (Exception ex) {
+            log.debug("ensureRoom {}: {}", roomName, ex.getMessage());
         }
     }
 
