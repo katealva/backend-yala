@@ -4,11 +4,13 @@ import io.livekit.server.AccessToken;
 import io.livekit.server.CanPublish;
 import io.livekit.server.CanPublishData;
 import io.livekit.server.CanSubscribe;
+import io.livekit.server.EgressServiceClient;
 import io.livekit.server.RoomJoin;
 import io.livekit.server.RoomName;
 import io.livekit.server.RoomServiceClient;
 import io.livekit.server.WebhookReceiver;
 import java.util.Optional;
+import livekit.LivekitEgress;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -29,14 +31,28 @@ public class LiveKitService {
     private final String url;
     private final String apiKey;
     private final String apiSecret;
+    // AWS creds are needed by egress itself to upload the recording to S3 (LiveKit's
+    // egress workers cannot use the ECS task role — they need explicit keys).
+    private final String awsBucket;
+    private final String awsRegion;
+    private final String awsAccessKey;
+    private final String awsSecret;
 
     public LiveKitService(
             @Value("${livekit.url:}") String url,
             @Value("${livekit.api-key:}") String apiKey,
-            @Value("${livekit.api-secret:}") String apiSecret) {
+            @Value("${livekit.api-secret:}") String apiSecret,
+            @Value("${aws.s3.bucket:}") String awsBucket,
+            @Value("${aws.region:us-east-1}") String awsRegion,
+            @Value("${aws.access-key-id:}") String awsAccessKey,
+            @Value("${aws.secret-access-key:}") String awsSecret) {
         this.url = url;
         this.apiKey = apiKey;
         this.apiSecret = apiSecret;
+        this.awsBucket = awsBucket;
+        this.awsRegion = awsRegion;
+        this.awsAccessKey = awsAccessKey;
+        this.awsSecret = awsSecret;
     }
 
     /** The wss:// URL clients use to connect to the LiveKit SFU. */
@@ -74,6 +90,61 @@ public class LiveKitService {
         return token.toJwt();
     }
 
+    /** True when egress can upload recordings to S3 (LiveKit + explicit AWS keys present). */
+    public boolean recordingAvailable() {
+        return isConfigured() && notBlank(awsBucket) && notBlank(awsAccessKey) && notBlank(awsSecret);
+    }
+
+    /**
+     * Starts a RoomComposite egress that records the live to {@code filepath} (an S3 key)
+     * as MP4. Returns the egress id, or empty when recording is not configured / the call
+     * fails (graceful degradation — the live still works, just without a recording).
+     */
+    public Optional<String> startRecordingEgress(String roomName, String filepath) {
+        if (!recordingAvailable()) {
+            log.info("Egress skipped for room {} (LiveKit/AWS recording not configured)", roomName);
+            return Optional.empty();
+        }
+        try {
+            LivekitEgress.S3Upload s3 = LivekitEgress.S3Upload.newBuilder()
+                    .setAccessKey(awsAccessKey)
+                    .setSecret(awsSecret)
+                    .setRegion(awsRegion)
+                    .setBucket(awsBucket)
+                    .build();
+            LivekitEgress.EncodedFileOutput output = LivekitEgress.EncodedFileOutput.newBuilder()
+                    .setFileType(LivekitEgress.EncodedFileType.MP4)
+                    .setFilepath(filepath)
+                    .setS3(s3)
+                    .build();
+            EgressServiceClient client = EgressServiceClient.createClient(httpUrl(), apiKey, apiSecret);
+            var response = client.startRoomCompositeEgress(roomName, output).execute();
+            if (response.isSuccessful() && response.body() != null) {
+                String egressId = response.body().getEgressId();
+                log.info("Egress {} started for room {} -> {}", egressId, roomName, filepath);
+                return Optional.ofNullable(egressId);
+            }
+            log.warn("Egress start for room {} returned HTTP {}", roomName, response.code());
+            return Optional.empty();
+        } catch (Exception ex) {
+            log.warn("Could not start egress for room {}: {}", roomName, ex.getMessage());
+            return Optional.empty();
+        }
+    }
+
+    /** Best-effort stop of a running egress (finalizes the MP4 in S3). */
+    public void stopEgress(String egressId) {
+        if (!isConfigured() || !notBlank(egressId)) {
+            return;
+        }
+        try {
+            EgressServiceClient.createClient(httpUrl(), apiKey, apiSecret).stopEgress(egressId).execute();
+            log.info("Egress {} stopped", egressId);
+        } catch (Exception ex) {
+            log.warn("Could not stop egress {}: {}", egressId, ex.getMessage());
+        }
+    }
+
     /** Best-effort room teardown so all participants get disconnected when a live ends. */
     public void deleteRoom(String roomName) {
         if (!isConfigured()) {
@@ -100,7 +171,13 @@ public class LiveKitService {
         try {
             var event = new WebhookReceiver(apiKey, apiSecret).receive(body, authHeader);
             String roomName = event.hasRoom() ? event.getRoom().getName() : null;
-            return Optional.of(new WebhookInfo(event.getEvent(), roomName));
+            String egressId = null;
+            String egressStatus = null;
+            if (event.hasEgressInfo()) {
+                egressId = event.getEgressInfo().getEgressId();
+                egressStatus = event.getEgressInfo().getStatus().name();
+            }
+            return Optional.of(new WebhookInfo(event.getEvent(), roomName, egressId, egressStatus));
         } catch (Exception ex) {
             log.warn("Invalid LiveKit webhook: {}", ex.getMessage());
             return Optional.empty();
@@ -121,7 +198,7 @@ public class LiveKitService {
         return s != null && !s.isBlank();
     }
 
-    /** Minimal projection of a LiveKit webhook event. */
-    public record WebhookInfo(String event, String roomName) {
+    /** Minimal projection of a LiveKit webhook event (room + optional egress details). */
+    public record WebhookInfo(String event, String roomName, String egressId, String egressStatus) {
     }
 }

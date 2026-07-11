@@ -16,4 +16,8 @@ public interface LiveStreamRepository extends JpaRepository<LiveStream, Long> {
     List<LiveStream> findByStatus(LiveStatus status);
 
     Optional<LiveStream> findByRoomName(String roomName);
+
+    Optional<LiveStream> findByEgressId(String egressId);
+
+    List<LiveStream> findBySellerIdOrderByStartedAtDesc(Long sellerId);
 }
