@@ -47,6 +47,7 @@ public class LiveController {
     private final LiveCommentService liveCommentService;
     private final LiveCommentSummaryService liveCommentSummaryService;
     private final HighlightService highlightService;
+    private final ProductVoiceService productVoiceService;
 
     // ----- Streams -----
 
@@ -171,6 +172,18 @@ public class LiveController {
     public ResponseEntity<java.util.List<com.yala.dto.live.ResponseLiveClipDTO>> clips(
             @PathVariable Long id, Authentication auth) {
         return ResponseEntity.ok(highlightService.listClips(id, auth.getName()));
+    }
+
+    @PostMapping("/{id}/detect-product")
+    @PreAuthorize("hasAnyRole('SELLER','ADMIN')")
+    @Operation(summary = "Extrae con IA los atributos del coleccionable que el host describe en voz alta, "
+            + "para pre-llenar una subasta flash (ADR-002). Solo el host.")
+    public ResponseEntity<com.yala.dto.live.ResponseDetectedProductDTO> detectProduct(
+            @PathVariable Long id,
+            @RequestBody com.yala.dto.live.RequestDetectProductDTO body,
+            Authentication auth) {
+        return ResponseEntity.ok(productVoiceService.detect(id, auth.getName(),
+                body != null ? body.transcript() : null));
     }
 
     // ----- Webhook -----
