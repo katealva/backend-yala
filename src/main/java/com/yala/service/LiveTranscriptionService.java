@@ -5,15 +5,15 @@ import com.yala.exceptions.ResourceNotFoundException;
 import com.yala.exceptions.UnauthorizedException;
 import com.yala.model.LiveStream;
 import com.yala.repository.LiveStreamRepository;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -62,33 +62,55 @@ public class LiveTranscriptionService {
             return new ResponseTranscriptDTO("");
         }
         try {
-            byte[] bytes = audio.getBytes();
+            byte[] audioBytes = audio.getBytes();
             String filename = audio.getOriginalFilename() != null && !audio.getOriginalFilename().isBlank()
                     ? audio.getOriginalFilename() : "chunk.wav";
-            ByteArrayResource file = new ByteArrayResource(bytes) {
-                @Override
-                public String getFilename() {
-                    return filename;
-                }
-            };
-            MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-            body.add("file", file);
-            body.add("model", model);
-            body.add("language", "es");
-            body.add("response_format", "text");
+            // Build the multipart body by hand as a byte[]: the JDK HttpClient transport can drop a
+            // MultiValueMap converter body (so language/prompt wouldn't reach OpenAI), but publishes a
+            // byte[] reliably — guaranteeing es + prompt + temperature are applied (reduces the wrong-
+            // language hallucinations).
+            String boundary = "YalaBoundary" + Long.toHexString(System.nanoTime());
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            writeField(out, boundary, "model", model);
+            writeField(out, boundary, "language", "es");
+            writeField(out, boundary, "response_format", "text");
+            writeField(out, boundary, "temperature", "0");
+            writeField(out, boundary, "prompt", TRANSCRIBE_PROMPT);
+            out.write(("--" + boundary + "\r\n").getBytes(StandardCharsets.UTF_8));
+            out.write(("Content-Disposition: form-data; name=\"file\"; filename=\"" + filename + "\"\r\n")
+                    .getBytes(StandardCharsets.UTF_8));
+            out.write("Content-Type: audio/wav\r\n\r\n".getBytes(StandardCharsets.UTF_8));
+            out.write(audioBytes);
+            out.write("\r\n".getBytes(StandardCharsets.UTF_8));
+            out.write(("--" + boundary + "--\r\n").getBytes(StandardCharsets.UTF_8));
 
             String text = restClient.post()
                     .uri(baseUrl + "/v1/audio/transcriptions")
                     .header("Authorization", "Bearer " + apiKey)
-                    .contentType(MediaType.MULTIPART_FORM_DATA)
-                    .body(body)
+                    .header("Content-Type", "multipart/form-data; boundary=" + boundary)
+                    .body(out.toByteArray())
                     .retrieve()
                     .body(String.class);
 
             return new ResponseTranscriptDTO(text != null ? text.trim() : "");
+        } catch (RestClientResponseException e) {
+            log.warn("Live transcription HTTP {}: {}", e.getStatusCode(), e.getResponseBodyAsString());
+            return new ResponseTranscriptDTO("");
         } catch (Exception e) {
             log.warn("Live transcription failed: {}", e.getMessage());
             return new ResponseTranscriptDTO("");
         }
+    }
+
+    private static final String TRANSCRIBE_PROMPT =
+            "Transcripción en español de un vendedor de coleccionables en un live.";
+
+    private static void writeField(ByteArrayOutputStream out, String boundary, String name, String value)
+            throws IOException {
+        out.write(("--" + boundary + "\r\n").getBytes(StandardCharsets.UTF_8));
+        out.write(("Content-Disposition: form-data; name=\"" + name + "\"\r\n\r\n")
+                .getBytes(StandardCharsets.UTF_8));
+        out.write(value.getBytes(StandardCharsets.UTF_8));
+        out.write("\r\n".getBytes(StandardCharsets.UTF_8));
     }
 }
