@@ -104,6 +104,9 @@ public class LiveEventListeners {
     public void onLiveAuctionClosed(LiveAuctionClosedEvent event) {
         LiveAuction auction = loadAuction(event.liveAuctionId());
 
+        // Mensaje amigable en el chat, distinto según por qué se cerró la subasta.
+        sendSystemChat(auction.getLiveStream().getId(), closeChatMessage(auction, event.reason()));
+
         if (auction.getStatus() == LiveAuctionStatus.SOLD && auction.getWinner() != null) {
             var seller = auction.getLiveStream().getSeller();
             var winner = auction.getWinner();
@@ -174,6 +177,30 @@ public class LiveEventListeners {
     private String formatAmount(Float amount) {
         if (amount == null) return "0";
         return amount == Math.floor(amount) ? String.valueOf(amount.longValue()) : String.valueOf(amount);
+    }
+
+    /** Texto del mensaje de cierre, distinto por motivo (máximo alcanzado / manual / desierta). */
+    private String closeChatMessage(LiveAuction auction, LiveAuctionCloseReason reason) {
+        boolean sold = auction.getStatus() == LiveAuctionStatus.SOLD && auction.getWinner() != null;
+        if (!sold) {
+            return "La subasta \"" + auction.getTitle() + "\" se cerró sin ofertas.";
+        }
+        String winner = auction.getWinner().getName();
+        Float amount = auction.getWinningAmount() != null
+                ? auction.getWinningAmount() : auction.getCurrentPrice();
+        if (reason == LiveAuctionCloseReason.MAX_REACHED) {
+            return "🏆 ¡Se alcanzó el monto máximo (S/. " + formatAmount(amount) + ")! La subasta \""
+                    + auction.getTitle() + "\" ha finalizado — " + winner + " es el ganador.";
+        }
+        return "🔨 El vendedor cerró la subasta \"" + auction.getTitle() + "\". " + winner
+                + " ganó con S/. " + formatAmount(amount) + ".";
+    }
+
+    /** Publica un mensaje de sistema en el chat del live (centinela id=0/userId=0, autor "Yala"). */
+    private void sendSystemChat(Long streamId, String text) {
+        messagingTemplate.convertAndSend(
+                "/topic/live/" + streamId + "/chat",
+                new ResponseLiveCommentDTO(0L, text, LocalDateTime.now(), "Yala", 0L));
     }
 
     private LiveAuction loadAuction(Long id) {
