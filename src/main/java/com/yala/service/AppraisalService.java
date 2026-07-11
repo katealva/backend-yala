@@ -80,15 +80,17 @@ public class AppraisalService {
             // Pre-serialized String body (un Map puede ser descartado por el transporte JDK HttpClient).
             String payload = objectMapper.writeValueAsString(body);
 
-            Map<?, ?> response = restClient.post()
+            // Leemos como bytes y parseamos con nuestro ObjectMapper (UTF-8 garantizado; evita mojibake
+            // en nombres con acentos como "Pokémon").
+            byte[] raw = restClient.post()
                     .uri(baseUrl + "/v1/chat/completions")
                     .header("Authorization", "Bearer " + apiKey)
                     .contentType(MediaType.APPLICATION_JSON)
                     .body(payload)
                     .retrieve()
-                    .body(Map.class);
+                    .body(byte[].class);
 
-            String content = extractContent(response);
+            String content = extractContent(raw);
             if (content == null || content.isBlank()) {
                 return ResponseAppraisalDTO.unrecognizable(
                         "No pudimos analizar la foto en este momento. Intenta de nuevo.");
@@ -167,18 +169,10 @@ public class AppraisalService {
         return s.startsWith("data:") ? s : "data:image/jpeg;base64," + s;
     }
 
-    @SuppressWarnings("unchecked")
-    private String extractContent(Map<?, ?> response) {
-        if (response == null) return null;
-        Object choices = response.get("choices");
-        if (choices instanceof List<?> list && !list.isEmpty()
-                && list.get(0) instanceof Map<?, ?> first) {
-            Object message = first.get("message");
-            if (message instanceof Map<?, ?> msg) {
-                Object content = msg.get("content");
-                return content != null ? content.toString() : null;
-            }
-        }
-        return null;
+    private String extractContent(byte[] raw) throws java.io.IOException {
+        if (raw == null || raw.length == 0) return null;
+        JsonNode root = objectMapper.readTree(raw);
+        JsonNode content = root.path("choices").path(0).path("message").path("content");
+        return content.isMissingNode() || content.isNull() ? null : content.asText(null);
     }
 }
