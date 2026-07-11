@@ -66,25 +66,25 @@ public class JustTcgService {
                 return null;
             }
 
+            // Usamos la carta mejor rankeada (primera por relevancia). El rango se calcula sobre SUS
+            // variantes (condiciones/ediciones), lo que da una tasación coherente para esa carta — en vez
+            // de mezclar todas las cartas de "Charizard" (una común de $1 y una rareza de $10k).
+            JsonNode card = data.get(0);
+            String matchedName = text(card, "name");
+            String setName = text(card, "set_name");
+
             double min = Double.MAX_VALUE;
             double max = 0;
-            String matchedName = null;
             List<Comparable> comparables = new ArrayList<>();
-
-            for (JsonNode card : data) {
-                if (matchedName == null) matchedName = text(card, "name");
-                String setName = text(card, "set_name");
-                for (JsonNode variant : card.path("variants")) {
-                    double price = variant.path("price").asDouble(0);
-                    if (price <= 0) continue;
-                    if (price < min) min = price;
-                    if (price > max) max = price;
-                    if (comparables.size() < MAX_COMPARABLES) {
-                        String cond = text(variant, "condition");
-                        String printing = text(variant, "printing");
-                        String title = buildTitle(setName, cond, printing);
-                        comparables.add(new Comparable(title, round(price)));
-                    }
+            for (JsonNode variant : card.path("variants")) {
+                double price = variant.path("price").asDouble(0);
+                if (price <= 0) continue;
+                if (price < min) min = price;
+                if (price > max) max = price;
+                if (comparables.size() < MAX_COMPARABLES) {
+                    String cond = text(variant, "condition");
+                    String printing = text(variant, "printing");
+                    comparables.add(new Comparable(buildTitle(setName, cond, printing), round(price)));
                 }
             }
 
