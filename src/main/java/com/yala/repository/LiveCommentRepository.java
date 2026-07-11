@@ -10,4 +10,7 @@ import org.springframework.stereotype.Repository;
 public interface LiveCommentRepository extends JpaRepository<LiveComment, Long> {
 
     Page<LiveComment> findByLiveStreamIdOrderByCreatedAtDesc(Long liveStreamId, Pageable pageable);
+
+    /** All comments of a live, oldest first — for highlight scoring and LLM context. */
+    java.util.List<LiveComment> findByLiveStreamIdOrderByCreatedAtAsc(Long liveStreamId);
 }

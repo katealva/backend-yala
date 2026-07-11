@@ -48,7 +48,9 @@
         { "name": "DIDIT_WEBHOOK_SECRET",    "valueFrom": "arn:aws:ssm:us-east-1:__ACCOUNT_ID__:parameter/yala/prod/didit-webhook-secret" },
         { "name": "DIDIT_WORKFLOW_ID",       "valueFrom": "arn:aws:ssm:us-east-1:__ACCOUNT_ID__:parameter/yala/prod/didit-workflow-id" },
         { "name": "OPENAI_API_KEY",          "valueFrom": "arn:aws:ssm:us-east-1:__ACCOUNT_ID__:parameter/yala/prod/openai-api-key" },
-        { "name": "JUSTTCG_API_KEY",         "valueFrom": "arn:aws:ssm:us-east-1:__ACCOUNT_ID__:parameter/yala/prod/justtcg-api-key" }
+        { "name": "JUSTTCG_API_KEY",         "valueFrom": "arn:aws:ssm:us-east-1:__ACCOUNT_ID__:parameter/yala/prod/justtcg-api-key" },
+        { "name": "EGRESS_AWS_ACCESS_KEY_ID",     "valueFrom": "arn:aws:ssm:us-east-1:__ACCOUNT_ID__:parameter/yala/prod/aws-access-key-id" },
+        { "name": "EGRESS_AWS_SECRET_ACCESS_KEY", "valueFrom": "arn:aws:ssm:us-east-1:__ACCOUNT_ID__:parameter/yala/prod/aws-secret-access-key" }
       ],
       "logConfiguration": {
         "logDriver": "awslogs",

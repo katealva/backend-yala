@@ -19,4 +19,7 @@ public interface LiveBidRepository extends JpaRepository<LiveBid, Long> {
     Page<LiveBid> findByLiveAuctionId(Long liveAuctionId, Pageable pageable);
 
     long countByLiveAuctionId(Long liveAuctionId);
+
+    /** All bids of a whole live (across its flash auctions), oldest first — for highlight scoring. */
+    List<LiveBid> findByLiveAuction_LiveStream_IdOrderByPlacedAtAsc(Long liveStreamId);
 }

@@ -9,6 +9,8 @@ RUN ./mvnw clean package -DskipTests -B
 
 # Runtime stage
 FROM eclipse-temurin:21-jre-alpine
+# ffmpeg: requerido por HighlightService para cortar los clips de highlights de la grabación.
+RUN apk add --no-cache ffmpeg
 RUN addgroup -S yala && adduser -S yala -G yala
 WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
