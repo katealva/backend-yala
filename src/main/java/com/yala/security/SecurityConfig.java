@@ -51,6 +51,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/v1/payments/webhook").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/identity/webhook").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/webhooks").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/appraisal/**").permitAll()
                         .requestMatchers("/swagger-ui/**", "/swagger-ui.html",
                                 "/v3/api-docs", "/v3/api-docs/**",
                                 "/v3/api-docs.yaml").permitAll()
