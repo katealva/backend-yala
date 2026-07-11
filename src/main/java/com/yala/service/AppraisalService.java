@@ -3,6 +3,7 @@ package com.yala.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yala.dto.appraisal.ResponseAppraisalDTO;
+import com.yala.dto.appraisal.ResponseAppraisalDTO.Pricing;
 import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
@@ -22,19 +23,20 @@ import org.springframework.web.client.RestClient;
 public class AppraisalService {
 
     private static final String SYSTEM_PROMPT =
-            "Eres un experto tasador de coleccionables. Analizas la foto e identificas el ítem. "
-            + "Categorías válidas EXACTAS: funko, nendoroid, manga, comic, tcg. "
-            + "'tcg' = cartas coleccionables (Pokémon, Yu-Gi-Oh!, Magic, etc.). "
+            "Eres un experto en cartas coleccionables (TCG). Analizas la foto e identificas la CARTA. "
+            + "Juegos válidos: Pokémon, Yu-Gi-Oh!, Magic: The Gathering, One Piece Card Game, Dragon Ball Super, "
+            + "Digimon, Disney Lorcana, Star Wars Unlimited, Gundam, entre otros TCG. "
             + "Responde SOLO un objeto JSON válido, sin texto adicional, con esta forma exacta:\n"
-            + "{\"category\": \"funko|nendoroid|manga|comic|tcg\", \"franchise\": \"...\", "
-            + "\"character\": \"...\", \"variant\": \"...\", \"confidence\": 0.0, \"recognizable\": true}\n"
-            + "Reglas: 'confidence' es un número entre 0 y 1. 'recognizable' es false si la foto es de mala "
-            + "calidad, está borrosa, o no muestra un coleccionable de esas categorías. Si algún campo no es "
-            + "visible, usa cadena vacía. 'franchise' es la saga (ej. Pokémon, One Piece, Marvel) y 'character' "
-            + "el personaje o título (ej. Charizard, Luffy, Spider-Man). 'variant' es la edición/rareza/"
-            + "exclusividad si se ve (ej. '1st Edition Holo', 'Chase', 'Exclusiva SDCC'), o cadena vacía.";
+            + "{\"category\": \"tcg\", \"franchise\": \"<juego>\", \"character\": \"<nombre de la carta>\", "
+            + "\"variant\": \"<edición/rareza si se ve>\", \"confidence\": 0.0, \"recognizable\": true}\n"
+            + "Reglas: 'category' es \"tcg\" si es una carta de esos juegos; si no, \"unknown\". 'franchise' es "
+            + "el juego (ej. Pokémon, Yu-Gi-Oh!, Magic). 'character' es el NOMBRE de la carta tal como aparece "
+            + "(ej. Charizard, Dark Magician, Black Lotus). 'variant' es la edición/rareza/set si se ve, o cadena "
+            + "vacía. 'confidence' es un número entre 0 y 1. 'recognizable' es false si la foto es de mala calidad, "
+            + "está borrosa, o NO es una carta TCG.";
 
     private final RestClient restClient;
+    private final JustTcgService justTcgService;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private final String apiKey;
@@ -43,10 +45,12 @@ public class AppraisalService {
 
     public AppraisalService(
             RestClient.Builder restClientBuilder,
+            JustTcgService justTcgService,
             @Value("${openai.api-key:}") String apiKey,
             @Value("${openai.base-url:https://api.openai.com}") String baseUrl,
             @Value("${openai.model:gpt-5-nano}") String model) {
         this.restClient = restClientBuilder.build();
+        this.justTcgService = justTcgService;
         this.apiKey = apiKey;
         this.baseUrl = baseUrl;
         this.model = model;
@@ -70,7 +74,7 @@ public class AppraisalService {
                             Map.of("role", "system", "content", SYSTEM_PROMPT),
                             Map.of("role", "user", "content", List.of(
                                     Map.of("type", "text", "text",
-                                            "Identifica este coleccionable y responde solo el JSON."),
+                                            "Identifica esta carta TCG y responde solo el JSON."),
                                     Map.of("type", "image_url",
                                             "image_url", Map.of("url", dataUrl))))));
             // Pre-serialized String body (un Map puede ser descartado por el transporte JDK HttpClient).
@@ -89,7 +93,7 @@ public class AppraisalService {
                 return ResponseAppraisalDTO.unrecognizable(
                         "No pudimos analizar la foto en este momento. Intenta de nuevo.");
             }
-            return parse(content);
+            return withPricing(parse(content));
         } catch (Exception e) {
             log.warn("OpenAI appraisal failed: {}", e.getMessage());
             return ResponseAppraisalDTO.unrecognizable(
@@ -116,13 +120,32 @@ public class AppraisalService {
                     text(n, "variant"),
                     Math.max(0.0, Math.min(1.0, confidence)),
                     recognizable,
+                    null,
                     recognizable ? null
-                            : "No pudimos reconocer un coleccionable. Sube una foto más clara y bien encuadrada.");
+                            : "No pudimos reconocer una carta TCG. Sube una foto más clara y bien encuadrada.");
         } catch (Exception e) {
             log.warn("Appraisal JSON parse failed: {}", e.getMessage());
             return ResponseAppraisalDTO.unrecognizable(
                     "No pudimos interpretar la identificación. Intenta con otra foto.");
         }
+    }
+
+    // Para cartas TCG reconocidas, adjunta el precio real de JustTCG (o una nota si no hay match).
+    private ResponseAppraisalDTO withPricing(ResponseAppraisalDTO id) {
+        if (!id.recognizable() || !"tcg".equals(id.category())) {
+            return id;
+        }
+        Pricing pricing = justTcgService.priceCard(id.franchise(), id.character());
+        if (pricing == null) {
+            String name = id.character() != null && !id.character().isBlank() ? id.character() : "esta carta";
+            return new ResponseAppraisalDTO(
+                    id.category(), id.franchise(), id.character(), id.variant(),
+                    id.confidence(), id.recognizable(), null,
+                    "Identificamos " + name + ", pero aún no encontramos su precio en JustTCG.");
+        }
+        return new ResponseAppraisalDTO(
+                id.category(), id.franchise(), id.character(), id.variant(),
+                id.confidence(), id.recognizable(), pricing, null);
     }
 
     private static String text(JsonNode n, String field) {
@@ -134,11 +157,7 @@ public class AppraisalService {
         if (raw == null) return "unknown";
         String c = raw.toLowerCase().trim();
         return switch (c) {
-            case "funko", "funkos", "funko pop", "pop" -> "funko";
-            case "nendoroid", "nendoroids" -> "nendoroid";
-            case "manga", "mangas" -> "manga";
-            case "comic", "comics", "cómic", "cómics", "comic book" -> "comic";
-            case "tcg", "card", "cards", "carta", "cartas", "trading card" -> "tcg";
+            case "tcg", "card", "cards", "carta", "cartas", "trading card", "trading card game" -> "tcg";
             default -> "unknown";
         };
     }
