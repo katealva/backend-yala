@@ -1,6 +1,7 @@
 package com.yala.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yala.dto.appraisal.ResponseAppraisalDTO.Comparable;
 import com.yala.dto.appraisal.ResponseAppraisalDTO.Pricing;
 import java.util.ArrayList;
@@ -23,6 +24,7 @@ public class JustTcgService {
     private static final int MAX_COMPARABLES = 3;
 
     private final RestClient restClient;
+    private final ObjectMapper objectMapper = new ObjectMapper();
     private final String apiKey;
     private final String baseUrl;
 
@@ -49,12 +51,15 @@ public class JustTcgService {
         String game = toGameSlug(franchise);
 
         try {
-            JsonNode root = restClient.get()
+            // Leemos como bytes y parseamos con nuestro ObjectMapper (UTF-8 garantizado y evita
+            // problemas de converter con JsonNode).
+            byte[] raw = restClient.get()
                     .uri(baseUrl + "/cards?q={q}&game={game}&limit=20", cardName.trim(), game)
                     .header("x-api-key", apiKey)
                     .retrieve()
-                    .body(JsonNode.class);
+                    .body(byte[].class);
 
+            JsonNode root = raw == null || raw.length == 0 ? null : objectMapper.readTree(raw);
             JsonNode data = root == null ? null : root.get("data");
             if (data == null || !data.isArray() || data.isEmpty()) {
                 log.info("JustTCG: sin resultados para q='{}' game='{}'", cardName, game);
