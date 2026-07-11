@@ -65,15 +65,14 @@ public class LiveBidService {
             throw new InvalidBidException("The host cannot bid on their own flash auction");
         }
 
-        // La primera puja válida es basePrice + incremento (pujar exactamente el precio base se rechaza);
-        // las siguientes, la puja actual + incremento.
-        float floor = auction.getCurrentPrice() == null
+        // La primera puja válida es el precio base (pujar exactamente el base se acepta); las
+        // siguientes, la puja actual + incremento. Coincide con el minNext que calcula el frontend.
+        float minNext = auction.getCurrentPrice() == null
                 ? auction.getBasePrice()
-                : auction.getCurrentPrice();
-        float minNext = floor + auction.getBidIncrement();
+                : auction.getCurrentPrice() + auction.getBidIncrement();
         if (request.amount() < minNext) {
             throw new InvalidBidException(
-                    "El monto debe ser mayor. Monto mínimo permitido: S/. " + minNext);
+                    "Monto mínimo permitido: S/. " + minNext);
         }
 
         Long previousBidderId = liveBidRepository
